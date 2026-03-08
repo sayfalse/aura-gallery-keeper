@@ -41,7 +41,7 @@ const ContactsPage = () => {
 
   const handleCreate = async () => {
     if (!user || !form.firstName.trim()) {
-      toast.error("First name is required");
+      toast.error(t("contacts.firstNameRequired"));
       return;
     }
     try {
