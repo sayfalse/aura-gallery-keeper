@@ -86,23 +86,66 @@ const VPNPage = () => {
   const generateWarpConfig = async () => {
     setGenerating(true);
     try {
-      const res = await fetch(proxyUrl({ action: "generate-config" }), { headers: proxyHeaders() });
-      const data = await res.json();
-      if (data.success && data.config) {
-        setWarpConfig({
-          config: data.config,
-          clientId: data.clientId,
-          v4Address: data.v4Address,
-          v6Address: data.v6Address,
-          endpoint: data.endpoint,
-          peerPublicKey: data.peerPublicKey,
-        });
-        toast.success("WARP config generated! Download and import into WireGuard.");
-      } else {
-        throw new Error(data.error || "Failed to generate config");
-      }
+      // Step 1: Generate X25519 keypair client-side
+      const keyPair = await crypto.subtle.generateKey("X25519" as any, true, ["deriveBits"]) as CryptoKeyPair;
+      const rawPriv = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
+      const rawPub = await crypto.subtle.exportKey("raw", keyPair.publicKey);
+      const privBytes = new Uint8Array(rawPriv).slice(-32);
+      const pubBytes = new Uint8Array(rawPub);
+      const privateKey = btoa(String.fromCharCode(...privBytes));
+      const publicKey = btoa(String.fromCharCode(...pubBytes));
+
+      // Step 2: Register via proxy
+      const regRes = await fetch(proxyUrl({ action: "warp-register" }), {
+        method: "POST",
+        headers: { ...proxyHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({
+          install_id: "",
+          tos: new Date().toISOString().replace(/\.\d{3}Z$/, ".000Z"),
+          key: publicKey,
+          fcm_token: "",
+          type: "ios",
+          locale: "en_US",
+        }),
+      });
+      const regData = await regRes.json();
+      if (!regData.result?.id) throw new Error(regData.errors?.[0] || "Registration failed");
+
+      // Step 3: Enable WARP via proxy
+      const enableRes = await fetch(proxyUrl({ action: "warp-enable" }), {
+        method: "POST",
+        headers: { ...proxyHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ id: regData.result.id, token: regData.result.token }),
+      });
+      const enableData = await enableRes.json();
+      const cfg = enableData.result?.config || {};
+      const iface = cfg.interface || {};
+      const peers = cfg.peers || [];
+
+      const v4Addr = iface.addresses?.v4 || "172.16.0.2/32";
+      const v6Addr = iface.addresses?.v6 || "";
+      const peerKey = peers[0]?.public_key || "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=";
+      const endpoint = peers[0]?.endpoint?.host || "engage.cloudflareclient.com:2408";
+
+      const wgConfig = [
+        "[Interface]",
+        `PrivateKey = ${privateKey}`,
+        `Address = ${v4Addr}${v6Addr ? ", " + v6Addr : ""}`,
+        "DNS = 1.1.1.1, 1.0.0.1, 2606:4700:4700::1111, 2606:4700:4700::1001",
+        "MTU = 1280",
+        "",
+        "[Peer]",
+        `PublicKey = ${peerKey}`,
+        "AllowedIPs = 0.0.0.0/0, ::/0",
+        `Endpoint = ${endpoint}`,
+        "PersistentKeepalive = 25",
+      ].join("\n");
+
+      setWarpConfig({ config: wgConfig, clientId: regData.result.id, v4Address: v4Addr, v6Address: v6Addr, endpoint, peerPublicKey: peerKey });
+      toast.success("WARP config generated! Download and import into WireGuard.");
     } catch (e: any) {
-      toast.error(e.message || "Failed to generate WARP config");
+      console.error("Config generation error:", e);
+      toast.error(e.message || "Failed to generate WARP config. Try the official WARP app instead.");
     }
     setGenerating(false);
   };
