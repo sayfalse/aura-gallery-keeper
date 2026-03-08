@@ -12,21 +12,21 @@ import {
 } from "lucide-react";
 
 const appKeys = [
-  { id: "gallery", nameKey: "apps.gallery", icon: Image, gradient: "from-blue-500 to-cyan-400", path: "/gallery", descKey: "apps.galleryDesc" },
-  { id: "notes", nameKey: "apps.notes", icon: StickyNote, gradient: "from-amber-500 to-orange-400", path: "/notes", descKey: "apps.notesDesc" },
-  { id: "drive", nameKey: "apps.drive", icon: HardDrive, gradient: "from-indigo-500 to-purple-400", path: "/drive", descKey: "apps.driveDesc" },
-  { id: "contacts", nameKey: "apps.people", icon: Users, gradient: "from-emerald-500 to-teal-400", path: "/contacts", descKey: "apps.peopleDesc" },
-  { id: "mail", nameKey: "apps.mail", icon: Mail, gradient: "from-sky-500 to-blue-400", path: "/mail", descKey: "apps.mailDesc" },
-  { id: "chat", nameKey: "apps.chat", icon: MessageCircle, gradient: "from-green-500 to-emerald-400", path: "/chat", descKey: "apps.chatDesc" },
-  { id: "pixel-ai", nameKey: "apps.pixelAI", icon: Sparkles, gradient: "from-violet-500 to-fuchsia-400", path: "/pixel-ai", descKey: "apps.pixelAIDesc" },
-  { id: "settings", nameKey: "apps.settings", icon: Settings, gradient: "from-slate-500 to-gray-400", path: "/settings", descKey: "apps.settingsDesc" },
+  { id: "gallery", nameKey: "apps.gallery", icon: Image, gradient: "from-violet-500 to-fuchsia-500", path: "/gallery", descKey: "apps.galleryDesc" },
+  { id: "notes", nameKey: "apps.notes", icon: StickyNote, gradient: "from-amber-400 to-orange-500", path: "/notes", descKey: "apps.notesDesc" },
+  { id: "drive", nameKey: "apps.drive", icon: HardDrive, gradient: "from-cyan-400 to-blue-500", path: "/drive", descKey: "apps.driveDesc" },
+  { id: "contacts", nameKey: "apps.people", icon: Users, gradient: "from-emerald-400 to-teal-500", path: "/contacts", descKey: "apps.peopleDesc" },
+  { id: "mail", nameKey: "apps.mail", icon: Mail, gradient: "from-pink-400 to-rose-500", path: "/mail", descKey: "apps.mailDesc" },
+  { id: "chat", nameKey: "apps.chat", icon: MessageCircle, gradient: "from-green-400 to-emerald-500", path: "/chat", descKey: "apps.chatDesc" },
+  { id: "pixel-ai", nameKey: "apps.pixelAI", icon: Sparkles, gradient: "from-purple-500 to-indigo-500", path: "/pixel-ai", descKey: "apps.pixelAIDesc" },
+  { id: "settings", nameKey: "apps.settings", icon: Settings, gradient: "from-slate-400 to-zinc-500", path: "/settings", descKey: "apps.settingsDesc" },
 ];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 16 },
   show: (i: number) => ({
     opacity: 1, y: 0,
-    transition: { delay: 0.08 * i, duration: 0.4, ease: "easeOut" as const }
+    transition: { delay: 0.06 * i, duration: 0.4, ease: "easeOut" as const }
   }),
 };
 
@@ -59,11 +59,18 @@ const Home = () => {
     return t("home.greeting.night");
   };
 
+  const stats = [
+    { label: t("home.stats.photos"), value: counts.photos, icon: Image, color: "from-violet-500 to-fuchsia-500" },
+    { label: t("home.stats.notes"), value: counts.notes, icon: StickyNote, color: "from-amber-400 to-orange-500" },
+    { label: t("home.stats.people"), value: counts.contacts, icon: Users, color: "from-emerald-400 to-teal-500" },
+    { label: t("home.stats.files"), value: counts.files, icon: HardDrive, color: "from-cyan-400 to-blue-500" },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between px-5 pt-[env(safe-area-inset-top)] py-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/20">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center shadow-lg shadow-primary/25">
             <Layers className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
@@ -75,13 +82,9 @@ const Home = () => {
       </header>
 
       <main className="px-5 pb-28 space-y-6">
+        {/* Stats with colorful icons */}
         <div className="grid grid-cols-4 gap-2">
-          {[
-            { label: t("home.stats.photos"), value: counts.photos, icon: Image },
-            { label: t("home.stats.notes"), value: counts.notes, icon: StickyNote },
-            { label: t("home.stats.people"), value: counts.contacts, icon: Users },
-            { label: t("home.stats.files"), value: counts.files, icon: HardDrive },
-          ].map((s, i) => (
+          {stats.map((s, i) => (
             <motion.div
               key={s.label}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -89,23 +92,27 @@ const Home = () => {
               transition={{ delay: 0.05 * i, duration: 0.35 }}
               className="p-3 rounded-2xl bg-card border border-border text-center"
             >
-              <s.icon className="w-4 h-4 text-muted-foreground mx-auto mb-1.5" />
+              <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center mx-auto mb-1.5`}>
+                <s.icon className="w-3.5 h-3.5 text-white" />
+              </div>
               <p className="text-lg font-bold text-foreground leading-none">{s.value}</p>
               <p className="text-[9px] text-muted-foreground mt-1">{s.label}</p>
             </motion.div>
           ))}
         </div>
 
+        {/* AI CTA with vibrant gradient */}
         <motion.button
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.4 }}
           onClick={() => navigate("/pixel-ai")}
-          className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 p-4 text-left group"
+          className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-500 to-orange-400 p-4 text-left group"
         >
-          <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8 group-hover:scale-150 transition-transform duration-500" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-500" />
+          <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-6" />
           <div className="relative flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
@@ -116,6 +123,7 @@ const Home = () => {
           </div>
         </motion.button>
 
+        {/* App grid */}
         <div>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("home.apps")}</h2>
           <div className="grid grid-cols-2 gap-2.5">
@@ -128,7 +136,7 @@ const Home = () => {
                 animate="show"
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate(app.path)}
-                className="group flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border hover:border-primary/20 hover:shadow-md transition-all duration-200 text-left"
+                className="group flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 text-left"
               >
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${app.gradient} flex items-center justify-center shadow-sm shrink-0`}>
                   <app.icon className="w-5 h-5 text-white" />

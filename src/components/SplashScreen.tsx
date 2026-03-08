@@ -18,52 +18,61 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
     <AnimatePresence>
       {visible && (
         <motion.div
-          className="fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center"
+          className="fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center overflow-hidden"
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
         >
-          {/* Ambient glow */}
+          {/* Colorful ambient blobs */}
           <motion.div
-            className="absolute w-64 h-64 rounded-full bg-primary/8 blur-3xl"
+            className="absolute w-72 h-72 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(circle, hsl(271 70% 60% / 0.12), transparent)" }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1.5, opacity: 1 }}
+            transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+          />
+          <motion.div
+            className="absolute w-48 h-48 rounded-full blur-3xl -translate-x-24 translate-y-16"
+            style={{ background: "radial-gradient(circle, hsl(340 75% 55% / 0.08), transparent)" }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1.3, opacity: 1 }}
+            transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+          />
+          <motion.div
+            className="absolute w-40 h-40 rounded-full blur-3xl translate-x-20 -translate-y-12"
+            style={{ background: "radial-gradient(circle, hsl(20 90% 58% / 0.08), transparent)" }}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1.2, opacity: 1 }}
-            transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
           />
 
-          {/* Logo container */}
+          {/* Logo */}
           <motion.div
             className="relative"
-            initial={{ scale: 0.6, opacity: 0 }}
+            initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
           >
-            {/* Soft ring */}
+            {/* Outer ring */}
             <motion.div
-              className="absolute -inset-5 rounded-3xl border border-primary/15"
+              className="absolute -inset-5 rounded-[1.5rem] border border-primary/10"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
             />
 
-            {/* Icon box */}
-            <div className="relative w-24 h-24 rounded-[1.25rem] bg-gradient-to-br from-primary via-primary/90 to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25">
-              {/* Shine sweep */}
-              <motion.div
-                className="absolute inset-0 rounded-[1.25rem] overflow-hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-              >
+            {/* Icon */}
+            <div className="relative w-24 h-24 rounded-[1.25rem] bg-gradient-to-br from-purple-600 via-fuchsia-500 to-orange-400 flex items-center justify-center shadow-2xl shadow-purple-500/30">
+              {/* Shine */}
+              <motion.div className="absolute inset-0 rounded-[1.25rem] overflow-hidden">
                 <motion.div
-                  className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg]"
+                  className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-[-20deg]"
                   animate={{ left: "200%" }}
-                  transition={{ duration: 0.8, delay: 0.8, ease: "easeInOut" }}
+                  transition={{ duration: 0.9, delay: 0.7, ease: "easeInOut" }}
                 />
               </motion.div>
 
-              {/* Letter */}
               <motion.span
-                className="relative z-10 text-primary-foreground font-display select-none"
+                className="relative z-10 text-white font-display select-none"
                 style={{ fontSize: "2.75rem", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -74,7 +83,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
             </div>
           </motion.div>
 
-          {/* Brand name */}
+          {/* Brand */}
           <motion.h1
             className="mt-6 font-display text-xl font-bold text-foreground tracking-tight"
             initial={{ opacity: 0, y: 10 }}
@@ -84,14 +93,17 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
             PixelVault
           </motion.h1>
 
-          {/* Subtle tagline dot loader */}
-          <div className="flex gap-1 mt-4">
+          {/* Dots */}
+          <div className="flex gap-1.5 mt-4">
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
-                className="w-1 h-1 rounded-full bg-muted-foreground/40"
+                className="w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: i === 0 ? "hsl(271 65% 58%)" : i === 1 ? "hsl(340 75% 55%)" : "hsl(20 90% 58%)",
+                }}
                 initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: [0, 1, 0.4], scale: [0, 1, 1] }}
+                animate={{ opacity: [0, 1, 0.5], scale: [0, 1, 1] }}
                 transition={{ duration: 1.2, delay: 0.8 + i * 0.15, ease: "easeOut" }}
               />
             ))}
