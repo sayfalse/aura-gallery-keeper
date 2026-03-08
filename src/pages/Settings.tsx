@@ -3,10 +3,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, ChevronRight } from "lucide-react";
+import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, ChevronRight, Lock, Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
+import {
+  getAppLockSettings,
+  setAppLockEnabled,
+  setAppLockTimeout,
+  setAppLockPin,
+  removeAppLock,
+} from "@/components/AppLockScreen";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
@@ -18,6 +25,14 @@ const SettingsPage = () => {
   const [noteCount, setNoteCount] = useState(0);
   const [contactCount, setContactCount] = useState(0);
   const [driveFileCount, setDriveFileCount] = useState(0);
+
+  // App lock state
+  const [lockEnabled, setLockEnabled] = useState(() => getAppLockSettings().enabled);
+  const [lockTimeout, setLockTimeout] = useState(() => getAppLockSettings().timeout);
+  const [showPinSetup, setShowPinSetup] = useState(false);
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [pinStep, setPinStep] = useState<"enter" | "confirm">("enter");
 
   useEffect(() => {
     if (!user) return;
@@ -193,7 +208,166 @@ const SettingsPage = () => {
           </div>
         </section>
 
-        {/* Sign out */}
+        {/* App Lock */}
+        <section className="rounded-2xl bg-card border border-border p-5">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Lock className="w-4 h-4" /> App Lock
+          </h2>
+
+          <div className="space-y-4">
+            {/* Toggle */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-foreground font-medium">Enable App Lock</p>
+                <p className="text-xs text-muted-foreground">Require PIN to open app</p>
+              </div>
+              <button
+                onClick={() => {
+                  if (!lockEnabled && !getAppLockSettings().hasPin) {
+                    setShowPinSetup(true);
+                    setPinStep("enter");
+                    setNewPin("");
+                    setConfirmPin("");
+                  } else if (lockEnabled) {
+                    setLockEnabled(false);
+                    setAppLockEnabled(false);
+                    removeAppLock();
+                    toast.success("App lock disabled");
+                  } else {
+                    setLockEnabled(true);
+                    setAppLockEnabled(true);
+                    toast.success("App lock enabled");
+                  }
+                }}
+                className={`w-12 h-7 rounded-full transition-colors relative ${
+                  lockEnabled ? "bg-primary" : "bg-border"
+                }`}
+              >
+                <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
+                  lockEnabled ? "translate-x-5" : "translate-x-0.5"
+                }`} />
+              </button>
+            </div>
+
+            {/* PIN Setup Modal */}
+            {showPinSetup && (
+              <div className="rounded-xl bg-secondary p-4 space-y-3">
+                <p className="text-sm font-medium text-foreground">
+                  {pinStep === "enter" ? "Set a 4-digit PIN" : "Confirm your PIN"}
+                </p>
+                <div className="flex gap-3 justify-center">
+                  {Array.from({ length: 4 }).map((_, i) => {
+                    const val = pinStep === "enter" ? newPin : confirmPin;
+                    return (
+                      <div
+                        key={i}
+                        className={`w-4 h-4 rounded-full transition-all ${
+                          i < val.length ? "bg-primary" : "bg-border"
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="grid grid-cols-3 gap-2 max-w-[200px] mx-auto">
+                  {["1","2","3","4","5","6","7","8","9","","0","⌫"].map((d, i) =>
+                    d === "" ? <div key={i} /> : (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          if (d === "⌫") {
+                            if (pinStep === "enter") setNewPin((p) => p.slice(0, -1));
+                            else setConfirmPin((p) => p.slice(0, -1));
+                            return;
+                          }
+                          if (pinStep === "enter") {
+                            const next = newPin + d;
+                            if (next.length <= 4) setNewPin(next);
+                            if (next.length === 4) {
+                              setTimeout(() => setPinStep("confirm"), 200);
+                            }
+                          } else {
+                            const next = confirmPin + d;
+                            if (next.length <= 4) setConfirmPin(next);
+                            if (next.length === 4) {
+                              if (next === newPin) {
+                                setAppLockPin(next);
+                                setAppLockEnabled(true);
+                                setLockEnabled(true);
+                                setShowPinSetup(false);
+                                toast.success("App lock PIN set!");
+                              } else {
+                                toast.error("PINs don't match, try again");
+                                setConfirmPin("");
+                                setPinStep("enter");
+                                setNewPin("");
+                              }
+                            }
+                          }
+                        }}
+                        className="h-10 rounded-xl bg-card hover:bg-accent text-sm font-semibold text-foreground transition-colors"
+                      >
+                        {d}
+                      </button>
+                    )
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowPinSetup(false)}
+                  className="text-xs text-muted-foreground hover:text-foreground w-full text-center"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            {/* Lock timeout */}
+            {lockEnabled && (
+              <div>
+                <p className="text-xs text-muted-foreground mb-2">Lock after</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Immediately", value: 0 },
+                    { label: "1 minute", value: 60 },
+                    { label: "5 minutes", value: 300 },
+                    { label: "20 minutes", value: 1200 },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => {
+                        setLockTimeout(opt.value);
+                        setAppLockTimeout(opt.value);
+                      }}
+                      className={`py-2 px-3 rounded-xl text-xs font-medium transition-all border-2 ${
+                        lockTimeout === opt.value
+                          ? "border-primary bg-primary/5 text-primary"
+                          : "border-border text-muted-foreground hover:border-muted-foreground/30"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Change PIN */}
+            {lockEnabled && (
+              <button
+                onClick={() => {
+                  setShowPinSetup(true);
+                  setPinStep("enter");
+                  setNewPin("");
+                  setConfirmPin("");
+                }}
+                className="text-sm text-primary font-medium hover:underline"
+              >
+                Change PIN
+              </button>
+            )}
+          </div>
+        </section>
+
+
         <button
           onClick={handleSignOut}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors text-sm font-medium"
