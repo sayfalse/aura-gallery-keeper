@@ -117,7 +117,7 @@ const TwoFactorSection = () => {
     <div className="space-y-4 pt-3 border-t border-border">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mfaEnabled ? "bg-primary/10" : "bg-secondary"}`}>
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${mfaEnabled ? "bg-primary/10" : "bg-primary/10 border border-primary/20"}`}>
             <Smartphone className={`w-4.5 h-4.5 ${mfaEnabled ? "text-primary" : "text-muted-foreground"}`} />
           </div>
           <div>
