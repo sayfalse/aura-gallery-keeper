@@ -3,13 +3,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail, ChevronRight, Github, Send } from "lucide-react";
+import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail, ChevronRight, Github, Send, BarChart3 } from "lucide-react";
 import PersonalInfoSection from "@/components/settings/PersonalInfoSection";
 import TwoFactorSection from "@/components/settings/TwoFactorSection";
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 import SharingSection from "@/components/settings/SharingSection";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import { getStorageAnalytics, formatFileSize } from "@/lib/driveService";
 import QuickNavButton from "@/components/QuickNavButton";
 import {
   getAppLockSettings,
@@ -113,7 +114,7 @@ const SettingsPage = () => {
   const [noteCount, setNoteCount] = useState(0);
   const [contactCount, setContactCount] = useState(0);
   const [driveFileCount, setDriveFileCount] = useState(0);
-
+  const [storageAnalytics, setStorageAnalytics] = useState<{totalSize: number; byType: Record<string, number>; largest: {name: string; size: number}[]; fileCount: number} | null>(null);
   // App lock state
   const [lockEnabled, setLockEnabled] = useState(() => getAppLockSettings().enabled);
   const [lockTimeout, setLockTimeoutState] = useState(() => getAppLockSettings().timeout);
@@ -143,6 +144,7 @@ const SettingsPage = () => {
     supabase.from("notes").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setNoteCount(count || 0));
     supabase.from("contacts").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setContactCount(count || 0));
     supabase.from("drive_files").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setDriveFileCount(count || 0));
+    getStorageAnalytics(user.id).then(setStorageAnalytics).catch(() => {});
   }, [user]);
 
   const handleSaveProfile = useCallback(async () => {
@@ -296,7 +298,7 @@ const SettingsPage = () => {
           )}
         </section>
 
-        {/* Storage */}
+        {/* Storage Analytics */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
             <HardDrive className="w-4 h-4" /> Storage & Data
@@ -313,15 +315,68 @@ const SettingsPage = () => {
                 <span className="text-sm text-muted-foreground font-medium">{item.count} items</span>
               </div>
             ))}
-            <div className="pt-2 border-t border-border">
+
+            {/* Storage usage bar */}
+            <div className="pt-3 border-t border-border">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-muted-foreground">Cloud Storage</span>
-                <span className="text-xs text-muted-foreground">Unlimited</span>
+                <span className="text-xs font-medium text-foreground">
+                  {storageAnalytics ? formatFileSize(storageAnalytics.totalSize) : "—"} used
+                </span>
               </div>
-              <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                <div className="h-full w-[8%] rounded-full bg-primary transition-all duration-500" />
+              <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-700"
+                  style={{ width: storageAnalytics ? `${Math.max(2, Math.min(100, (storageAnalytics.totalSize / (5 * 1024 * 1024 * 1024)) * 100))}%` : "2%" }}
+                />
               </div>
             </div>
+
+            {/* File type distribution */}
+            {storageAnalytics && Object.keys(storageAnalytics.byType).length > 0 && (
+              <div className="pt-3 border-t border-border">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                  <BarChart3 className="w-3.5 h-3.5" /> Storage by Type
+                </p>
+                <div className="space-y-2">
+                  {Object.entries(storageAnalytics.byType)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([type, size]) => {
+                      const pct = storageAnalytics.totalSize > 0 ? (size / storageAnalytics.totalSize) * 100 : 0;
+                      const colors: Record<string, string> = {
+                        Images: "bg-blue-500", Videos: "bg-purple-500", Audio: "bg-pink-500",
+                        Documents: "bg-amber-500", Other: "bg-slate-400",
+                      };
+                      return (
+                        <div key={type}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs text-foreground font-medium">{type}</span>
+                            <span className="text-[10px] text-muted-foreground">{formatFileSize(size)} ({pct.toFixed(1)}%)</span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                            <div className={`h-full rounded-full ${colors[type] || "bg-primary"} transition-all duration-500`} style={{ width: `${Math.max(2, pct)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* Largest files */}
+            {storageAnalytics && storageAnalytics.largest.length > 0 && (
+              <div className="pt-3 border-t border-border">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Largest Files</p>
+                <div className="space-y-1.5">
+                  {storageAnalytics.largest.map((f, i) => (
+                    <div key={i} className="flex items-center justify-between py-1">
+                      <span className="text-xs text-foreground truncate flex-1 mr-2">{f.name}</span>
+                      <span className="text-[10px] text-muted-foreground font-medium shrink-0">{formatFileSize(f.size)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </section>
 
