@@ -222,7 +222,7 @@ const NotesPage = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   onBlur={() => handleSave()}
-                  placeholder="Title"
+                  placeholder={t("notes.titlePlaceholder")}
                   className="w-full text-2xl font-display font-bold text-foreground bg-transparent outline-none mb-4 placeholder:text-muted-foreground/40"
                 />
                 <RichTextEditor
