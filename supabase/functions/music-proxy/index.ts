@@ -16,16 +16,12 @@ const HEADERS = {
 
 function decryptUrl(encryptedUrl: string): string {
   try {
-    const keyBytes = new Uint8Array([0x33, 0x38, 0x33, 0x34, 0x36, 0x35, 0x39, 0x31]); // "38346591" as bytes
-    const decipher = createDecipheriv("des-ecb", keyBytes, null);
+    const key = Buffer.from("38346591", "utf8");
+    const data = Buffer.from(encryptedUrl, "base64");
+    const decipher = createDecipheriv("des-ecb", key, Buffer.alloc(0));
     decipher.setAutoPadding(true);
-    const encData = Uint8Array.from(atob(encryptedUrl), c => c.charCodeAt(0));
-    let decrypted = decipher.update(encData);
-    const final = decipher.final();
-    const result = new Uint8Array(decrypted.length + final.length);
-    result.set(new Uint8Array(decrypted.buffer, decrypted.byteOffset, decrypted.length));
-    result.set(new Uint8Array(final.buffer, final.byteOffset, final.length), decrypted.length);
-    const url = new TextDecoder().decode(result);
+    const decrypted = Buffer.concat([decipher.update(data), decipher.final()]);
+    const url = decrypted.toString("utf8");
     return url.replace("_96.mp4", "_320.mp4").replace("_96_p.mp4", "_320.mp4");
   } catch (e) {
     console.error("Decrypt error:", e);
