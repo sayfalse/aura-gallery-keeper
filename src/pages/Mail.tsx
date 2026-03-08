@@ -5,7 +5,6 @@ import { ArrowLeft, Mail, Inbox, Send, Star, Trash2, Plus, ExternalLink, AtSign,
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
-import ModuleSwitcher from "@/components/ModuleSwitcher";
 
 interface MailAccount {
   id: string;
