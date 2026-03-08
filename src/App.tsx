@@ -16,7 +16,10 @@ import MailPage from "./pages/Mail";
 import GmailCallback from "./pages/GmailCallback";
 import SettingsPage from "./pages/Settings";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import AppLockScreen, { shouldShowLockScreen, updateLastActive } from "./components/AppLockScreen";
 
 const queryClient = new QueryClient();
 
