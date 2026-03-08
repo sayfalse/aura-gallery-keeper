@@ -75,9 +75,9 @@ const DrivePage = () => {
         Array.from(fileList).map((f) => uploadDriveFile(user.id, f, currentFolder))
       );
       setFiles((prev) => [...uploadedFiles, ...prev]);
-      toast.success(`${uploadedFiles.length} file(s) uploaded!`);
+      toast.success(t("drive.filesUploaded", { count: uploadedFiles.length }));
     } catch {
-      toast.error("Upload failed");
+      toast.error(t("drive.uploadFailed"));
     } finally {
       setUploading(false);
     }
