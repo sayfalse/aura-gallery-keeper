@@ -1,4 +1,4 @@
-import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info, Calendar, HardDrive, ImageIcon, Clock, Share2, Check, MapPin, Maximize2, FileText, Camera, FolderOpen } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info, Calendar, HardDrive, ImageIcon, Clock, Share2, Check, MapPin, Maximize2, FileText, Camera, FolderOpen, Pencil } from "lucide-react";
 import type { Photo } from "@/types/photo";
 import { format } from "date-fns";
 import { useState, useEffect, useRef } from "react";
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { createShareLink } from "@/lib/sharedPhotoService";
 import { toast } from "sonner";
+import PhotoEditor from "@/components/PhotoEditor";
 
 interface LightboxProps {
   photo: Photo;
@@ -30,6 +31,7 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
   const [showInfo, setShowInfo] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [imageMeta, setImageMeta] = useState<ImageMeta | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   // Extract image dimensions when loaded
@@ -118,6 +120,9 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
           </button>
           <button onClick={handleShareLink} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
             {linkCopied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5 text-card" />}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setShowEditor(true); }} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
+            <Pencil className="w-5 h-5 text-card" />
           </button>
           <button onClick={(e) => { e.stopPropagation(); setShowInfo(!showInfo); }} className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${showInfo ? "bg-primary/30" : "bg-card/10 hover:bg-card/20"}`}>
             <Info className="w-5 h-5 text-card" />
@@ -320,6 +325,13 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
           </motion.div>
         )}
       </AnimatePresence>
+      {showEditor && (
+        <PhotoEditor
+          imageSrc={photo.src}
+          imageName={photo.name}
+          onClose={() => setShowEditor(false)}
+        />
+      )}
     </div>
   );
 };

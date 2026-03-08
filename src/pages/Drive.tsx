@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { fetchDriveFiles, uploadDriveFile, deleteDriveFile, downloadDriveFile, getDriveFolders, moveDriveFile, formatFileSize, type DriveFile } from "@/lib/driveService";
-import { ArrowLeft, Upload, Trash2, Download, HardDrive, File, Image, FileText, Film, Music, Search, FolderPlus, Folder, ChevronRight, Home, FolderInput } from "lucide-react";
+import { ArrowLeft, Upload, Trash2, Download, HardDrive, File, Image, FileText, Film, Music, Search, FolderPlus, Folder, ChevronRight, Home, FolderInput, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import MoveToFolderModal from "@/components/MoveToFolderModal";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
+import DocumentViewer from "@/components/DocumentViewer";
 
 const getFileIcon = (mimeType: string) => {
   if (mimeType.startsWith("image/")) return Image;
@@ -30,6 +31,7 @@ const DrivePage = () => {
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [moveFile, setMoveFile] = useState<DriveFile | null>(null);
+  const [previewFile, setPreviewFile] = useState<DriveFile | null>(null);
 
   const loadFiles = useCallback(async () => {
     if (!user) return;
@@ -272,7 +274,8 @@ const DrivePage = () => {
                     return (
                       <div
                         key={file.id}
-                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/50 transition-colors group"
+                        onClick={() => setPreviewFile(file)}
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/50 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
                           <FileIcon className="w-5 h-5 text-muted-foreground" />
@@ -284,6 +287,9 @@ const DrivePage = () => {
                           </p>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => setPreviewFile(file)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors" title="Preview">
+                            <Eye className="w-4 h-4" />
+                          </button>
                           <button onClick={() => setMoveFile(file)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors" title="Move to folder">
                             <FolderInput className="w-4 h-4" />
                           </button>
@@ -312,6 +318,14 @@ const DrivePage = () => {
         currentFolder={currentFolder}
         onMove={handleMove}
       />
+      {previewFile && (
+        <DocumentViewer
+          fileName={previewFile.name}
+          storagePath={previewFile.storagePath}
+          mimeType={previewFile.mimeType}
+          onClose={() => setPreviewFile(null)}
+        />
+      )}
       <ModuleSwitcher />
     </div>
   );
