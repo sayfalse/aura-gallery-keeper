@@ -78,7 +78,7 @@ const NotesPage = () => {
         prev.map((n) => (n.id === activeNote.id ? { ...n, title, content, updatedAt: new Date() } : n))
       );
     } catch {
-      toast.error("Failed to save note");
+      toast.error(t("notes.failedSave"));
     }
   }, [activeNote, title, content]);
 
