@@ -105,6 +105,18 @@ const LANG_STORAGE_KEY = "app_language";
 
 export const getAppLanguage = () => localStorage.getItem(LANG_STORAGE_KEY) || "en";
 
+const getTimeAgo = (dateStr: string) => {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString();
+};
+
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
