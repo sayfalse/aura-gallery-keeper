@@ -9,7 +9,7 @@ import PullToRefresh from "@/components/PullToRefresh";
 import { motion } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, MessageCircle,
-  ArrowUpRight, Layers, Shield
+  ArrowUpRight, Layers, Shield, Globe
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,6 +20,7 @@ const appKeys = [
   { id: "contacts", nameKey: "apps.people", icon: Users, gradient: "from-emerald-400 to-teal-500", path: "/contacts", descKey: "apps.peopleDesc" },
   { id: "mail", nameKey: "apps.mail", icon: Mail, gradient: "from-indigo-400 to-blue-500", path: "/mail", descKey: "apps.mailDesc" },
   { id: "chat", nameKey: "apps.chat", icon: MessageCircle, gradient: "from-cyan-400 to-sky-500", path: "/chat", descKey: "apps.chatDesc" },
+  { id: "browser", nameKey: "apps.browser", icon: Globe, gradient: "from-violet-500 to-purple-600", path: "/browser", descKey: "apps.browserDesc" },
   { id: "pixel-ai", nameKey: "apps.pixelAI", icon: Sparkles, gradient: "from-blue-600 to-indigo-500", path: "/pixel-ai", descKey: "apps.pixelAIDesc" },
   { id: "settings", nameKey: "apps.settings", icon: Settings, gradient: "from-slate-400 to-zinc-500", path: "/settings", descKey: "apps.settingsDesc" },
 ];

@@ -49,6 +49,8 @@
     "mailDesc": "Email",
     "chat": "Chat",
     "chatDesc": "Messages",
+    "browser": "Browser",
+    "browserDesc": "Secure browsing",
     "pixelAI": "Pixel AI",
     "pixelAIDesc": "AI Assistant",
     "settings": "Settings",

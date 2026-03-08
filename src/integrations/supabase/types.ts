@@ -148,6 +148,96 @@ export type Database = {
         }
         Relationships: []
       }
+      browser_bookmarks: {
+        Row: {
+          created_at: string | null
+          favicon_url: string | null
+          folder: string | null
+          id: string
+          title: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          favicon_url?: string | null
+          folder?: string | null
+          id?: string
+          title?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          favicon_url?: string | null
+          folder?: string | null
+          id?: string
+          title?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      browser_downloads: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          id: string
+          mime_type: string | null
+          size_bytes: number | null
+          status: string | null
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          status?: string | null
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          status?: string | null
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      browser_history: {
+        Row: {
+          favicon_url: string | null
+          id: string
+          title: string | null
+          url: string
+          user_id: string
+          visited_at: string | null
+        }
+        Insert: {
+          favicon_url?: string | null
+          id?: string
+          title?: string | null
+          url: string
+          user_id: string
+          visited_at?: string | null
+        }
+        Update: {
+          favicon_url?: string | null
+          id?: string
+          title?: string | null
+          url?: string
+          user_id?: string
+          visited_at?: string | null
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           address: string | null
