@@ -61,7 +61,15 @@ const Index = () => {
     }
   }, [user]);
 
-  useEffect(() => { loadPhotos(); loadAlbums(); }, [loadPhotos, loadAlbums]);
+  const loadSharedPhotos = useCallback(async () => {
+    if (!user) return;
+    try {
+      const shared = await fetchSharedWithMe(user.id);
+      setSharedPhotos(shared);
+    } catch { /* silent */ }
+  }, [user]);
+
+  useEffect(() => { loadPhotos(); loadAlbums(); loadSharedPhotos(); }, [loadPhotos, loadAlbums, loadSharedPhotos]);
 
   const loadAlbumPhotos = useCallback(async (albumId: string) => {
     try {
