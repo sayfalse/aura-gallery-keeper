@@ -2,19 +2,24 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import AppSidebar from "@/components/AppSidebar";
 import BottomNav from "@/components/BottomNav";
 import PhotoGrid from "@/components/PhotoGrid";
+import AlbumGrid from "@/components/AlbumGrid";
 import Toolbar from "@/components/Toolbar";
 import Lightbox from "@/components/Lightbox";
 import UploadModal from "@/components/UploadModal";
+import CreateAlbumModal from "@/components/CreateAlbumModal";
+import AddToAlbumModal from "@/components/AddToAlbumModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchPhotos, fetchDeletedPhotos, toggleFavorite as toggleFavApi, softDeletePhoto, uploadPhoto } from "@/lib/photoService";
-import type { Photo, ViewMode, SidebarSection } from "@/types/photo";
+import { fetchAlbums, createAlbum, deleteAlbum, addPhotosToAlbum, fetchAlbumPhotos, updateAlbumCover } from "@/lib/albumService";
+import type { Photo, Album, ViewMode, SidebarSection } from "@/types/photo";
 import { toast } from "sonner";
-import { LogOut } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const Index = () => {
   const { user, signOut } = useAuth();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [deletedPhotos, setDeletedPhotos] = useState<Photo[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   const [activeSection, setActiveSection] = useState<SidebarSection>("photos");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,6 +27,10 @@ const Index = () => {
   const [selectionMode, setSelectionMode] = useState(false);
   const [lightboxPhoto, setLightboxPhoto] = useState<Photo | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [showCreateAlbum, setShowCreateAlbum] = useState(false);
+  const [showAddToAlbum, setShowAddToAlbum] = useState(false);
+  const [activeAlbum, setActiveAlbum] = useState<Album | null>(null);
+  const [albumPhotoIds, setAlbumPhotoIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadPhotos = useCallback(async () => {
@@ -33,16 +42,39 @@ const Index = () => {
       ]);
       setPhotos(active);
       setDeletedPhotos(deleted);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to load photos");
     } finally {
       setLoading(false);
     }
   }, [user]);
 
-  useEffect(() => { loadPhotos(); }, [loadPhotos]);
+  const loadAlbums = useCallback(async () => {
+    if (!user) return;
+    try {
+      const data = await fetchAlbums(user.id);
+      setAlbums(data);
+    } catch {
+      toast.error("Failed to load albums");
+    }
+  }, [user]);
+
+  useEffect(() => { loadPhotos(); loadAlbums(); }, [loadPhotos, loadAlbums]);
+
+  const loadAlbumPhotos = useCallback(async (albumId: string) => {
+    try {
+      const ids = await fetchAlbumPhotos(albumId);
+      setAlbumPhotoIds(ids);
+    } catch {
+      toast.error("Failed to load album photos");
+    }
+  }, []);
 
   const filteredPhotos = useMemo(() => {
+    // If viewing an album's photos
+    if (activeAlbum) {
+      return photos.filter((p) => albumPhotoIds.includes(p.id));
+    }
     let result = photos;
     if (activeSection === "favorites") result = result.filter((p) => p.favorite);
     if (activeSection === "recent") result = result.slice().sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
@@ -52,7 +84,7 @@ const Index = () => {
       result = result.filter((p) => p.name.toLowerCase().includes(q) || p.album?.toLowerCase().includes(q));
     }
     return result;
-  }, [photos, activeSection, searchQuery, deletedPhotos]);
+  }, [photos, activeSection, searchQuery, deletedPhotos, activeAlbum, albumPhotoIds]);
 
   const handleToggleFavorite = useCallback(async (id: string) => {
     const photo = photos.find((p) => p.id === id);
@@ -115,6 +147,59 @@ const Index = () => {
     }
   }, [user]);
 
+  const handleCreateAlbum = useCallback(async (name: string, description?: string) => {
+    if (!user) return;
+    try {
+      const album = await createAlbum(user.id, name, description);
+      setAlbums((prev) => [album, ...prev]);
+      setShowCreateAlbum(false);
+      toast.success(`Album "${name}" created!`);
+    } catch {
+      toast.error("Failed to create album");
+    }
+  }, [user]);
+
+  const handleDeleteAlbum = useCallback(async (id: string) => {
+    setAlbums((prev) => prev.filter((a) => a.id !== id));
+    try {
+      await deleteAlbum(id);
+      toast.success("Album deleted");
+    } catch {
+      toast.error("Failed to delete album");
+      loadAlbums();
+    }
+  }, [loadAlbums]);
+
+  const handleOpenAlbum = useCallback((album: Album) => {
+    setActiveAlbum(album);
+    loadAlbumPhotos(album.id);
+  }, [loadAlbumPhotos]);
+
+  const handleAddToAlbum = useCallback(async (albumId: string) => {
+    const ids = Array.from(selectedPhotos);
+    try {
+      await addPhotosToAlbum(albumId, ids);
+      // Set cover if album has none
+      const album = albums.find((a) => a.id === albumId);
+      if (album && !album.coverPhotoUrl && ids.length > 0) {
+        await updateAlbumCover(albumId, ids[0]);
+      }
+      setShowAddToAlbum(false);
+      setSelectedPhotos(new Set());
+      setSelectionMode(false);
+      loadAlbums();
+      toast.success(`Added ${ids.length} photo(s) to album`);
+    } catch {
+      toast.error("Failed to add photos to album");
+    }
+  }, [selectedPhotos, albums, loadAlbums]);
+
+  const handleSectionChange = useCallback((section: SidebarSection) => {
+    setActiveSection(section);
+    setActiveAlbum(null);
+    setAlbumPhotoIds([]);
+  }, []);
+
   const lightboxIndex = lightboxPhoto ? filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id) : -1;
 
   if (loading) {
@@ -125,11 +210,13 @@ const Index = () => {
     );
   }
 
+  const showAlbumsList = activeSection === "albums" && !activeAlbum;
+
   return (
     <div className="min-h-screen bg-background">
       <AppSidebar
         activeSection={activeSection}
-        onSectionChange={setActiveSection}
+        onSectionChange={handleSectionChange}
         onUpload={() => setShowUpload(true)}
         photoCount={photos.length}
         favoriteCount={photos.filter((p) => p.favorite).length}
@@ -138,7 +225,7 @@ const Index = () => {
 
       <BottomNav
         activeSection={activeSection}
-        onSectionChange={setActiveSection}
+        onSectionChange={handleSectionChange}
         onUpload={() => setShowUpload(true)}
       />
 
@@ -154,17 +241,29 @@ const Index = () => {
           selectedCount={selectedPhotos.size}
           onDeleteSelected={deleteSelected}
           onClearSelection={() => { setSelectedPhotos(new Set()); setSelectionMode(false); }}
+          onAddToAlbum={selectedPhotos.size > 0 ? () => setShowAddToAlbum(true) : undefined}
+          activeAlbum={activeAlbum}
+          onBackFromAlbum={() => { setActiveAlbum(null); setAlbumPhotoIds([]); }}
         />
 
         <div className="p-3 md:p-6 pb-24 md:pb-6">
-          <PhotoGrid
-            photos={filteredPhotos}
-            selectedPhotos={selectedPhotos}
-            onSelect={toggleSelect}
-            onOpen={setLightboxPhoto}
-            onToggleFavorite={handleToggleFavorite}
-            selectionMode={selectionMode}
-          />
+          {showAlbumsList ? (
+            <AlbumGrid
+              albums={albums}
+              onOpenAlbum={handleOpenAlbum}
+              onCreateAlbum={() => setShowCreateAlbum(true)}
+              onDeleteAlbum={handleDeleteAlbum}
+            />
+          ) : (
+            <PhotoGrid
+              photos={filteredPhotos}
+              selectedPhotos={selectedPhotos}
+              onSelect={toggleSelect}
+              onOpen={setLightboxPhoto}
+              onToggleFavorite={handleToggleFavorite}
+              selectionMode={selectionMode}
+            />
+          )}
         </div>
       </main>
 
@@ -185,6 +284,20 @@ const Index = () => {
         isOpen={showUpload}
         onClose={() => setShowUpload(false)}
         onUpload={handleUpload}
+      />
+
+      <CreateAlbumModal
+        isOpen={showCreateAlbum}
+        onClose={() => setShowCreateAlbum(false)}
+        onCreate={handleCreateAlbum}
+      />
+
+      <AddToAlbumModal
+        isOpen={showAddToAlbum}
+        onClose={() => setShowAddToAlbum(false)}
+        albums={albums}
+        onAddToAlbum={handleAddToAlbum}
+        selectedCount={selectedPhotos.size}
       />
     </div>
   );
