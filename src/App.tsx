@@ -17,6 +17,7 @@ import GmailCallback from "./pages/GmailCallback";
 import PixelAIPage from "./pages/PixelAI";
 import BrowserPage from "./pages/Browser";
 import ChatPage from "./pages/Chat";
+import TempMailPage from "./pages/TempMail";
 import SettingsPage from "./pages/Settings";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
