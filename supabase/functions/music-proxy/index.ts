@@ -214,7 +214,8 @@ async function getSongById(id: string): Promise<any> {
   const data = await res.json();
   const songs = data.songs || (data[id] ? [data[id]] : Object.values(data).filter((v: any) => v?.id));
   const mapped = songs.map(mapSong);
-  return { data: mapped };
+  const resolved = await resolveUrls(mapped);
+  return { data: resolved };
 }
 
 async function getSuggestions(id: string, limit: string): Promise<any> {
@@ -225,7 +226,8 @@ async function getSuggestions(id: string, limit: string): Promise<any> {
   const data = await res.json();
   const songs = Array.isArray(data) ? data : Object.values(data).filter((v: any) => v?.id);
   const mapped = songs.map(mapSong);
-  return { data: mapped };
+  const resolved = await resolveUrls(mapped);
+  return { data: resolved };
 }
 
 serve(async (req) => {
