@@ -40,17 +40,27 @@ const Auth = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    // In native Capacitor app, window.location.origin is "http://localhost" which breaks OAuth.
-    // Use the published web URL so Google redirects correctly, then the app handles the deep link.
-    const isNative = window.location.hostname === "localhost" && !window.location.port;
-    const redirectUri = isNative
-      ? "https://aura-gallery-keeper.lovable.app"
-      : window.location.origin;
+    try {
+      setLoading(true);
+      // For native Capacitor apps, use the published URL; for web, use current origin
+      const isNative = typeof (window as any).Capacitor !== "undefined";
+      const redirectUri = isNative
+        ? "https://aura-gallery-keeper.lovable.app"
+        : window.location.origin;
 
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: redirectUri,
-    });
-    if (error) toast.error("Google sign-in failed");
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: redirectUri,
+      });
+      if (result?.error) {
+        console.error("Google sign-in error:", result.error);
+        toast.error(result.error.message || "Google sign-in failed");
+      }
+    } catch (err: any) {
+      console.error("Google sign-in exception:", err);
+      toast.error(err.message || "Google sign-in failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
