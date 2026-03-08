@@ -264,7 +264,7 @@ const DrivePage = () => {
           <>
             {subfolders.length > 0 && (
               <div className="mb-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Folders</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("drive.folders")}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {subfolders.map((folder) => (
                     <button key={folder} onClick={() => navigateToFolder(folder)} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 hover:bg-accent/50 transition-all">
