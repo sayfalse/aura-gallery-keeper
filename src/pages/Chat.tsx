@@ -507,7 +507,7 @@ const ChatPage = () => {
       {/* Message input */}
       <div className="shrink-0 border-t border-border bg-background px-3 py-2 pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-2 bg-secondary rounded-2xl px-3 py-2">
+          <div className="flex-1 flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-2xl px-3 py-2">
             <input
               ref={inputRef}
               type="text"

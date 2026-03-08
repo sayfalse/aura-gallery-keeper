@@ -579,7 +579,7 @@ const MailPage = () => {
                 placeholder="To"
                 value={composeTo}
                 onChange={(e) => setComposeTo(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
+                className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground transition-all"
               />
 
               <input
@@ -587,7 +587,7 @@ const MailPage = () => {
                 placeholder="Subject"
                 value={composeSubject}
                 onChange={(e) => setComposeSubject(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
+                className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground transition-all"
               />
 
               <textarea
@@ -595,7 +595,7 @@ const MailPage = () => {
                 value={composeBody}
                 onChange={(e) => setComposeBody(e.target.value)}
                 rows={12}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none"
+                className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none transition-all"
               />
 
               {/* Attachments */}

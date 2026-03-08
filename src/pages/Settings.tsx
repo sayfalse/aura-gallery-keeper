@@ -371,7 +371,7 @@ const SettingsPage = () => {
                             <span className="text-xs text-foreground font-medium">{type}</span>
                             <span className="text-[10px] text-muted-foreground">{formatFileSize(size)} ({pct.toFixed(1)}%)</span>
                           </div>
-                          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                          <div className="h-1.5 rounded-full bg-primary/10 overflow-hidden">
                             <div className={`h-full rounded-full ${colors[type] || "bg-primary"} transition-all duration-500`} style={{ width: `${Math.max(2, pct)}%` }} />
                           </div>
                         </div>
