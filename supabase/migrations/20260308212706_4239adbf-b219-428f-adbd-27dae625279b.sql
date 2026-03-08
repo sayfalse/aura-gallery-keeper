@@ -1,0 +1,1 @@
+ALTER TABLE public.announcements REPLICA IDENTITY FULL;
