@@ -263,7 +263,7 @@ const SettingsPage = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search languages..."
+              placeholder={t("settings.searchLanguages")}
               value={langSearch}
               onChange={(e) => {
                 setLangSearch(e.target.value);
