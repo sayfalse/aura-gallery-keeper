@@ -286,9 +286,11 @@ const Index = () => {
           selectedCount={selectedPhotos.size}
           onDeleteSelected={deleteSelected}
           onClearSelection={() => { setSelectedPhotos(new Set()); setSelectionMode(false); }}
-          onAddToAlbum={selectedPhotos.size > 0 ? () => setShowAddToAlbum(true) : undefined}
+          onAddToAlbum={selectedPhotos.size > 0 && activeSection !== "trash" ? () => setShowAddToAlbum(true) : undefined}
           activeAlbum={activeAlbum}
           onBackFromAlbum={() => { setActiveAlbum(null); setAlbumPhotoIds([]); }}
+          onRestoreSelected={activeSection === "trash" && selectedPhotos.size > 0 ? restoreSelected : undefined}
+          onPermanentDeleteSelected={activeSection === "trash" && selectedPhotos.size > 0 ? permanentDeleteSelected : undefined}
         />
 
         <div className="p-3 md:p-6 pb-24 md:pb-6">
