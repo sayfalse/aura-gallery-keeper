@@ -1,4 +1,4 @@
-import { Images, Heart, FolderOpen, Clock, Trash2, Upload, Cloud } from "lucide-react";
+import { Images, Heart, FolderOpen, Clock, Trash2, Upload, Cloud, LogOut } from "lucide-react";
 import type { SidebarSection } from "@/types/photo";
 
 interface AppSidebarProps {
@@ -7,6 +7,7 @@ interface AppSidebarProps {
   onUpload: () => void;
   photoCount: number;
   favoriteCount: number;
+  onSignOut?: () => void;
 }
 
 const navItems: { id: SidebarSection; label: string; icon: React.ElementType }[] = [
