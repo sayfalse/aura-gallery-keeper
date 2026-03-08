@@ -171,8 +171,6 @@ const SettingsPage = () => {
     toast.success(`Language set to ${lang?.name || code}`);
   };
 
-  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
-  const email = user?.email || "";
 
   const themeOptions = [
     { value: "light", label: "Light", icon: Sun },
