@@ -80,7 +80,7 @@ const Home = () => {
         <ProfileMenu />
       </header>
 
-      <main className="px-6 pt-4 pb-20 max-w-3xl mx-auto space-y-8">
+      <main className="px-6 pt-4 pb-24 max-w-3xl mx-auto space-y-8">
         {/* Quick Stats */}
         {stats.length > 0 && (
           <div className="grid grid-cols-4 gap-3">
