@@ -323,20 +323,32 @@ const SettingsPage = () => {
             ))}
 
             {/* Storage usage bar */}
-            <div className="pt-3 border-t border-border">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-muted-foreground">Cloud Storage</span>
-                <span className="text-xs font-medium text-foreground">
-                  {storageAnalytics ? formatFileSize(storageAnalytics.totalSize) : "—"} used
-                </span>
-              </div>
-              <div className="h-2.5 rounded-full bg-primary/10 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-700"
-                  style={{ width: storageAnalytics ? `${Math.max(2, Math.min(100, (storageAnalytics.totalSize / (5 * 1024 * 1024 * 1024)) * 100))}%` : "2%" }}
-                />
-              </div>
-            </div>
+            {(() => {
+              const STORAGE_LIMIT = 1 * 1024 * 1024 * 1024; // 1 GB
+              const used = storageAnalytics?.totalSize || 0;
+              const pct = Math.max(1, Math.min(100, (used / STORAGE_LIMIT) * 100));
+              const isNearLimit = pct > 80;
+              const isOverLimit = pct >= 100;
+              return (
+                <div className="pt-3 border-t border-border">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground">Cloud Storage</span>
+                    <span className={`text-xs font-medium ${isOverLimit ? "text-destructive" : isNearLimit ? "text-yellow-500" : "text-foreground"}`}>
+                      {storageAnalytics ? formatFileSize(used) : "—"} / 1 GB
+                    </span>
+                  </div>
+                  <div className="h-2.5 rounded-full bg-primary/10 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${isOverLimit ? "bg-destructive" : isNearLimit ? "bg-yellow-500" : "bg-gradient-to-r from-primary to-primary/70"}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1.5">
+                    {isOverLimit ? "Storage limit reached — delete files to free space" : isNearLimit ? "Running low on storage" : `${(100 - pct).toFixed(1)}% remaining`}
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* File type distribution */}
             {storageAnalytics && Object.keys(storageAnalytics.byType).length > 0 && (
