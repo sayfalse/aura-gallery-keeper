@@ -286,8 +286,10 @@ const DrivePage = () => {
                             {formatFileSize(file.sizeBytes)} · {format(file.createdAt, "MMM d, yyyy")} at {format(file.createdAt, "h:mm a")}
                           </p>
                         </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => setPreviewFile(file)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors" title="Preview">
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button onClick={(e) => { e.stopPropagation(); setPreviewFile(file); }} className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors" title="Preview">
                             <Eye className="w-4 h-4" />
                           </button>
                           <button onClick={() => setMoveFile(file)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors" title="Move to folder">

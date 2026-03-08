@@ -535,6 +535,15 @@ const SettingsPage = () => {
               </a>
             </div>
             <div className="flex items-center justify-between py-2">
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Github className="w-3.5 h-3.5 text-muted-foreground" />
+                GitHub
+              </span>
+              <a href="https://github.com/sayfalse" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-medium hover:underline">
+                @sayfalse
+              </a>
+            </div>
+            <div className="flex items-center justify-between py-2">
               <span className="text-sm text-foreground">Version</span>
               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">1.0.0</span>
             </div>
