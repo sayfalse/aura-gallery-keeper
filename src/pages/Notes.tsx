@@ -143,7 +143,7 @@ const NotesPage = () => {
         </button>
         <div className="flex-1 flex items-center gap-2">
           <StickyNote className="w-5 h-5 text-amber-500" />
-          <h1 className="font-display text-lg font-bold text-foreground">Notes</h1>
+          <h1 className="font-display text-lg font-bold text-foreground">{t("notes.title")}</h1>
         </div>
         <QuickNavButton />
         <button onClick={handleCreate} className="p-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
