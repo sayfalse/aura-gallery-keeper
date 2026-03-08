@@ -99,6 +99,22 @@ const DocumentViewer = ({ fileName, storagePath, mimeType, onClose }: DocumentVi
       );
     }
 
+    if (isVideo) {
+      return (
+        <div className="flex-1 flex items-center justify-center overflow-auto p-4 bg-black/90">
+          <video
+            src={fileUrl}
+            controls
+            autoPlay
+            className="max-w-full max-h-full rounded-lg shadow-lg"
+            style={{ transform: `scale(${zoom / 100})` }}
+          >
+            Your browser does not support video playback.
+          </video>
+        </div>
+      );
+    }
+
     if (isOffice && fileUrl) {
       // Use Microsoft Office Online Viewer
       const encodedUrl = encodeURIComponent(fileUrl);
