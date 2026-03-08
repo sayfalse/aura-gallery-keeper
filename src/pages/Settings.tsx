@@ -389,7 +389,7 @@ const SettingsPage = () => {
         {/* Security & Encryption */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Shield className="w-4 h-4" /> Security & Encryption
+            <Shield className="w-4 h-4" /> {t("settings.security")}
           </h2>
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 mb-4">
             <div className="flex items-start gap-3">
