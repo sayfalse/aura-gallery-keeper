@@ -1,27 +1,42 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Share2, BookOpen, ChevronLeft, ChevronRight, RotateCw, Lock, RefreshCw, Search } from "lucide-react";
+import { Share2, BookOpen, ChevronLeft, ChevronRight, RotateCw, Lock, RefreshCw, Search, ExternalLink, Globe } from "lucide-react";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+
+const SEARCH_ENGINE = "https://www.google.com/search?igu=1&q=";
 
 const BrowserPage = () => {
   const navigate = useNavigate();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [url, setUrl] = useState("https://www.google.com/webhp?igu=1");
-  const [inputUrl, setInputUrl] = useState("google.com");
-  const [loading, setLoading] = useState(true);
+  const [url, setUrl] = useState("");
+  const [inputUrl, setInputUrl] = useState("");
+  const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [history, setHistory] = useState<string[]>(["https://www.google.com/webhp?igu=1"]);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const [loadError, setLoadError] = useState(false);
+  const [started, setStarted] = useState(false);
+  const loadTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const navigateTo = (target: string) => {
     setUrl(target);
     setLoading(true);
     setLoadError(false);
+    setStarted(true);
     const newHistory = [...history.slice(0, historyIndex + 1), target];
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
+
+    // Auto-detect load failures after timeout
+    clearTimeout(loadTimeout.current);
+    loadTimeout.current = setTimeout(() => {
+      setLoading(false);
+    }, 8000);
   };
+
+  useEffect(() => {
+    return () => clearTimeout(loadTimeout.current);
+  }, []);
 
   const handleNavigate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +46,7 @@ const BrowserPage = () => {
       if (target.includes(".") && !target.includes(" ")) {
         target = "https://" + target;
       } else {
-        target = `https://www.google.com/search?igu=1&q=${encodeURIComponent(target)}`;
+        target = `${SEARCH_ENGINE}${encodeURIComponent(target)}`;
       }
     }
     navigateTo(target);
@@ -59,7 +74,7 @@ const BrowserPage = () => {
   };
 
   const handleRefresh = () => {
-    if (iframeRef.current) {
+    if (iframeRef.current && url) {
       setLoadError(false);
       iframeRef.current.src = url;
       setLoading(true);
@@ -75,6 +90,7 @@ const BrowserPage = () => {
   };
 
   const displayUrl = () => {
+    if (!url) return "";
     try {
       const u = new URL(url);
       return u.hostname.replace("www.", "");
@@ -87,6 +103,11 @@ const BrowserPage = () => {
 
   const handleIframeLoad = () => {
     setLoading(false);
+    clearTimeout(loadTimeout.current);
+  };
+
+  const openExternal = () => {
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -100,19 +121,43 @@ const BrowserPage = () => {
           </div>
         )}
 
-        {loadError ? (
+        {!started ? (
+          /* Landing state - search prompt */
+          <div className="flex flex-col items-center justify-center px-6 text-center" style={{ height: "calc(100vh - 88px)" }}>
+            <Globe className="w-16 h-16 text-muted-foreground/30 mb-4" />
+            <p className="text-lg font-semibold text-foreground mb-2">Search the Web</p>
+            <p className="text-sm text-muted-foreground mb-6 max-w-xs">
+              Type a URL or search term in the bar below to get started.
+            </p>
+            <button
+              onClick={() => setFocused(true)}
+              className="px-6 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-medium"
+            >
+              Start Browsing
+            </button>
+          </div>
+        ) : loadError ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center" style={{ height: "calc(100vh - 88px)" }}>
             <Search className="w-12 h-12 text-muted-foreground/40" />
             <div>
               <p className="text-base font-medium text-foreground mb-1">Page can't be loaded</p>
-              <p className="text-sm text-muted-foreground">This site may block embedding. Try opening it directly in your device browser.</p>
+              <p className="text-sm text-muted-foreground">This site blocks embedding. You can open it in your device browser instead.</p>
             </div>
-            <button
-              onClick={() => window.open(url, "_blank")}
-              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium"
-            >
-              Open in External Browser
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={openExternal}
+                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium flex items-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Open Externally
+              </button>
+              <button
+                onClick={() => { setStarted(false); setUrl(""); }}
+                className="px-4 py-2 rounded-xl bg-secondary text-foreground text-sm font-medium"
+              >
+                New Search
+              </button>
+            </div>
           </div>
         ) : (
           <iframe
@@ -121,7 +166,7 @@ const BrowserPage = () => {
             className="w-full border-0"
             style={{ height: "calc(100vh - 88px)" }}
             onLoad={handleIframeLoad}
-            onError={() => { setLoading(false); setLoadError(true); }}
+            onError={() => { setLoading(false); setLoadError(true); clearTimeout(loadTimeout.current); }}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-downloads"
             allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; picture-in-picture; fullscreen"
             referrerPolicy="no-referrer-when-downgrade"
@@ -151,11 +196,13 @@ const BrowserPage = () => {
             </form>
           ) : (
             <button
-              onClick={() => { setFocused(true); setInputUrl(url); }}
+              onClick={() => { setFocused(true); setInputUrl(url || ""); }}
               className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-secondary/80 hover:bg-secondary transition-colors"
             >
-              {isSecure && <Lock className="w-3 h-3 text-muted-foreground" />}
-              <span className="text-sm text-foreground font-medium truncate">{displayUrl()}</span>
+              {url && isSecure && <Lock className="w-3 h-3 text-muted-foreground" />}
+              <span className="text-sm text-foreground font-medium truncate">
+                {displayUrl() || "Search or enter URL"}
+              </span>
               {loading && <RotateCw className="w-3 h-3 text-muted-foreground animate-spin ml-1" />}
             </button>
           )}
@@ -169,13 +216,13 @@ const BrowserPage = () => {
           <button onClick={goForward} disabled={historyIndex >= history.length - 1} className="p-2 disabled:opacity-30 text-primary transition-opacity">
             <ChevronRight className="w-5 h-5" />
           </button>
-          <button onClick={handleShare} className="p-2 text-primary">
+          <button onClick={handleShare} disabled={!url} className="p-2 text-primary disabled:opacity-30">
             <Share2 className="w-5 h-5" />
           </button>
           <button onClick={() => navigate("/")} className="p-2 text-primary">
             <BookOpen className="w-5 h-5" />
           </button>
-          <button onClick={handleRefresh} className="p-2 text-primary">
+          <button onClick={handleRefresh} disabled={!url} className="p-2 text-primary disabled:opacity-30">
             <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
           </button>
         </div>

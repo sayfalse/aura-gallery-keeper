@@ -208,7 +208,7 @@ const SettingsPage = () => {
         <QuickNavButton />
       </header>
 
-      <div className="max-w-lg mx-auto p-4 md:p-6 space-y-6">
+      <div className="max-w-lg mx-auto p-4 md:p-6 space-y-6 pb-36">
         {/* Personal Info */}
         {user && (
           <PersonalInfoSection
