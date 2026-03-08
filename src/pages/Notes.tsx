@@ -49,7 +49,7 @@ const NotesPage = () => {
       const data = await fetchNotes(user.id);
       setNotes(data);
     } catch {
-      toast.error("Failed to load notes");
+      toast.error(t("notes.failedLoad"));
     } finally {
       setLoading(false);
     }
