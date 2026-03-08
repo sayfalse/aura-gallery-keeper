@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Image, StickyNote, HardDrive, Users, Mail, Settings, Home, Sparkles } from "lucide-react";
+import { Image, StickyNote, HardDrive, Users, Mail, Settings, Home, Sparkles, Globe } from "lucide-react";
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import { useCallback } from "react";
 
