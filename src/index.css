@@ -1,4 +1,4 @@
-/* iOS System Font (SF Pro) */
+/* PixelVault — Vibrant Modern Theme */
 
 @tailwind base;
 @tailwind components;
@@ -6,118 +6,118 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 220 20% 10%;
+    --background: 240 20% 98%;
+    --foreground: 240 15% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 240 15% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 240 15% 10%;
 
-    --primary: 220 70% 50%;
+    --primary: 271 65% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 94%;
-    --secondary-foreground: 220 20% 20%;
+    --secondary: 340 75% 55%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 15% 95%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 250 20% 95%;
+    --muted-foreground: 250 10% 45%;
 
-    --accent: 220 15% 92%;
-    --accent-foreground: 220 20% 15%;
+    --accent: 20 90% 58%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 91%;
-    --input: 220 15% 91%;
-    --ring: 220 70% 50%;
+    --border: 250 15% 90%;
+    --input: 250 15% 90%;
+    --ring: 271 65% 58%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
     --sidebar-bg: 0 0% 100%;
-    --sidebar-fg: 220 20% 10%;
-    --sidebar-hover: 220 15% 96%;
-    --sidebar-active: 220 70% 97%;
-    --sidebar-active-text: 220 70% 50%;
-    --sidebar-border: 220 15% 93%;
+    --sidebar-fg: 240 15% 10%;
+    --sidebar-hover: 271 40% 96%;
+    --sidebar-active: 271 50% 95%;
+    --sidebar-active-text: 271 65% 55%;
+    --sidebar-border: 250 15% 92%;
     --sidebar-width: 260px;
 
     --toolbar-bg: 0 0% 100%;
-    --toolbar-border: 220 15% 93%;
+    --toolbar-border: 250 15% 92%;
 
-    --photo-radius: 0.5rem;
-    --photo-shadow: 0 1px 3px 0 hsl(220 20% 10% / 0.06);
-    --photo-shadow-hover: 0 8px 25px -5px hsl(220 20% 10% / 0.12);
+    --photo-radius: 0.625rem;
+    --photo-shadow: 0 2px 8px 0 hsl(271 50% 20% / 0.06);
+    --photo-shadow-hover: 0 12px 32px -8px hsl(271 50% 20% / 0.15);
 
-    --overlay: 220 20% 10% / 0.7;
+    --overlay: 271 30% 10% / 0.7;
 
     --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 240 20% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 271 30% 95%;
     --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border-default: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-border-default: 250 15% 90%;
+    --sidebar-ring: 271 65% 58%;
   }
 
   .dark {
-    --background: 220 15% 8%;
-    --foreground: 220 10% 90%;
+    --background: 260 20% 7%;
+    --foreground: 260 10% 92%;
 
-    --card: 220 15% 12%;
-    --card-foreground: 220 10% 90%;
+    --card: 260 18% 11%;
+    --card-foreground: 260 10% 92%;
 
-    --popover: 220 15% 12%;
-    --popover-foreground: 220 10% 90%;
+    --popover: 260 18% 11%;
+    --popover-foreground: 260 10% 92%;
 
-    --primary: 220 70% 55%;
+    --primary: 271 70% 62%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 15% 16%;
-    --secondary-foreground: 220 10% 80%;
+    --secondary: 340 75% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 260 18% 14%;
+    --muted-foreground: 260 10% 50%;
 
-    --accent: 220 15% 18%;
-    --accent-foreground: 220 10% 85%;
+    --accent: 20 85% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 220 70% 55%;
+    --border: 260 15% 17%;
+    --input: 260 15% 17%;
+    --ring: 271 70% 62%;
 
-    --sidebar-bg: 220 15% 10%;
-    --sidebar-fg: 220 10% 90%;
-    --sidebar-hover: 220 15% 15%;
-    --sidebar-active: 220 70% 15%;
-    --sidebar-active-text: 220 70% 65%;
-    --sidebar-border: 220 15% 16%;
+    --sidebar-bg: 260 18% 9%;
+    --sidebar-fg: 260 10% 90%;
+    --sidebar-hover: 271 25% 15%;
+    --sidebar-active: 271 35% 16%;
+    --sidebar-active-text: 271 70% 70%;
+    --sidebar-border: 260 15% 16%;
 
-    --toolbar-bg: 220 15% 10%;
-    --toolbar-border: 220 15% 16%;
+    --toolbar-bg: 260 18% 9%;
+    --toolbar-border: 260 15% 16%;
 
-    --photo-shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.3);
-    --photo-shadow-hover: 0 8px 25px -5px hsl(0 0% 0% / 0.5);
+    --photo-shadow: 0 2px 8px 0 hsl(0 0% 0% / 0.3);
+    --photo-shadow-hover: 0 12px 32px -8px hsl(0 0% 0% / 0.5);
 
     --overlay: 0 0% 0% / 0.8;
 
-    --sidebar-background: 220 15% 8%;
-    --sidebar-foreground: 220 10% 80%;
-    --sidebar-primary: 220 10% 90%;
-    --sidebar-primary-foreground: 220 15% 8%;
-    --sidebar-accent: 220 15% 15%;
-    --sidebar-accent-foreground: 220 10% 90%;
-    --sidebar-border-default: 220 15% 18%;
-    --sidebar-ring: 220 70% 55%;
+    --sidebar-background: 260 20% 7%;
+    --sidebar-foreground: 260 10% 80%;
+    --sidebar-primary: 260 10% 92%;
+    --sidebar-primary-foreground: 260 18% 8%;
+    --sidebar-accent: 271 25% 15%;
+    --sidebar-accent-foreground: 260 10% 92%;
+    --sidebar-border-default: 260 15% 17%;
+    --sidebar-ring: 271 70% 62%;
   }
 }
 
@@ -135,11 +135,9 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
   }
-  /* Smooth scrolling everywhere */
   html {
     scroll-behavior: smooth;
   }
-  /* Smoother transitions globally */
   button, a, input, textarea {
     @apply transition-colors duration-200;
   }
@@ -175,38 +173,14 @@
 }
 
 /* Tiptap editor styles */
-.tiptap {
-  outline: none;
-}
-.tiptap h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: hsl(var(--foreground));
-}
-.tiptap h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: hsl(var(--foreground));
-}
-.tiptap p {
-  margin-bottom: 0.25rem;
-  line-height: 1.7;
-}
-.tiptap ul, .tiptap ol {
-  padding-left: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-.tiptap ul {
-  list-style: disc;
-}
-.tiptap ol {
-  list-style: decimal;
-}
-.tiptap li {
-  margin-bottom: 0.15rem;
-}
+.tiptap { outline: none; }
+.tiptap h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: hsl(var(--foreground)); }
+.tiptap h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; color: hsl(var(--foreground)); }
+.tiptap p { margin-bottom: 0.25rem; line-height: 1.7; }
+.tiptap ul, .tiptap ol { padding-left: 1.5rem; margin-bottom: 0.5rem; }
+.tiptap ul { list-style: disc; }
+.tiptap ol { list-style: decimal; }
+.tiptap li { margin-bottom: 0.15rem; }
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -220,6 +194,4 @@
   20%, 60% { transform: translateX(-6px); }
   40%, 80% { transform: translateX(6px); }
 }
-.animate-shake {
-  animation: shake 0.4s ease-in-out;
-}
+.animate-shake { animation: shake 0.4s ease-in-out; }
