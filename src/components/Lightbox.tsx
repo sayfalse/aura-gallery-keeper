@@ -1,8 +1,11 @@
-import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info, Calendar, HardDrive, ImageIcon, Clock } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info, Calendar, HardDrive, ImageIcon, Clock, Share2, Link, Check } from "lucide-react";
 import type { Photo } from "@/types/photo";
 import { format } from "date-fns";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { createShareLink } from "@/lib/sharedPhotoService";
+import { toast } from "sonner";
 
 interface LightboxProps {
   photo: Photo;
