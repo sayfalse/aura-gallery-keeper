@@ -1,19 +1,52 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, RefreshCw, ExternalLink, Mail } from "lucide-react";
+import { ArrowLeft, RefreshCw, ExternalLink, Mail, AlertCircle } from "lucide-react";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
+
+const TEMP_MAIL_URL = "https://m.kuku.lu/";
 
 const TempMailPage = () => {
   const navigate = useNavigate();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    // If iframe doesn't load within 10s, show fallback
+    timeoutRef.current = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setLoadFailed(true);
+      }
+    }, 10000);
+    return () => clearTimeout(timeoutRef.current);
+  }, [loading]);
 
   const handleRefresh = () => {
+    setLoadFailed(false);
+    setLoading(true);
     if (iframeRef.current) {
-      iframeRef.current.src = "https://m.kuku.lu/";
-      setLoading(true);
+      iframeRef.current.src = TEMP_MAIL_URL;
     }
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setLoadFailed(true);
+      }
+    }, 10000);
+  };
+
+  const handleLoad = () => {
+    setLoading(false);
+    setLoadFailed(false);
+    clearTimeout(timeoutRef.current);
+  };
+
+  const openExternal = () => {
+    window.open(TEMP_MAIL_URL, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -30,26 +63,56 @@ const TempMailPage = () => {
         <button onClick={handleRefresh} className="p-2 rounded-xl hover:bg-accent transition-colors shrink-0" title="Refresh">
           <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? "animate-spin" : ""}`} />
         </button>
-        <button onClick={() => window.open("https://m.kuku.lu/", "_blank", "noopener,noreferrer")} className="p-2 rounded-xl hover:bg-accent transition-colors shrink-0" title="Open externally">
+        <button onClick={openExternal} className="p-2 rounded-xl hover:bg-accent transition-colors shrink-0" title="Open externally">
           <ExternalLink className="w-4 h-4 text-muted-foreground" />
         </button>
       </header>
 
       <div className="flex-1 relative">
-        {loading && (
+        {loading && !loadFailed && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        <iframe
-          ref={iframeRef}
-          src="https://m.kuku.lu/"
-          className="w-full h-full border-0"
-          style={{ minHeight: "calc(100vh - 52px)" }}
-          onLoad={() => setLoading(false)}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-          title="Temp Mail"
-        />
+
+        {loadFailed ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center py-20">
+            <AlertCircle className="w-12 h-12 text-muted-foreground/40" />
+            <div>
+              <p className="text-base font-medium text-foreground mb-1">Couldn't load Temp Mail</p>
+              <p className="text-sm text-muted-foreground max-w-xs">
+                The service may be unavailable or blocked from loading inline. You can open it in your device browser instead.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={openExternal}
+                className="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium flex items-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Open in Browser
+              </button>
+              <button
+                onClick={handleRefresh}
+                className="px-5 py-2.5 rounded-xl bg-secondary text-foreground text-sm font-medium flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            src={TEMP_MAIL_URL}
+            className="w-full h-full border-0"
+            style={{ minHeight: "calc(100vh - 52px)" }}
+            onLoad={handleLoad}
+            onError={() => { setLoading(false); setLoadFailed(true); }}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+            title="Temp Mail"
+          />
+        )}
       </div>
 
       <ModuleSwitcher />
