@@ -20,18 +20,21 @@ export type Database = {
           album_id: string
           id: string
           photo_id: string
+          sort_order: number
         }
         Insert: {
           added_at?: string
           album_id: string
           id?: string
           photo_id: string
+          sort_order?: number
         }
         Update: {
           added_at?: string
           album_id?: string
           id?: string
           photo_id?: string
+          sort_order?: number
         }
         Relationships: [
           {

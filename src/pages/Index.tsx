@@ -10,7 +10,7 @@ import CreateAlbumModal from "@/components/CreateAlbumModal";
 import AddToAlbumModal from "@/components/AddToAlbumModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchPhotos, fetchDeletedPhotos, toggleFavorite as toggleFavApi, softDeletePhoto, uploadPhoto } from "@/lib/photoService";
-import { fetchAlbums, createAlbum, deleteAlbum, addPhotosToAlbum, fetchAlbumPhotos, updateAlbumCover } from "@/lib/albumService";
+import { fetchAlbums, createAlbum, deleteAlbum, addPhotosToAlbum, fetchAlbumPhotos, updateAlbumCover, reorderAlbumPhotos } from "@/lib/albumService";
 import type { Photo, Album, ViewMode, SidebarSection } from "@/types/photo";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
@@ -71,9 +71,12 @@ const Index = () => {
   }, []);
 
   const filteredPhotos = useMemo(() => {
-    // If viewing an album's photos
+    // If viewing an album's photos, maintain album sort order
     if (activeAlbum) {
-      return photos.filter((p) => albumPhotoIds.includes(p.id));
+      const albumPhotos = albumPhotoIds
+        .map((id) => photos.find((p) => p.id === id))
+        .filter(Boolean) as Photo[];
+      return albumPhotos;
     }
     let result = photos;
     if (activeSection === "favorites") result = result.filter((p) => p.favorite);
@@ -200,6 +203,18 @@ const Index = () => {
     setAlbumPhotoIds([]);
   }, []);
 
+  const handleReorderPhotos = useCallback(async (orderedIds: string[]) => {
+    if (!activeAlbum) return;
+    // Optimistic update
+    setAlbumPhotoIds(orderedIds);
+    try {
+      await reorderAlbumPhotos(activeAlbum.id, orderedIds);
+    } catch {
+      toast.error("Failed to save photo order");
+      loadAlbumPhotos(activeAlbum.id);
+    }
+  }, [activeAlbum, loadAlbumPhotos]);
+
   const lightboxIndex = lightboxPhoto ? filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id) : -1;
 
   if (loading) {
@@ -262,6 +277,8 @@ const Index = () => {
               onOpen={setLightboxPhoto}
               onToggleFavorite={handleToggleFavorite}
               selectionMode={selectionMode}
+              isAlbumView={!!activeAlbum}
+              onReorder={handleReorderPhotos}
             />
           )}
         </div>
