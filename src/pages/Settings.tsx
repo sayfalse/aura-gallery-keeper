@@ -192,6 +192,14 @@ const SettingsPage = () => {
         setAnnouncements((prev) => [newAnn, ...prev]);
         toast.info(`📢 ${newAnn.title || "New announcement"}`, { description: newAnn.content.substring(0, 80) });
       })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "announcements" }, (payload) => {
+        const updated = payload.new as typeof announcements[0];
+        setAnnouncements((prev) => prev.map((a) => a.id === updated.id ? updated : a));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "announcements" }, (payload) => {
+        const deleted = payload.old as { id: string };
+        setAnnouncements((prev) => prev.filter((a) => a.id !== deleted.id));
+      })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
