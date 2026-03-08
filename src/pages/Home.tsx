@@ -4,19 +4,20 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import { motion } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Clock, FileText, Sparkles,
   Shield, ArrowUpRight, TrendingUp, Layers
 } from "lucide-react";
 
 const apps = [
-  { id: "gallery", name: "Gallery", icon: Image, gradient: "from-blue-500 via-blue-400 to-cyan-400", shadow: "shadow-blue-500/25", desc: "Photos & Albums" },
-  { id: "notes", name: "Notes", icon: StickyNote, gradient: "from-amber-500 via-orange-400 to-yellow-400", shadow: "shadow-amber-500/25", desc: "Quick thoughts" },
-  { id: "drive", name: "Drive", icon: HardDrive, gradient: "from-indigo-600 via-indigo-500 to-purple-400", shadow: "shadow-indigo-500/25", desc: "File storage" },
-  { id: "contacts", name: "Contacts", icon: Users, gradient: "from-emerald-500 via-emerald-400 to-teal-400", shadow: "shadow-emerald-500/25", desc: "People" },
-  { id: "mail", name: "Mail", icon: Mail, gradient: "from-sky-500 via-sky-400 to-blue-400", shadow: "shadow-sky-500/25", desc: "Email" },
-  { id: "pixel-ai", name: "Pixel AI", icon: Sparkles, gradient: "from-violet-600 via-fuchsia-500 to-pink-400", shadow: "shadow-violet-500/25", desc: "AI Assistant" },
-  { id: "settings", name: "Settings", icon: Settings, gradient: "from-slate-500 via-slate-400 to-gray-400", shadow: "shadow-slate-500/25", desc: "Preferences" },
+  { id: "gallery", name: "Gallery", icon: Image, gradient: "from-blue-500 via-blue-400 to-cyan-400", shadow: "shadow-blue-500/25", desc: "Photos & Albums", path: "/gallery" },
+  { id: "notes", name: "Notes", icon: StickyNote, gradient: "from-amber-500 via-orange-400 to-yellow-400", shadow: "shadow-amber-500/25", desc: "Quick thoughts", path: "/notes" },
+  { id: "drive", name: "Drive", icon: HardDrive, gradient: "from-indigo-600 via-indigo-500 to-purple-400", shadow: "shadow-indigo-500/25", desc: "File storage", path: "/drive" },
+  { id: "contacts", name: "Contacts", icon: Users, gradient: "from-emerald-500 via-emerald-400 to-teal-400", shadow: "shadow-emerald-500/25", desc: "People", path: "/contacts" },
+  { id: "mail", name: "Mail", icon: Mail, gradient: "from-sky-500 via-sky-400 to-blue-400", shadow: "shadow-sky-500/25", desc: "Email", path: "/mail" },
+  { id: "pixel-ai", name: "Pixel AI", icon: Sparkles, gradient: "from-violet-600 via-fuchsia-500 to-pink-400", shadow: "shadow-violet-500/25", desc: "AI Assistant", path: "/pixel-ai" },
+  { id: "settings", name: "Settings", icon: Settings, gradient: "from-slate-500 via-slate-400 to-gray-400", shadow: "shadow-slate-500/25", desc: "Preferences", path: "/settings" },
 ];
 
 const statConfig = [
@@ -26,11 +27,11 @@ const statConfig = [
   { key: "Files", gradient: "from-indigo-500 to-purple-400", icon: HardDrive },
 ];
 
-interface QuickStat {
-  label: string;
-  count: number;
-  icon: typeof Image;
-}
+interface QuickStat { label: string; count: number; icon: typeof Image; }
+
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" as const } } };
+const scaleIn = { hidden: { opacity: 0, scale: 0.9 }, show: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" as const } } };
 
 const Home = () => {
   const { user } = useAuth();
@@ -54,16 +55,8 @@ const Home = () => {
         { label: "Files", count: files.count || 0, icon: HardDrive },
       ]);
     });
-
-    supabase
-      .from("notes")
-      .select("id, title, updated_at")
-      .eq("user_id", user.id)
-      .order("updated_at", { ascending: false })
-      .limit(3)
-      .then(({ data }) => {
-        setRecentNotes((data || []).map((n: any) => ({ id: n.id, title: n.title, updatedAt: n.updated_at })));
-      });
+    supabase.from("notes").select("id, title, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(3)
+      .then(({ data }) => { setRecentNotes((data || []).map((n: any) => ({ id: n.id, title: n.title, updatedAt: n.updated_at }))); });
   }, [user]);
 
   const greeting = () => {
@@ -75,14 +68,18 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Decorative gradient blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute top-1/3 -left-20 w-72 h-72 bg-primary/3 rounded-full blur-3xl" />
       </div>
 
       {/* Header */}
-      <header className="relative flex items-center justify-between px-6 py-5">
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="relative flex items-center justify-between px-6 py-5"
+      >
         <div className="flex items-center gap-3">
           <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
             <Layers className="w-5 h-5 text-primary-foreground" />
@@ -94,31 +91,33 @@ const Home = () => {
           </div>
         </div>
         <ProfileMenu />
-      </header>
+      </motion.header>
 
       <main className="relative px-5 pt-2 pb-28 max-w-3xl mx-auto space-y-7">
-        {/* Stats Row */}
+        {/* Stats */}
         {stats.length > 0 && (
-          <div className="grid grid-cols-4 gap-2.5">
+          <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-4 gap-2.5">
             {stats.map((stat, i) => {
               const cfg = statConfig[i];
               return (
-                <div
-                  key={stat.label}
+                <motion.div key={stat.label} variants={scaleIn}
                   className="relative overflow-hidden p-3 rounded-2xl bg-card border border-border group hover:border-primary/20 transition-all duration-300"
                 >
                   <div className={`absolute top-0 right-0 w-12 h-12 bg-gradient-to-br ${cfg.gradient} opacity-[0.08] rounded-full -translate-y-2 translate-x-2 group-hover:opacity-[0.15] transition-opacity`} />
                   <cfg.icon className="w-4 h-4 text-muted-foreground mb-2" />
                   <p className="text-xl font-bold text-foreground leading-none">{stat.count}</p>
                   <p className="text-[10px] text-muted-foreground mt-1 font-medium">{stat.label}</p>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         )}
 
         {/* Pixel AI Banner */}
-        <button
+        <motion.button
+          initial={{ opacity: 0, y: 20, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
           onClick={() => navigate("/pixel-ai")}
           className="w-full relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 p-5 text-left group hover:shadow-2xl hover:shadow-violet-500/20 transition-all duration-500"
         >
@@ -126,9 +125,13 @@ const Home = () => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700" />
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-10 -translate-x-5" />
           <div className="relative flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20"
+            >
               <Sparkles className="w-6 h-6 text-white" />
-            </div>
+            </motion.div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
                 <h3 className="text-base font-bold text-white">Ask Pixel AI</h3>
@@ -138,21 +141,23 @@ const Home = () => {
             </div>
             <ArrowUpRight className="w-5 h-5 text-white/60 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
           </div>
-        </button>
+        </motion.button>
 
         {/* App Grid */}
-        <div>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-foreground">Your Apps</h2>
             <span className="text-[10px] text-muted-foreground">{apps.length} apps</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            {apps.map((app, i) => (
-              <button
+          <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {apps.map((app) => (
+              <motion.button
                 key={app.id}
-                onClick={() => navigate(`/${app.id === "pixel-ai" ? "pixel-ai" : app.id === "settings" ? "settings" : app.id}`)}
-                className="group relative overflow-hidden flex flex-col items-start gap-3 p-4 rounded-2xl bg-card border border-border hover:border-primary/20 hover:shadow-lg transition-all duration-300 animate-slide-up"
-                style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}
+                variants={fadeUp}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => navigate(app.path)}
+                className="group relative overflow-hidden flex flex-col items-start gap-3 p-4 rounded-2xl bg-card border border-border hover:border-primary/20 hover:shadow-lg transition-all duration-300"
               >
                 <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${app.gradient} opacity-[0.06] rounded-full -translate-y-6 translate-x-6 group-hover:opacity-[0.12] group-hover:scale-150 transition-all duration-500`} />
                 <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${app.gradient} flex items-center justify-center shadow-md ${app.shadow} group-hover:scale-105 group-hover:shadow-lg transition-all duration-300`}>
@@ -162,14 +167,14 @@ const Home = () => {
                   <span className="text-sm font-semibold text-foreground block">{app.name}</span>
                   <span className="text-[10px] text-muted-foreground">{app.desc}</span>
                 </div>
-              </button>
+              </motion.button>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Recent Notes */}
         {recentNotes.length > 0 && (
-          <div>
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.4 }}>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 text-muted-foreground" /> Recent Activity
@@ -179,9 +184,12 @@ const Home = () => {
               </button>
             </div>
             <div className="space-y-2">
-              {recentNotes.map((note) => (
-                <button
+              {recentNotes.map((note, i) => (
+                <motion.button
                   key={note.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + i * 0.08, duration: 0.35 }}
                   onClick={() => navigate("/notes")}
                   className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border hover:border-primary/20 hover:shadow-md transition-all duration-200 text-left group"
                 >
@@ -195,15 +203,20 @@ const Home = () => {
                     </span>
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
-        {/* Cloud & Security Banner */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-card border border-border group">
+        {/* Cloud & Security */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55, duration: 0.4 }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+        >
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-card border border-border">
             <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 rounded-full -translate-y-4 translate-x-4" />
             <div className="flex items-center gap-3 mb-2">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -217,12 +230,9 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Data syncs across all your devices in real-time.
-            </p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">Data syncs across all your devices in real-time.</p>
           </div>
-
-          <div className="relative overflow-hidden p-4 rounded-2xl bg-card border border-border group">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-card border border-border">
             <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-full -translate-y-4 translate-x-4" />
             <div className="flex items-center gap-3 mb-2">
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -233,11 +243,9 @@ const Home = () => {
                 <span className="text-[10px] text-muted-foreground">AES-256 • TLS 1.3</span>
               </div>
             </div>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              Military-grade encryption protects your data.
-            </p>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">Military-grade encryption protects your data.</p>
           </div>
-        </div>
+        </motion.div>
       </main>
       <ModuleSwitcher />
     </div>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 
 interface Message {
@@ -221,7 +222,9 @@ const PixelAI = () => {
                 </div>
               ) : (
                 <>
-                  <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                  <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-pre:my-2 prose-code:text-xs prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
                   {msg.images && msg.images.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {msg.images.map((imgUrl, i) => (
