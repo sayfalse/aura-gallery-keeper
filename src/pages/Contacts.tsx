@@ -195,7 +195,7 @@ const ContactsPage = () => {
                 {activeContact.phone && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                     <Phone className="w-4 h-4 text-muted-foreground" />
-                    <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm text-foreground">{activeContact.phone}</p></div>
+                    <div><p className="text-xs text-muted-foreground">{t("common.phone")}</p><p className="text-sm text-foreground">{activeContact.phone}</p></div>
                   </div>
                 )}
                 {activeContact.email && (
