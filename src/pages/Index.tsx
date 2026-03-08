@@ -284,6 +284,7 @@ const Index = () => {
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
         onUpload={() => setShowUpload(true)}
+        sharedCount={sharedPhotos.length}
       />
 
       <main className="md:ml-[260px]">
