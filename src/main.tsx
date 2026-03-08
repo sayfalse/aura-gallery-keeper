@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "./i18n";
 
 // Apply saved language preference on startup
 const savedLang = localStorage.getItem("app_language") || "en";
