@@ -67,43 +67,43 @@
   }
 
   .dark {
-    --background: 260 20% 7%;
-    --foreground: 260 10% 92%;
+    --background: 220 20% 7%;
+    --foreground: 215 12% 92%;
 
-    --card: 260 18% 11%;
-    --card-foreground: 260 10% 92%;
+    --card: 220 18% 11%;
+    --card-foreground: 215 12% 92%;
 
-    --popover: 260 18% 11%;
-    --popover-foreground: 260 10% 92%;
+    --popover: 220 18% 11%;
+    --popover-foreground: 215 12% 92%;
 
-    --primary: 271 70% 62%;
+    --primary: 217 85% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 340 75% 60%;
+    --secondary: 199 80% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 260 18% 14%;
-    --muted-foreground: 260 10% 50%;
+    --muted: 220 18% 14%;
+    --muted-foreground: 215 12% 50%;
 
-    --accent: 20 85% 55%;
+    --accent: 199 75% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 260 15% 17%;
-    --input: 260 15% 17%;
-    --ring: 271 70% 62%;
+    --border: 220 16% 17%;
+    --input: 220 16% 17%;
+    --ring: 217 85% 60%;
 
-    --sidebar-bg: 260 18% 9%;
-    --sidebar-fg: 260 10% 90%;
-    --sidebar-hover: 271 25% 15%;
-    --sidebar-active: 271 35% 16%;
-    --sidebar-active-text: 271 70% 70%;
-    --sidebar-border: 260 15% 16%;
+    --sidebar-bg: 220 18% 9%;
+    --sidebar-fg: 215 12% 90%;
+    --sidebar-hover: 217 25% 15%;
+    --sidebar-active: 217 35% 16%;
+    --sidebar-active-text: 217 80% 70%;
+    --sidebar-border: 220 16% 16%;
 
-    --toolbar-bg: 260 18% 9%;
-    --toolbar-border: 260 15% 16%;
+    --toolbar-bg: 220 18% 9%;
+    --toolbar-border: 220 16% 16%;
 
     --photo-shadow: 0 2px 8px 0 hsl(0 0% 0% / 0.3);
     --photo-shadow-hover: 0 12px 32px -8px hsl(0 0% 0% / 0.5);
