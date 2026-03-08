@@ -63,14 +63,25 @@ function mapSong(s: any): any {
 }
 
 async function fetchSaavn(endpoint: string): Promise<any> {
-  const res = await fetch(`${SAAVN_API}/${endpoint}`, {
-    headers: { "Accept": "application/json" },
-  });
-  if (!res.ok) {
-    console.error(`Saavn API error: ${res.status} for ${endpoint}`);
-    throw new Error(`API error: ${res.status}`);
+  const apis = [...SAAVN_APIS];
+  for (let i = 0; i < apis.length; i++) {
+    const apiBase = apis[(currentApiIndex + i) % apis.length];
+    try {
+      const res = await fetch(`${apiBase}/${endpoint}`, {
+        headers: { "Accept": "application/json" },
+      });
+      if (!res.ok) {
+        console.error(`Saavn API error: ${res.status} from ${apiBase}`);
+        continue;
+      }
+      currentApiIndex = (currentApiIndex + i) % apis.length;
+      return res.json();
+    } catch (e) {
+      console.error(`Saavn API fetch failed from ${apiBase}:`, e);
+      continue;
+    }
   }
-  return res.json();
+  throw new Error("All API endpoints failed");
 }
 
 async function searchSongs(query: string, limit: string): Promise<any> {
