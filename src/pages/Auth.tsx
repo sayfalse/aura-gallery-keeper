@@ -144,6 +144,10 @@ const Auth = () => {
           </button>
         </p>
       </div>
+
+      <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">
+        © {new Date().getFullYear()} PixelVault. All rights reserved.
+      </p>
     </div>
   );
 };
