@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { fetchDriveFiles, uploadDriveFile, deleteDriveFile, downloadDriveFile, getDriveFolders, formatFileSize, type DriveFile } from "@/lib/driveService";
-import { ArrowLeft, Upload, Trash2, Download, HardDrive, File, Image, FileText, Film, Music, Search, FolderPlus, Folder, ChevronRight, Home } from "lucide-react";
+import { fetchDriveFiles, uploadDriveFile, deleteDriveFile, downloadDriveFile, getDriveFolders, moveDriveFile, formatFileSize, type DriveFile } from "@/lib/driveService";
+import { ArrowLeft, Upload, Trash2, Download, HardDrive, File, Image, FileText, Film, Music, Search, FolderPlus, Folder, ChevronRight, Home, FolderInput } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import MoveToFolderModal from "@/components/MoveToFolderModal";
 
 const getFileIcon = (mimeType: string) => {
   if (mimeType.startsWith("image/")) return Image;
@@ -26,6 +27,7 @@ const DrivePage = () => {
   const [uploading, setUploading] = useState(false);
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
+  const [moveFile, setMoveFile] = useState<DriveFile | null>(null);
 
   const loadFiles = useCallback(async () => {
     if (!user) return;
@@ -46,16 +48,12 @@ const DrivePage = () => {
 
   useEffect(() => { loadFiles(); }, [loadFiles]);
 
-  // Get subfolders of the current folder
   const subfolders = folders.filter((f) => {
     if (f === currentFolder) return false;
-    const parent = f.substring(0, f.lastIndexOf("/") + 1) || "/";
-    // For root, subfolders are like "/FolderName"
     if (currentFolder === "/") {
       const parts = f.split("/").filter(Boolean);
       return parts.length === 1 && f !== "/";
     }
-    // For nested, check if parent matches
     const normalizedCurrent = currentFolder.endsWith("/") ? currentFolder : currentFolder + "/";
     return f.startsWith(normalizedCurrent) && f !== currentFolder && f.replace(normalizedCurrent, "").split("/").filter(Boolean).length === 1;
   });
@@ -103,11 +101,21 @@ const DrivePage = () => {
     }
   };
 
+  const handleMove = async (file: DriveFile, targetFolder: string) => {
+    setFiles((prev) => prev.filter((f) => f.id !== file.id));
+    try {
+      await moveDriveFile(file.id, targetFolder);
+      toast.success(`Moved "${file.name}" to ${targetFolder === "/" ? "Root" : targetFolder.split("/").filter(Boolean).pop()}`);
+    } catch {
+      toast.error("Failed to move file");
+      loadFiles();
+    }
+  };
+
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) return;
     const folderPath = currentFolder === "/" ? `/${newFolderName.trim()}` : `${currentFolder}/${newFolderName.trim()}`;
     if (!user) return;
-    // Create a placeholder file to register the folder
     try {
       const placeholder = new Blob([""], { type: "text/plain" });
       const file = new globalThis.File([placeholder], ".folder", { type: "text/plain" });
@@ -133,7 +141,7 @@ const DrivePage = () => {
   }, [])];
 
   const filtered = files.filter((f) => {
-    if (f.name === ".folder") return false; // hide placeholder
+    if (f.name === ".folder") return false;
     if (!searchQuery) return true;
     return f.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -147,7 +155,7 @@ const DrivePage = () => {
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
         <div className="flex-1 flex items-center gap-2">
-          <HardDrive className="w-5 h-5 text-indigo-500" />
+          <HardDrive className="w-5 h-5 text-primary" />
           <h1 className="font-display text-lg font-bold text-foreground">Drive</h1>
           <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
             {formatFileSize(totalSize)} used
@@ -170,7 +178,6 @@ const DrivePage = () => {
       </header>
 
       <div className="p-4">
-        {/* Breadcrumbs */}
         <div className="flex items-center gap-1 mb-3 text-sm overflow-x-auto">
           {breadcrumbs.map((crumb, i) => (
             <div key={crumb} className="flex items-center gap-1 shrink-0">
@@ -187,7 +194,6 @@ const DrivePage = () => {
           ))}
         </div>
 
-        {/* New folder dialog */}
         {showNewFolder && (
           <div className="mb-4 p-3 rounded-xl bg-card border border-border flex items-center gap-2">
             <Folder className="w-5 h-5 text-muted-foreground shrink-0" />
@@ -226,7 +232,6 @@ const DrivePage = () => {
           </div>
         ) : (
           <>
-            {/* Subfolders */}
             {subfolders.length > 0 && (
               <div className="mb-4">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Folders</p>
@@ -247,7 +252,6 @@ const DrivePage = () => {
               </div>
             )}
 
-            {/* Files */}
             {filtered.length === 0 && subfolders.length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 <HardDrive className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -277,6 +281,9 @@ const DrivePage = () => {
                           </p>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => setMoveFile(file)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors" title="Move to folder">
+                            <FolderInput className="w-4 h-4" />
+                          </button>
                           <button onClick={() => handleDownload(file)} className="p-2 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors">
                             <Download className="w-4 h-4" />
                           </button>
@@ -293,6 +300,15 @@ const DrivePage = () => {
           </>
         )}
       </div>
+
+      <MoveToFolderModal
+        isOpen={!!moveFile}
+        onClose={() => setMoveFile(null)}
+        file={moveFile}
+        folders={folders}
+        currentFolder={currentFolder}
+        onMove={handleMove}
+      />
     </div>
   );
 };

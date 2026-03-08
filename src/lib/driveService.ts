@@ -74,6 +74,11 @@ export const deleteDriveFile = async (id: string, storagePath: string) => {
   if (error) throw error;
 };
 
+export const moveDriveFile = async (id: string, newFolder: string) => {
+  const { error } = await supabase.from("drive_files").update({ folder: newFolder }).eq("id", id);
+  if (error) throw error;
+};
+
 export const getDriveFolders = async (userId: string): Promise<string[]> => {
   const { data, error } = await supabase
     .from("drive_files")
