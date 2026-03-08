@@ -117,6 +117,7 @@ const AppContent = () => {
           <Route path="/chat" element={<ProtectedRoute module="Chat"><ChatPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute module="Settings"><SettingsPage /></ProtectedRoute>} />
           <Route path="/browser" element={<ProtectedRoute module="Browser"><BrowserPage /></ProtectedRoute>} />
+          <Route path="/vault" element={<ProtectedRoute module="Vault"><VaultPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute module="Admin"><AdminDashboard /></ProtectedRoute>} />
 
           {/* Public routes */}

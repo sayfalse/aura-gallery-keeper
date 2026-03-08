@@ -33,7 +33,7 @@ export const removeVaultPin = () => localStorage.removeItem(VAULT_PIN_HASH_KEY);
 async function deriveKey(pin: string, salt: Uint8Array): Promise<CryptoKey> {
   const raw = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 100_000, hash: "SHA-256" },
+    { name: "PBKDF2", salt: salt.buffer as ArrayBuffer, iterations: 100_000, hash: "SHA-256" },
     raw,
     { name: "AES-GCM", length: 256 },
     false,
