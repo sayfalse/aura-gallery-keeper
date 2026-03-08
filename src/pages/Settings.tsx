@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { getStorageAnalytics, formatFileSize } from "@/lib/driveService";
 import QuickNavButton from "@/components/QuickNavButton";
+import WallpaperSettings from "@/components/WallpaperSettings";
 import {
   getAppLockSettings,
   setAppLockEnabled,
@@ -352,6 +353,9 @@ const SettingsPage = () => {
             </div>
           )}
         </section>
+
+        {/* Wallpaper */}
+        <WallpaperSettings />
 
         {/* Appearance */}
         <section className="rounded-2xl bg-card border border-border p-5">
