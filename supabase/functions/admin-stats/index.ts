@@ -120,7 +120,7 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
     if (dailySignups[day] !== undefined) dailySignups[day]++;
   });
 
-  const [photosRes, notesRes, filesRes, contactsRes, messagesRes, announcementsRes, profilesRes, allRolesRes, auditRes, recentPhotosRes, recentNotesRes, driveFilesAllRes] = await Promise.all([
+  const [photosRes, notesRes, filesRes, contactsRes, messagesRes, announcementsRes, profilesRes, allRolesRes, auditRes, recentPhotosRes, recentNotesRes, driveFilesAllRes, quotasRes] = await Promise.all([
     adminClient.from("photos").select("*", { count: "exact", head: true }),
     adminClient.from("notes").select("*", { count: "exact", head: true }),
     adminClient.from("drive_files").select("*", { count: "exact", head: true }),
@@ -133,6 +133,7 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
     adminClient.from("photos").select("id, name, created_at, user_id").order("created_at", { ascending: false }).limit(5),
     adminClient.from("notes").select("id, title, created_at, user_id").order("created_at", { ascending: false }).limit(5),
     adminClient.from("drive_files").select("user_id, size_bytes, mime_type").limit(1000),
+    adminClient.from("storage_quotas").select("user_id, quota_bytes"),
   ]);
 
   // Build per-user storage breakdown
@@ -166,12 +167,17 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
   const profileMap: Record<string, string> = {};
   profiles.forEach((p: any) => { profileMap[p.user_id] = p.display_name || p.username || "Unknown"; });
 
+  // Build quota map
+  const quotaMap: Record<string, number> = {};
+  (quotasRes.data || []).forEach((q: any) => { quotaMap[q.user_id] = q.quota_bytes; });
+
   const enrichedProfiles = profiles.map((p: any) => ({
     ...p,
     role: roleMap[p.user_id] || "user",
     email: users.find((u: any) => u.id === p.user_id)?.email || null,
     banned_until: banMap[p.user_id] || null,
     storage: storageByUser[p.user_id] || { totalBytes: 0, fileCount: 0, byType: {} },
+    quotaBytes: quotaMap[p.user_id] || 1073741824, // default 1GB
   }));
 
   const enrichedAuditLogs = auditLogs.map((l: any) => ({

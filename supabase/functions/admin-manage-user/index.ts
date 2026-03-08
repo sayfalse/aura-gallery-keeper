@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { action, targetUserId, role } = body;
+    const { action, targetUserId, role, quotaBytes } = body;
 
     if (!targetUserId || !action) {
       return new Response(JSON.stringify({ error: "Missing action or targetUserId" }), {
@@ -148,6 +148,34 @@ Deno.serve(async (req) => {
 
         auditDetails = "User unbanned";
         result.message = "User unbanned";
+        break;
+      }
+
+      case "set_quota": {
+        if (typeof quotaBytes !== "number" || quotaBytes < 0) {
+          return new Response(JSON.stringify({ error: "Invalid quota value" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const { error: quotaErr } = await adminClient
+          .from("storage_quotas")
+          .upsert(
+            { user_id: targetUserId, quota_bytes: quotaBytes, updated_at: new Date().toISOString() },
+            { onConflict: "user_id" }
+          );
+
+        if (quotaErr) {
+          return new Response(JSON.stringify({ error: quotaErr.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        const quotaGB = (quotaBytes / (1024 * 1024 * 1024)).toFixed(2);
+        auditDetails = `Storage quota set to ${quotaGB} GB`;
+        result.message = `Storage quota set to ${quotaGB} GB`;
         break;
       }
 
