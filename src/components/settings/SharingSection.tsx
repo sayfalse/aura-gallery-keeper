@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Share2, UserPlus, Search, Check, X, Users, Loader2, AtSign } from "lucide-react";
+import { UserPlus, Search, Check, X, Users, Loader2, AtSign, Bell } from "lucide-react";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import {
