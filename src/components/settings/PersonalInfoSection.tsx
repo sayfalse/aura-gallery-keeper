@@ -286,7 +286,7 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
             {showChangePassword ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
           </button>
           {showChangePassword && (
-            <div className="rounded-xl bg-secondary p-4 space-y-3 animate-fade-in">
+            <div className="rounded-xl bg-primary/10 border border-primary/20 p-4 space-y-3 animate-fade-in">
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
