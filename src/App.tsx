@@ -52,6 +52,7 @@ const App = () => (
               <Route path="/drive" element={<ProtectedRoute><DrivePage /></ProtectedRoute>} />
               <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
               <Route path="/mail" element={<ProtectedRoute><MailPage /></ProtectedRoute>} />
+              <Route path="/gmail-callback" element={<ProtectedRoute><GmailCallback /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
