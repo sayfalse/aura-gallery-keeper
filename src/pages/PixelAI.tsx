@@ -64,6 +64,7 @@ const readFileAsText = (file: File): Promise<string> =>
 const PixelAI = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
