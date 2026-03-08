@@ -1,4 +1,5 @@
-import { Images, Heart, FolderOpen, Clock, Trash2, Upload, Cloud, LogOut } from "lucide-react";
+import { Images, Heart, FolderOpen, Clock, Trash2, Upload, Cloud, LogOut, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { SidebarSection } from "@/types/photo";
 
 interface AppSidebarProps {
