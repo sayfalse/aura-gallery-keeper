@@ -5,6 +5,7 @@ import { fetchNotes, createNote, updateNote, deleteNote, type Note } from "@/lib
 import { ArrowLeft, Plus, Pin, Trash2, Search, StickyNote } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import RichTextEditor from "@/components/RichTextEditor";
 
 const NotesPage = () => {
   const { user } = useAuth();
@@ -55,9 +56,6 @@ const NotesPage = () => {
     }
   }, [activeNote, title, content]);
 
-  // Auto-save on blur
-  const handleBlur = () => { handleSave(); };
-
   const handleDelete = async (id: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== id));
     if (activeNote?.id === id) { setActiveNote(null); setTitle(""); setContent(""); }
@@ -83,10 +81,12 @@ const NotesPage = () => {
     }
   };
 
+  const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
+
   const filtered = notes.filter((n) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
-    return n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q);
+    return n.title.toLowerCase().includes(q) || stripHtml(n.content).toLowerCase().includes(q);
   });
 
   const selectNote = (note: Note) => {
@@ -98,7 +98,6 @@ const NotesPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
       <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-20">
         <button onClick={() => navigate("/")} className="p-2 rounded-xl hover:bg-accent transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
@@ -113,7 +112,6 @@ const NotesPage = () => {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar list */}
         <aside className={`w-full md:w-80 border-r border-border flex flex-col shrink-0 ${activeNote ? "hidden md:flex" : "flex"}`}>
           <div className="p-3">
             <div className="relative">
@@ -150,7 +148,7 @@ const NotesPage = () => {
                     {note.pinned && <Pin className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />}
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm text-foreground truncate">{note.title || "Untitled"}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">{note.content.slice(0, 60) || "No content"}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{stripHtml(note.content).slice(0, 60) || "No content"}</p>
                       <p className="text-[10px] text-muted-foreground/60 mt-1">{format(note.updatedAt, "MMM d, h:mm a")}</p>
                     </div>
                   </div>
@@ -160,7 +158,6 @@ const NotesPage = () => {
           </div>
         </aside>
 
-        {/* Editor */}
         <main className={`flex-1 flex flex-col ${!activeNote ? "hidden md:flex" : "flex"}`}>
           {activeNote ? (
             <>
@@ -176,21 +173,19 @@ const NotesPage = () => {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <div className="flex-1 p-4 md:p-8 overflow-y-auto">
+              <div className="flex-1 p-4 md:p-8 overflow-y-auto flex flex-col">
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  onBlur={handleBlur}
+                  onBlur={() => handleSave()}
                   placeholder="Title"
                   className="w-full text-2xl font-display font-bold text-foreground bg-transparent outline-none mb-4 placeholder:text-muted-foreground/40"
                 />
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  onBlur={handleBlur}
-                  placeholder="Start writing..."
-                  className="w-full flex-1 min-h-[60vh] text-foreground bg-transparent outline-none resize-none text-sm leading-relaxed placeholder:text-muted-foreground/40"
+                <RichTextEditor
+                  content={content}
+                  onChange={setContent}
+                  onBlur={() => handleSave()}
                 />
               </div>
             </>
