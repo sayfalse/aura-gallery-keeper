@@ -279,7 +279,7 @@ const PixelAI = () => {
     if (!user) return;
     await clearAllMemories(user.id);
     setMemories([]);
-    toast.success("All memories cleared 🧹");
+    toast.success(t("pixelAI.memoriesCleared"));
   };
 
   const handleAddMemory = async (content: string, category: string) => {
