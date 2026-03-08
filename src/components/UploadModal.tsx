@@ -1,11 +1,10 @@
 import { useCallback, useRef, useState } from "react";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
-import type { Photo } from "@/types/photo";
+import { Upload, X } from "lucide-react";
 
 interface UploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpload: (photos: Photo[]) => void;
+  onUpload: (files: File[]) => void;
 }
 
 const UploadModal = ({ isOpen, onClose, onUpload }: UploadModalProps) => {
@@ -13,18 +12,9 @@ const UploadModal = ({ isOpen, onClose, onUpload }: UploadModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = useCallback((files: FileList) => {
-    const newPhotos: Photo[] = Array.from(files)
-      .filter((f) => f.type.startsWith("image/"))
-      .map((file) => ({
-        id: crypto.randomUUID(),
-        src: URL.createObjectURL(file),
-        name: file.name.replace(/\.[^/.]+$/, ""),
-        date: new Date(),
-        size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-        favorite: false,
-      }));
-    if (newPhotos.length) {
-      onUpload(newPhotos);
+    const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (imageFiles.length) {
+      onUpload(imageFiles);
       onClose();
     }
   }, [onUpload, onClose]);
@@ -32,7 +22,7 @@ const UploadModal = ({ isOpen, onClose, onUpload }: UploadModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 lightbox-overlay flex items-center justify-center animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 lightbox-overlay flex items-center justify-center animate-fade-in px-4" onClick={onClose}>
       <div
         className="bg-card rounded-2xl shadow-2xl w-full max-w-lg p-6 animate-slide-up"
         onClick={(e) => e.stopPropagation()}
