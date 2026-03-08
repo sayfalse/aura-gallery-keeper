@@ -444,8 +444,8 @@ const SettingsPage = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-foreground font-medium">Enable App Lock</p>
-                <p className="text-xs text-muted-foreground">Require PIN to open app</p>
+                <p className="text-sm text-foreground font-medium">{t("settings.enableAppLock")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.requirePin")}</p>
               </div>
               <button
                 onClick={() => {
