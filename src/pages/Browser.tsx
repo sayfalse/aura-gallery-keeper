@@ -355,14 +355,8 @@ const Browser = () => {
   );
 };
 
-// Loading placeholder
-const loadingPage = `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>
-  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
-  body{display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f8f9fa;}
-  .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;animation:pulse 1.2s infinite;margin:0 4px;}
-  .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
-  @media(prefers-color-scheme:dark){body{background:#0a0a0a;}.dot{background:#475569;}}
-</style></head><body><div style="display:flex"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></body></html>`;
+// Loading placeholder (no longer needed with src approach but kept for reference)
+const loadingPage = "";
 
 // === New Tab Page ===
 const NewTabPage = ({

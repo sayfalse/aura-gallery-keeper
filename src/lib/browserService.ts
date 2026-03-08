@@ -140,8 +140,10 @@ export const getDisplayUrl = (url: string): string => {
 export const defaultQuickLinks = [
   { title: "Google", url: "https://www.google.com/webhp?igu=1", icon: "🔍" },
   { title: "YouTube", url: "https://m.youtube.com", icon: "▶️" },
+  { title: "Facebook", url: "https://m.facebook.com", icon: "📘" },
+  { title: "Instagram", url: "https://www.instagram.com", icon: "📸" },
+  { title: "Twitter/X", url: "https://mobile.twitter.com", icon: "🐦" },
   { title: "Wikipedia", url: "https://en.m.wikipedia.org", icon: "📚" },
   { title: "Reddit", url: "https://www.reddit.com", icon: "🗨️" },
   { title: "GitHub", url: "https://github.com", icon: "💻" },
-  { title: "Stack Overflow", url: "https://stackoverflow.com", icon: "📋" },
 ];
