@@ -1,10 +1,10 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Clock, FileText, Sparkles,
   Shield, ArrowUpRight, TrendingUp, Layers
@@ -39,6 +39,15 @@ const Home = () => {
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
   const [stats, setStats] = useState<QuickStat[]>([]);
   const [recentNotes, setRecentNotes] = useState<{ id: string; title: string; updatedAt: string }[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll({ container: scrollRef });
+  const headerY = useTransform(scrollY, [0, 120], [0, -30]);
+  const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.85]);
+  const headerScale = useTransform(scrollY, [0, 120], [1, 0.97]);
+  const blobX1 = useTransform(scrollY, [0, 300], [0, 40]);
+  const blobY1 = useTransform(scrollY, [0, 300], [0, -60]);
+  const blobX2 = useTransform(scrollY, [0, 300], [0, -30]);
+  const blobY2 = useTransform(scrollY, [0, 300], [0, 40]);
 
   useEffect(() => {
     if (!user) return;
@@ -67,18 +76,20 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div ref={scrollRef} className="min-h-screen bg-background overflow-y-auto">
+      {/* Parallax decorative blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -left-20 w-72 h-72 bg-primary/3 rounded-full blur-3xl" />
+        <motion.div style={{ x: blobX1, y: blobY1 }} className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <motion.div style={{ x: blobX2, y: blobY2 }} className="absolute top-1/3 -left-20 w-72 h-72 bg-primary/3 rounded-full blur-3xl" />
       </div>
 
-      {/* Header */}
+      {/* Parallax Header */}
       <motion.header
+        style={{ y: headerY, opacity: headerOpacity, scale: headerScale }}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative flex items-center justify-between px-6 py-5"
+        className="sticky top-0 z-20 flex items-center justify-between px-6 py-5 bg-background/70 backdrop-blur-xl"
       >
         <div className="flex items-center gap-3">
           <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
