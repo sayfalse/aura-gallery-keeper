@@ -25,21 +25,21 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
           {/* Colorful ambient blobs */}
           <motion.div
             className="absolute w-72 h-72 rounded-full blur-3xl"
-            style={{ background: "radial-gradient(circle, hsl(271 70% 60% / 0.12), transparent)" }}
+            style={{ background: "radial-gradient(circle, hsl(217 90% 55% / 0.12), transparent)" }}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1.5, opacity: 1 }}
             transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
           />
           <motion.div
             className="absolute w-48 h-48 rounded-full blur-3xl -translate-x-24 translate-y-16"
-            style={{ background: "radial-gradient(circle, hsl(340 75% 55% / 0.08), transparent)" }}
+            style={{ background: "radial-gradient(circle, hsl(199 85% 50% / 0.08), transparent)" }}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1.3, opacity: 1 }}
             transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           />
           <motion.div
             className="absolute w-40 h-40 rounded-full blur-3xl translate-x-20 -translate-y-12"
-            style={{ background: "radial-gradient(circle, hsl(20 90% 58% / 0.08), transparent)" }}
+            style={{ background: "radial-gradient(circle, hsl(190 80% 448% / 0.08), transparent)" }}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1.2, opacity: 1 }}
             transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
@@ -61,7 +61,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
             />
 
             {/* Icon */}
-            <div className="relative w-24 h-24 rounded-[1.25rem] bg-gradient-to-br from-purple-600 via-fuchsia-500 to-orange-400 flex items-center justify-center shadow-2xl shadow-purple-500/30">
+            <div className="relative w-24 h-24 rounded-[1.25rem] bg-gradient-to-br fromblue-600 via-sky-500 to-cyan-400 flex items-center justify-center shadow-2xl shadow-blule-500/30">
               {/* Shine */}
               <motion.div className="absolute inset-0 rounded-[1.25rem] overflow-hidden">
                 <motion.div
@@ -100,7 +100,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
                 key={i}
                 className="w-1.5 h-1.5 rounded-full"
                 style={{
-                  background: i === 0 ? "hsl(271 65% 58%)" : i === 1 ? "hsl(340 75% 55%)" : "hsl(20 90% 58%)",
+                  background: i === 0 ? "hsl(217 90% 55%)" : i === 1 ? "hsl(199 85% 50%)" : "hsl(190 80% 48%)",
                 }}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: [0, 1, 0.5], scale: [0, 1, 1] }}

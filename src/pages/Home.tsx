@@ -12,13 +12,13 @@ import {
 } from "lucide-react";
 
 const appKeys = [
-  { id: "gallery", nameKey: "apps.gallery", icon: Image, gradient: "from-violet-500 to-fuchsia-500", path: "/gallery", descKey: "apps.galleryDesc" },
+  { id: "gallery", nameKey: "apps.gallery", icon: Image, gradient: "from-blue-500 to-cyan-400", path: "/gallery", descKey: "apps.galleryDesc" },
   { id: "notes", nameKey: "apps.notes", icon: StickyNote, gradient: "from-amber-400 to-orange-500", path: "/notes", descKey: "apps.notesDesc" },
-  { id: "drive", nameKey: "apps.drive", icon: HardDrive, gradient: "from-cyan-400 to-blue-500", path: "/drive", descKey: "apps.driveDesc" },
+  { id: "drive", nameKey: "apps.drive", icon: HardDrive, gradient: "from-sky-400 to-blue-600", path: "/drive", descKey: "apps.driveDesc" },
   { id: "contacts", nameKey: "apps.people", icon: Users, gradient: "from-emerald-400 to-teal-500", path: "/contacts", descKey: "apps.peopleDesc" },
-  { id: "mail", nameKey: "apps.mail", icon: Mail, gradient: "from-pink-400 to-rose-500", path: "/mail", descKey: "apps.mailDesc" },
-  { id: "chat", nameKey: "apps.chat", icon: MessageCircle, gradient: "from-green-400 to-emerald-500", path: "/chat", descKey: "apps.chatDesc" },
-  { id: "pixel-ai", nameKey: "apps.pixelAI", icon: Sparkles, gradient: "from-purple-500 to-indigo-500", path: "/pixel-ai", descKey: "apps.pixelAIDesc" },
+  { id: "mail", nameKey: "apps.mail", icon: Mail, gradient: "from-indigo-400 to-blue-500", path: "/mail", descKey: "apps.mailDesc" },
+  { id: "chat", nameKey: "apps.chat", icon: MessageCircle, gradient: "from-cyan-400 to-sky-500", path: "/chat", descKey: "apps.chatDesc" },
+  { id: "pixel-ai", nameKey: "apps.pixelAI", icon: Sparkles, gradient: "from-blue-600 to-indigo-500", path: "/pixel-ai", descKey: "apps.pixelAIDesc" },
   { id: "settings", nameKey: "apps.settings", icon: Settings, gradient: "from-slate-400 to-zinc-500", path: "/settings", descKey: "apps.settingsDesc" },
 ];
 
@@ -60,17 +60,17 @@ const Home = () => {
   };
 
   const stats = [
-    { label: t("home.stats.photos"), value: counts.photos, icon: Image, color: "from-violet-500 to-fuchsia-500" },
+    { label: t("home.stats.photos"), value: counts.photos, icon: Image, color: "from-blue-500 to-cyan-400" },
     { label: t("home.stats.notes"), value: counts.notes, icon: StickyNote, color: "from-amber-400 to-orange-500" },
     { label: t("home.stats.people"), value: counts.contacts, icon: Users, color: "from-emerald-400 to-teal-500" },
-    { label: t("home.stats.files"), value: counts.files, icon: HardDrive, color: "from-cyan-400 to-blue-500" },
+    { label: t("home.stats.files"), value: counts.files, icon: HardDrive, color: "from-sky-400 to-blue-600" },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between px-5 pt-[env(safe-area-inset-top)] py-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center shadow-lg shadow-primary/25">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 via-primary to-cyan-400 flex items-center justify-center shadow-lg shadow-primary/25">
             <Layers className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
@@ -107,7 +107,7 @@ const Home = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.4 }}
           onClick={() => navigate("/pixel-ai")}
-          className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-500 to-orange-400 p-4 text-left group"
+          className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 p-4 text-left group"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-500" />
           <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-6" />
