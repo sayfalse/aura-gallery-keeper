@@ -115,13 +115,13 @@ const DrivePage = () => {
   };
 
   const handleDelete = async (file: DriveFile) => {
-    if (!confirm(`Delete "${file.name}"?`)) return;
+    if (!confirm(t("drive.deleteConfirm", { name: file.name }))) return;
     setFiles((prev) => prev.filter((f) => f.id !== file.id));
     try {
       await deleteDriveFile(file.id, file.storagePath);
-      toast.success("File deleted");
+      toast.success(t("drive.fileDeleted"));
     } catch {
-      toast.error("Failed to delete file");
+      toast.error(t("drive.failedDelete"));
       loadFiles();
     }
   };
