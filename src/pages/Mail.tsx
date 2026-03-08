@@ -506,6 +506,56 @@ const MailPage = () => {
               </button>
             </div>
 
+            {/* Attachments */}
+            {(() => {
+              const msgAttachments = getAttachments(selectedMessage);
+              if (msgAttachments.length === 0) return null;
+              return (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                    <Paperclip className="w-3.5 h-3.5" />
+                    {msgAttachments.length} Attachment{msgAttachments.length > 1 ? "s" : ""}
+                  </p>
+                  <div className="grid gap-2">
+                    {msgAttachments.map((att, i) => (
+                      <button
+                        key={i}
+                        onClick={async () => {
+                          try {
+                            toast.info(`Downloading ${att.filename}...`);
+                            const data = await getAttachment(activeEmail, selectedMessage.id, att.attachmentId);
+                            const blob = base64UrlToBlob(data.data, att.mimeType);
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = att.filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                          } catch {
+                            toast.error(`Failed to download ${att.filename}`);
+                          }
+                        }}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-accent/50 hover:bg-accent transition-colors text-left"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                          <FileText className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{att.filename}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {att.size < 1024 ? `${att.size} B` : att.size < 1024 * 1024 ? `${(att.size / 1024).toFixed(1)} KB` : `${(att.size / (1024 * 1024)).toFixed(1)} MB`}
+                          </p>
+                        </div>
+                        <Download className="w-4 h-4 text-muted-foreground shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Message body */}
             <div className="rounded-xl border border-border bg-card p-4 overflow-x-auto">
               <div
