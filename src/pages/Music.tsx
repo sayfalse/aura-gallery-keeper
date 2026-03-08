@@ -221,7 +221,7 @@ const MusicPage = () => {
             {/* Greeting */}
             <div className="py-5">
               <h1 className="text-2xl font-bold text-foreground">
-                {new Date().getHours() < 12 ? "Good Morning ☀️" : new Date().getHours() < 18 ? "Good Afternoon 🎵" : "Good Evening 🌙"}
+                {(() => { const h = new Date().getHours(); if (h < 6) return "Good Night 🌙"; if (h < 12) return "Good Morning ☀️"; if (h < 18) return "Good Afternoon 🎵"; if (h < 21) return "Good Evening 🌆"; return "Good Night 🌙"; })()}
               </h1>
             </div>
 
