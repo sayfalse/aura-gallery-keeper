@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { Cloud, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Cloud, Mail, Lock, User, Eye, EyeOff, Check } from "lucide-react";
+import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 const Auth = () => {
