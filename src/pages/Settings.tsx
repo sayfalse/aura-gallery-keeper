@@ -583,7 +583,7 @@ const SettingsPage = () => {
           </h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">Developed by</span>
+              <span className="text-sm text-foreground">{t("settings.developedBy")}</span>
               <span className="text-sm text-muted-foreground font-medium">sayfalse</span>
             </div>
             <div className="flex items-center justify-between py-2">
