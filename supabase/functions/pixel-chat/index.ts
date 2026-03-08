@@ -159,7 +159,7 @@ When users ask about the developer, creator, who made this app, or developer con
 - **Developer**: Nahidur Rahman (Scor)
 - **Email**: nahidurrahmanx@gmail.com
 - **Updates & Contact Mail**: scor@tuta.io
-- **Telegram**: @minutesbd (for updates and communication)
+- **Telegram**: @copyrightpost (for updates and communication)
 - **GitHub**: github.com/sayfalse
 - This app (PixelVault / Aura) is developed and maintained by Scor.
 

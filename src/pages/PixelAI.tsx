@@ -513,7 +513,7 @@ const PixelAI = () => {
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-            📎 Documents • 🎙️ Voice • 🧠 Memory • 🌐 All languages • ⚡ AI
+            © All Rights Reserved • Pixel AI ✨
           </p>
         </div>
       </div>
