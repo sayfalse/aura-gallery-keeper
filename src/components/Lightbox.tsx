@@ -1,7 +1,8 @@
-import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info, Calendar, HardDrive, ImageIcon, Clock } from "lucide-react";
 import type { Photo } from "@/types/photo";
 import { format } from "date-fns";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface LightboxProps {
   photo: Photo;
@@ -31,10 +32,11 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch {
-      // fallback: open in new tab
       window.open(photo.src, "_blank");
     }
   };
+
+  const extension = photo.name.includes(".") ? photo.name.split(".").pop()?.toUpperCase() : "JPG";
 
   return (
     <div className="fixed inset-0 z-50 lightbox-overlay flex items-center justify-center animate-fade-in" onClick={onClose}>
@@ -50,7 +52,7 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
           <button onClick={handleDownload} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
             <Download className="w-5 h-5 text-card" />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); setShowInfo(!showInfo); }} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
+          <button onClick={(e) => { e.stopPropagation(); setShowInfo(!showInfo); }} className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${showInfo ? "bg-primary/30" : "bg-card/10 hover:bg-card/20"}`}>
             <Info className="w-5 h-5 text-card" />
           </button>
           <button onClick={(e) => { e.stopPropagation(); onDelete(photo.id); }} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
@@ -59,7 +61,7 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
         </div>
       </div>
 
-      {/* Navigation - hidden on mobile (use swipe) */}
+      {/* Navigation */}
       {hasPrev && (
         <button onClick={(e) => { e.stopPropagation(); onPrev(); }} className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-card/10 hover:bg-card/20 items-center justify-center transition-colors z-10 hidden md:flex">
           <ChevronLeft className="w-6 h-6 text-card" />
@@ -79,17 +81,83 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
         onClick={(e) => e.stopPropagation()}
       />
 
-      {/* Info panel */}
-      {showInfo && (
-        <div className="absolute right-0 bottom-0 left-0 md:left-auto md:top-0 w-full md:w-72 bg-card/95 backdrop-blur-xl p-6 pt-6 md:pt-20 rounded-t-2xl md:rounded-none animate-fade-in" onClick={(e) => e.stopPropagation()}>
-          <h3 className="font-display font-semibold text-foreground text-lg">{photo.name}</h3>
-          <div className="mt-4 space-y-3 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span className="text-foreground">{format(photo.date, "MMM d, yyyy")}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Size</span><span className="text-foreground">{photo.size}</span></div>
-            {photo.album && <div className="flex justify-between"><span className="text-muted-foreground">Album</span><span className="text-foreground">{photo.album}</span></div>}
-          </div>
-        </div>
-      )}
+      {/* Enhanced Info panel */}
+      <AnimatePresence>
+        {showInfo && (
+          <motion.div
+            initial={{ y: "100%", opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: "100%", opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="absolute right-0 bottom-0 left-0 md:left-auto md:top-0 w-full md:w-80 bg-card/95 backdrop-blur-2xl border-t md:border-l border-border p-6 pt-6 md:pt-20 rounded-t-3xl md:rounded-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-4 md:hidden" />
+
+            <h3 className="font-display font-semibold text-foreground text-lg truncate">{photo.name}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">{extension} file</p>
+
+            <div className="mt-5 space-y-4">
+              {/* Date & Time */}
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Calendar className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Uploaded</p>
+                  <p className="text-sm font-medium text-foreground">{format(photo.date, "MMMM d, yyyy")}</p>
+                  <p className="text-xs text-muted-foreground">{format(photo.date, "h:mm a")}</p>
+                </div>
+              </div>
+
+              {/* File Size */}
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <HardDrive className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">File Size</p>
+                  <p className="text-sm font-medium text-foreground">{photo.size || "Unknown"}</p>
+                </div>
+              </div>
+
+              {/* Type */}
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <ImageIcon className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Type</p>
+                  <p className="text-sm font-medium text-foreground">{extension} Image</p>
+                </div>
+              </div>
+
+              {/* Album */}
+              {photo.album && (
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Clock className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Album</p>
+                    <p className="text-sm font-medium text-foreground">{photo.album}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Favorite status */}
+              <div className="pt-3 border-t border-border">
+                <div className="flex items-center gap-2">
+                  <Heart className={`w-4 h-4 ${photo.favorite ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                  <span className="text-sm text-muted-foreground">
+                    {photo.favorite ? "In your favorites" : "Not favorited"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
