@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
-import { motion } from "framer-motion";
-import { Shield, ShieldCheck, ShieldX, Globe, Zap, Lock, RefreshCw, ExternalLink, Copy, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Shield, ShieldCheck, ShieldX, Globe, Zap, Lock, RefreshCw, ExternalLink, Copy, CheckCircle2, Power } from "lucide-react";
 import { toast } from "sonner";
 
 interface DnsResult {
