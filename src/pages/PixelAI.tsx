@@ -376,7 +376,7 @@ const PixelAI = () => {
           return (
             <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} group`}>
               <div className={`max-w-[85%] ${msg.role === "user"
-                ? "bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2.5"
+                ? "bg-muted text-foreground rounded-2xl rounded-br-md px-4 py-2.5"
                 : "bg-card border border-border rounded-2xl rounded-bl-md px-4 py-2.5"
               }`}>
                 {msg.role === "assistant" && (
@@ -387,7 +387,7 @@ const PixelAI = () => {
                   </div>
                 )}
                 {msg.role === "user" && msg.fileName && (
-                  <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-lg bg-primary-foreground/10">
+                  <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-lg bg-foreground/10">
                     <FileText className="w-3.5 h-3.5" />
                     <span className="text-[11px] font-medium truncate">{msg.fileName}</span>
                   </div>
