@@ -403,12 +403,12 @@ const SettingsPage = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Database className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Database className="w-3.5 h-3.5 text-primary" />
                 At-rest Encryption
               </span>
-              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">AES-256</span>
+              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">AES-256</span>
             </div>
             <div className="flex items-center justify-between py-2">
               <span className="flex items-center gap-2 text-sm text-foreground">
