@@ -12,6 +12,8 @@ const modules = [
   { path: "/chat", icon: MessageCircle, label: "Chat" },
   { path: "/pixel-ai", icon: Sparkles, label: "Pixel AI" },
   { path: "/browser", icon: Globe, label: "Browser" },
+  { path: "/music", icon: Music2, label: "Music" },
+  { path: "/vpn", icon: Shield, label: "VPN & DNS" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
 

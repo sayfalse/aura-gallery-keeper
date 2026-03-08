@@ -96,6 +96,8 @@ const AppContent = () => {
           <Route path="/browser" element={<ProtectedRoute><BrowserPage /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/temp-mail" element={<ProtectedRoute><TempMailPage /></ProtectedRoute>} />
+          <Route path="/music" element={<ProtectedRoute><MusicPage /></ProtectedRoute>} />
+          <Route path="/vpn" element={<ProtectedRoute><VPNPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
