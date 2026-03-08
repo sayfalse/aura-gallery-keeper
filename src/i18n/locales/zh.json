@@ -1,0 +1,63 @@
+{
+  "common": {
+    "save": "保存", "cancel": "取消", "delete": "删除", "confirm": "确认",
+    "search": "搜索", "loading": "加载中...", "retry": "重试",
+    "signOut": "退出登录", "back": "返回", "upload": "上传", "items": "项",
+    "openInBrowser": "在浏览器中打开", "openExternally": "外部打开", "newSearch": "新搜索"
+  },
+  "home": {
+    "greeting": { "night": "晚安 🌙", "morning": "早上好 ☀️", "afternoon": "下午好 🌤️", "evening": "晚上好 🌆" },
+    "apps": "应用", "askPixelAI": "询问 Pixel AI", "aiDesc": "聊天、生成、翻译",
+    "stats": { "photos": "照片", "notes": "笔记", "people": "联系人", "files": "文件" }
+  },
+  "apps": {
+    "gallery": "相册", "galleryDesc": "照片与相册", "notes": "笔记", "notesDesc": "快速记录",
+    "drive": "云盘", "driveDesc": "云存储", "people": "联系人", "peopleDesc": "通讯录",
+    "mail": "邮件", "mailDesc": "电子邮件", "tempMail": "临时邮件", "tempMailDesc": "一次性邮件",
+    "chat": "聊天", "chatDesc": "消息", "pixelAI": "Pixel AI", "pixelAIDesc": "AI助手",
+    "browser": "浏览器", "browserDesc": "网页", "music": "音乐", "musicDesc": "听音乐",
+    "vpn": "VPN和DNS", "vpnDesc": "隐私工具", "settings": "设置", "settingsDesc": "偏好设置"
+  },
+  "nav": {
+    "home": "首页", "gallery": "相册", "mail": "邮件", "chat": "聊天", "settings": "设置",
+    "photos": "照片", "favorites": "收藏", "shared": "共享", "recent": "最近", "upload": "上传"
+  },
+  "settings": {
+    "title": "设置", "appearance": "外观", "light": "浅色", "dark": "深色", "system": "系统",
+    "language": "语言", "currentLang": "当前", "searchLanguages": "搜索语言...",
+    "showAll": "显示全部 {{count}} 种语言", "noLanguagesFound": "未找到语言",
+    "storage": "存储与数据", "cloudStorage": "云存储", "used": "已用",
+    "storageByType": "按类型存储", "largestFiles": "最大文件",
+    "security": "安全与加密", "dataProtected": "您的数据受到保护",
+    "dataProtectedDesc": "所有数据均端到端加密。",
+    "atRestEncryption": "静态加密", "inTransitEncryption": "传输加密",
+    "dataIsolation": "数据隔离", "authProvider": "认证提供者",
+    "appLock": "应用锁", "enableAppLock": "启用应用锁", "requirePin": "需要PIN解锁",
+    "lockAfter": "锁定时间", "immediately": "立即", "oneMinute": "1分钟",
+    "fiveMinutes": "5分钟", "twentyMinutes": "20分钟", "changePin": "更改PIN",
+    "setPin": "设置4位PIN", "confirmPin": "确认PIN",
+    "pinSet": "PIN已设置!", "pinMismatch": "PIN不匹配",
+    "lockEnabled": "应用锁已启用", "lockDisabled": "应用锁已禁用",
+    "developer": "开发者", "developedBy": "开发者", "contact": "联系",
+    "version": "版本", "privacyPolicy": "隐私政策", "termsOfService": "服务条款",
+    "profileUpdated": "个人资料已更新!", "profileFailed": "保存失败"
+  },
+  "deleteAccount": {
+    "title": "删除账户", "description": "永久删除您的账户和所有相关数据。此操作不可撤销。",
+    "deleteBtn": "删除我的账户", "askTitle": "您确定要删除账户吗？",
+    "keepIt": "不，保留", "yesDelete": "是，删除",
+    "absolutelySure": "您确定吗？", "typeDelete": "输入 DELETE 确认。",
+    "placeholder": "输入 \"DELETE\" 确认", "deleting": "删除中...",
+    "deleteForever": "永久删除", "deleted": "账户已永久删除"
+  },
+  "browser": {
+    "searchTheWeb": "搜索网页", "searchPrompt": "输入网址或搜索词。",
+    "startBrowsing": "开始浏览", "cantLoad": "无法加载页面",
+    "cantLoadDesc": "该网站阻止了嵌入。", "searchOrEnter": "搜索或输入网站",
+    "searchOrEnterUrl": "搜索或输入网址"
+  },
+  "tempMail": {
+    "title": "临时邮件", "cantLoad": "无法加载临时邮件",
+    "cantLoadDesc": "服务可能不可用。"
+  }
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail, ChevronRight, Github, Send, BarChart3 } from "lucide-react";
@@ -108,6 +109,7 @@ const SettingsPage = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { t, i18n } = useTranslation();
   const [displayName, setDisplayName] = useState("");
   const [saving, setSaving] = useState(false);
   const [photoCount, setPhotoCount] = useState(0);
@@ -173,18 +175,18 @@ const SettingsPage = () => {
     setSelectedLang(code);
     localStorage.setItem(LANG_STORAGE_KEY, code);
     document.documentElement.lang = code;
-    // Set RTL direction for Arabic, Hebrew, Urdu, Persian
     const rtlLangs = ["ar", "he", "ur", "fa"];
     document.documentElement.dir = rtlLangs.includes(code) ? "rtl" : "ltr";
+    i18n.changeLanguage(code);
     const lang = LANGUAGES.find((l) => l.code === code);
     toast.success(`Language set to ${lang?.name || code}`);
   };
 
 
   const themeOptions = [
-    { value: "light", label: "Light", icon: Sun },
-    { value: "dark", label: "Dark", icon: Moon },
-    { value: "system", label: "System", icon: Monitor },
+    { value: "light", label: t("settings.light"), icon: Sun },
+    { value: "dark", label: t("settings.dark"), icon: Moon },
+    { value: "system", label: t("settings.system"), icon: Monitor },
   ];
 
   const filteredLangs = LANGUAGES.filter(
@@ -203,7 +205,7 @@ const SettingsPage = () => {
         </button>
         <div className="flex-1 flex items-center gap-2">
           <Settings className="w-5 h-5 text-muted-foreground" />
-          <h1 className="font-display text-lg font-bold text-foreground">Settings</h1>
+          <h1 className="font-display text-lg font-bold text-foreground">{t("settings.title")}</h1>
         </div>
         <QuickNavButton />
       </header>
@@ -226,7 +228,7 @@ const SettingsPage = () => {
         {/* Appearance */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Moon className="w-4 h-4" /> Appearance
+            <Moon className="w-4 h-4" /> {t("settings.appearance")}
           </h2>
           <div className="grid grid-cols-3 gap-2">
             {themeOptions.map((opt) => (
@@ -251,17 +253,17 @@ const SettingsPage = () => {
         {/* Language */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Globe className="w-4 h-4" /> Language
+            <Globe className="w-4 h-4" /> {t("settings.language")}
           </h2>
           <p className="text-xs text-muted-foreground mb-3">
-            Current: <span className="text-foreground font-medium">{LANGUAGES.find((l) => l.code === selectedLang)?.name || "English"}</span>
+            {t("settings.currentLang")}: <span className="text-foreground font-medium">{LANGUAGES.find((l) => l.code === selectedLang)?.name || "English"}</span>
           </p>
           {/* Search */}
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search languages..."
+              placeholder={t("settings.searchLanguages")}
               value={langSearch}
               onChange={(e) => {
                 setLangSearch(e.target.value);
@@ -294,18 +296,18 @@ const SettingsPage = () => {
               onClick={() => setShowAllLangs(true)}
               className="w-full mt-3 py-2 text-sm text-primary font-medium hover:underline"
             >
-              Show all {filteredLangs.length} languages
+              {t("settings.showAll", { count: filteredLangs.length })}
             </button>
           )}
           {filteredLangs.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">No languages found</p>
+            <p className="text-sm text-muted-foreground text-center py-4">{t("settings.noLanguagesFound")}</p>
           )}
         </section>
 
         {/* Storage Analytics */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <HardDrive className="w-4 h-4" /> Storage & Data
+            <HardDrive className="w-4 h-4" /> {t("settings.storage")}
           </h2>
           <div className="space-y-3">
             {[
@@ -387,15 +389,15 @@ const SettingsPage = () => {
         {/* Security & Encryption */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Shield className="w-4 h-4" /> Security & Encryption
+            <Shield className="w-4 h-4" /> {t("settings.security")}
           </h2>
           <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 mb-4">
             <div className="flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-foreground">Your data is protected</p>
+                <p className="text-sm font-medium text-foreground">{t("settings.dataProtected")}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  All your data is encrypted end-to-end. Files, photos, notes, and contacts are secured with industry-standard encryption both in transit and at rest.
+                  {t("settings.dataProtectedDesc")}
                 </p>
               </div>
             </div>
@@ -437,13 +439,13 @@ const SettingsPage = () => {
         {/* App Lock */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Lock className="w-4 h-4" /> App Lock
+            <Lock className="w-4 h-4" /> {t("settings.appLock")}
           </h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-foreground font-medium">Enable App Lock</p>
-                <p className="text-xs text-muted-foreground">Require PIN to open app</p>
+                <p className="text-sm text-foreground font-medium">{t("settings.enableAppLock")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.requirePin")}</p>
               </div>
               <button
                 onClick={() => {
@@ -531,13 +533,13 @@ const SettingsPage = () => {
 
             {lockEnabled && (
               <div>
-                <p className="text-xs text-muted-foreground mb-2">Lock after</p>
+                <p className="text-xs text-muted-foreground mb-2">{t("settings.lockAfter")}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { label: "Immediately", value: 0 },
-                    { label: "1 minute", value: 60 },
-                    { label: "5 minutes", value: 300 },
-                    { label: "20 minutes", value: 1200 },
+                    { label: t("settings.immediately"), value: 0 },
+                    { label: t("settings.oneMinute"), value: 60 },
+                    { label: t("settings.fiveMinutes"), value: 300 },
+                    { label: t("settings.twentyMinutes"), value: 1200 },
                   ].map((opt) => (
                     <button
                       key={opt.value}
@@ -568,7 +570,7 @@ const SettingsPage = () => {
                 }}
                 className="text-sm text-primary font-medium hover:underline"
               >
-                Change PIN
+                {t("settings.changePin")}
               </button>
             )}
           </div>
@@ -577,11 +579,11 @@ const SettingsPage = () => {
         {/* Developer */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Code className="w-4 h-4" /> Developer
+            <Code className="w-4 h-4" /> {t("settings.developer")}
           </h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">Developed by</span>
+              <span className="text-sm text-foreground">{t("settings.developedBy")}</span>
               <span className="text-sm text-muted-foreground font-medium">sayfalse</span>
             </div>
             <div className="flex items-center justify-between py-2">
@@ -612,7 +614,7 @@ const SettingsPage = () => {
               </a>
             </div>
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">Version</span>
+              <span className="text-sm text-foreground">{t("settings.version")}</span>
               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">1.0.0</span>
             </div>
             <div className="pt-2 border-t border-border space-y-2">
@@ -620,14 +622,14 @@ const SettingsPage = () => {
                 href="/privacy-policy"
                 className="flex items-center justify-between py-2 rounded-lg hover:bg-accent px-2 -mx-2 transition-colors"
               >
-                <span className="text-sm text-foreground">Privacy Policy</span>
+                <span className="text-sm text-foreground">{t("settings.privacyPolicy")}</span>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </a>
               <a
                 href="/terms-of-service"
                 className="flex items-center justify-between py-2 rounded-lg hover:bg-accent px-2 -mx-2 transition-colors"
               >
-                <span className="text-sm text-foreground">Terms of Service</span>
+                <span className="text-sm text-foreground">{t("settings.termsOfService")}</span>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </a>
             </div>
@@ -640,7 +642,7 @@ const SettingsPage = () => {
           className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors text-sm font-medium"
         >
           <LogOut className="w-4 h-4" />
-          Sign Out
+          {t("common.signOut")}
         </button>
 
         {/* Delete Account */}

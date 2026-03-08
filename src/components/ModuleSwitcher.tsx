@@ -1,18 +1,20 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Image, Settings, Home, Mail, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 const modules = [
-  { path: "/", icon: Home, label: "Home" },
-  { path: "/gallery", icon: Image, label: "Gallery" },
-  { path: "/mail", icon: Mail, label: "Mail" },
-  { path: "/chat", icon: MessageCircle, label: "Chat" },
-  { path: "/settings", icon: Settings, label: "Settings" },
+  { path: "/", icon: Home, labelKey: "nav.home" },
+  { path: "/gallery", icon: Image, labelKey: "nav.gallery" },
+  { path: "/mail", icon: Mail, labelKey: "nav.mail" },
+  { path: "/chat", icon: MessageCircle, labelKey: "nav.chat" },
+  { path: "/settings", icon: Settings, labelKey: "nav.settings" },
 ];
 
 const ModuleSwitcher = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { t } = useTranslation();
 
   return (
     <motion.nav
@@ -31,9 +33,7 @@ const ModuleSwitcher = () => {
                 onClick={() => navigate(mod.path)}
                 whileTap={{ scale: 0.85 }}
                 className={`relative flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-xl transition-all duration-200 min-w-0 flex-1 ${
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground"
+                  isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 {isActive && (
@@ -45,7 +45,7 @@ const ModuleSwitcher = () => {
                 )}
                 <mod.icon className={`relative z-10 w-[18px] h-[18px] ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`} />
                 <span className={`relative z-10 text-[9px] leading-none font-medium ${isActive ? "font-semibold" : ""}`}>
-                  {mod.label}
+                  {t(mod.labelKey)}
                 </span>
               </motion.button>
             );

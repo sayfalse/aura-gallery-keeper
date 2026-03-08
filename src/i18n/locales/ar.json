@@ -1,0 +1,64 @@
+{
+  "common": {
+    "save": "حفظ", "cancel": "إلغاء", "delete": "حذف", "confirm": "تأكيد",
+    "search": "بحث", "loading": "جاري التحميل...", "retry": "إعادة المحاولة",
+    "signOut": "تسجيل الخروج", "back": "رجوع", "upload": "رفع", "items": "عناصر",
+    "openInBrowser": "فتح في المتصفح", "openExternally": "فتح خارجياً", "newSearch": "بحث جديد"
+  },
+  "home": {
+    "greeting": { "night": "تصبح على خير 🌙", "morning": "صباح الخير ☀️", "afternoon": "مساء الخير 🌤️", "evening": "مساء الخير 🌆" },
+    "apps": "التطبيقات", "askPixelAI": "اسأل Pixel AI", "aiDesc": "محادثة، إنشاء، ترجمة",
+    "stats": { "photos": "صور", "notes": "ملاحظات", "people": "أشخاص", "files": "ملفات" }
+  },
+  "apps": {
+    "gallery": "المعرض", "galleryDesc": "صور وألبومات", "notes": "ملاحظات", "notesDesc": "أفكار سريعة",
+    "drive": "التخزين", "driveDesc": "تخزين سحابي", "people": "جهات الاتصال", "peopleDesc": "جهات الاتصال",
+    "mail": "البريد", "mailDesc": "البريد الإلكتروني", "tempMail": "بريد مؤقت", "tempMailDesc": "بريد مؤقت",
+    "chat": "محادثة", "chatDesc": "رسائل", "pixelAI": "Pixel AI", "pixelAIDesc": "مساعد ذكي",
+    "browser": "المتصفح", "browserDesc": "ويب", "music": "موسيقى", "musicDesc": "استماع للموسيقى",
+    "vpn": "VPN و DNS", "vpnDesc": "أدوات الخصوصية", "settings": "الإعدادات", "settingsDesc": "التفضيلات"
+  },
+  "nav": {
+    "home": "الرئيسية", "gallery": "المعرض", "mail": "البريد", "chat": "محادثة", "settings": "الإعدادات",
+    "photos": "صور", "favorites": "المفضلة", "shared": "مشترك", "recent": "الأخيرة", "upload": "رفع"
+  },
+  "settings": {
+    "title": "الإعدادات", "appearance": "المظهر", "light": "فاتح", "dark": "داكن", "system": "النظام",
+    "language": "اللغة", "currentLang": "الحالية", "searchLanguages": "البحث عن لغات...",
+    "showAll": "عرض كل {{count}} لغة", "noLanguagesFound": "لم يتم العثور على لغات",
+    "storage": "التخزين والبيانات", "cloudStorage": "التخزين السحابي", "used": "مستخدم",
+    "storageByType": "التخزين حسب النوع", "largestFiles": "أكبر الملفات",
+    "security": "الأمان والتشفير", "dataProtected": "بياناتك محمية",
+    "dataProtectedDesc": "جميع بياناتك مشفرة من طرف إلى طرف.",
+    "atRestEncryption": "تشفير أثناء الراحة", "inTransitEncryption": "تشفير أثناء النقل",
+    "dataIsolation": "عزل البيانات", "authProvider": "مزود المصادقة",
+    "appLock": "قفل التطبيق", "enableAppLock": "تفعيل القفل", "requirePin": "طلب رمز PIN",
+    "lockAfter": "القفل بعد", "immediately": "فوراً", "oneMinute": "دقيقة واحدة",
+    "fiveMinutes": "5 دقائق", "twentyMinutes": "20 دقيقة", "changePin": "تغيير PIN",
+    "setPin": "تعيين رمز PIN من 4 أرقام", "confirmPin": "تأكيد رمز PIN",
+    "pinSet": "تم تعيين رمز PIN!", "pinMismatch": "الرموز غير متطابقة",
+    "lockEnabled": "تم تفعيل القفل", "lockDisabled": "تم تعطيل القفل",
+    "developer": "المطور", "developedBy": "تطوير بواسطة", "contact": "تواصل",
+    "version": "الإصدار", "privacyPolicy": "سياسة الخصوصية", "termsOfService": "شروط الخدمة",
+    "profileUpdated": "تم تحديث الملف!", "profileFailed": "فشل في حفظ الملف"
+  },
+  "deleteAccount": {
+    "title": "حذف الحساب",
+    "description": "حذف حسابك نهائياً وجميع البيانات المرتبطة. لا يمكن التراجع عن هذا الإجراء.",
+    "deleteBtn": "حذف حسابي", "askTitle": "هل تريد حقاً حذف حسابك؟",
+    "keepIt": "لا، احتفظ به", "yesDelete": "نعم، احذفه",
+    "absolutelySure": "هل أنت متأكد تماماً؟", "typeDelete": "اكتب DELETE للتأكيد.",
+    "placeholder": "اكتب \"DELETE\" للتأكيد", "deleting": "جاري الحذف...",
+    "deleteForever": "حذف نهائياً", "deleted": "تم حذف الحساب نهائياً"
+  },
+  "browser": {
+    "searchTheWeb": "البحث في الويب", "searchPrompt": "اكتب رابطاً أو مصطلح بحث.",
+    "startBrowsing": "ابدأ التصفح", "cantLoad": "لا يمكن تحميل الصفحة",
+    "cantLoadDesc": "هذا الموقع يمنع التضمين.", "searchOrEnter": "بحث أو كتابة موقع",
+    "searchOrEnterUrl": "بحث أو كتابة رابط"
+  },
+  "tempMail": {
+    "title": "بريد مؤقت", "cantLoad": "تعذر تحميل البريد المؤقت",
+    "cantLoadDesc": "الخدمة قد تكون غير متاحة. يمكنك فتحها في متصفحك."
+  }
+}

@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
@@ -10,19 +11,19 @@ import {
   ArrowUpRight, Layers, AtSign, Music2, Shield
 } from "lucide-react";
 
-const apps = [
-  { id: "gallery", name: "Gallery", icon: Image, gradient: "from-blue-500 to-cyan-400", path: "/gallery", desc: "Photos & Albums" },
-  { id: "notes", name: "Notes", icon: StickyNote, gradient: "from-amber-500 to-orange-400", path: "/notes", desc: "Quick thoughts" },
-  { id: "drive", name: "Drive", icon: HardDrive, gradient: "from-indigo-500 to-purple-400", path: "/drive", desc: "Cloud storage" },
-  { id: "contacts", name: "People", icon: Users, gradient: "from-emerald-500 to-teal-400", path: "/contacts", desc: "Contacts" },
-  { id: "mail", name: "Mail", icon: Mail, gradient: "from-sky-500 to-blue-400", path: "/mail", desc: "Email" },
-  { id: "temp-mail", name: "Temp Mail", icon: AtSign, gradient: "from-orange-500 to-red-400", path: "/temp-mail", desc: "Disposable email" },
-  { id: "chat", name: "Chat", icon: MessageCircle, gradient: "from-green-500 to-emerald-400", path: "/chat", desc: "Messages" },
-  { id: "pixel-ai", name: "Pixel AI", icon: Sparkles, gradient: "from-violet-500 to-fuchsia-400", path: "/pixel-ai", desc: "AI Assistant" },
-  { id: "browser", name: "Browser", icon: Globe, gradient: "from-rose-500 to-orange-400", path: "/browser", desc: "Web" },
-  { id: "music", name: "Music", icon: Music2, gradient: "from-pink-500 to-rose-400", path: "/music", desc: "Stream music" },
-  { id: "vpn", name: "VPN & DNS", icon: Shield, gradient: "from-orange-500 to-amber-400", path: "/vpn", desc: "Privacy tools" },
-  { id: "settings", name: "Settings", icon: Settings, gradient: "from-slate-500 to-gray-400", path: "/settings", desc: "Preferences" },
+const appKeys = [
+  { id: "gallery", nameKey: "apps.gallery", icon: Image, gradient: "from-blue-500 to-cyan-400", path: "/gallery", descKey: "apps.galleryDesc" },
+  { id: "notes", nameKey: "apps.notes", icon: StickyNote, gradient: "from-amber-500 to-orange-400", path: "/notes", descKey: "apps.notesDesc" },
+  { id: "drive", nameKey: "apps.drive", icon: HardDrive, gradient: "from-indigo-500 to-purple-400", path: "/drive", descKey: "apps.driveDesc" },
+  { id: "contacts", nameKey: "apps.people", icon: Users, gradient: "from-emerald-500 to-teal-400", path: "/contacts", descKey: "apps.peopleDesc" },
+  { id: "mail", nameKey: "apps.mail", icon: Mail, gradient: "from-sky-500 to-blue-400", path: "/mail", descKey: "apps.mailDesc" },
+  { id: "temp-mail", nameKey: "apps.tempMail", icon: AtSign, gradient: "from-orange-500 to-red-400", path: "/temp-mail", descKey: "apps.tempMailDesc" },
+  { id: "chat", nameKey: "apps.chat", icon: MessageCircle, gradient: "from-green-500 to-emerald-400", path: "/chat", descKey: "apps.chatDesc" },
+  { id: "pixel-ai", nameKey: "apps.pixelAI", icon: Sparkles, gradient: "from-violet-500 to-fuchsia-400", path: "/pixel-ai", descKey: "apps.pixelAIDesc" },
+  { id: "browser", nameKey: "apps.browser", icon: Globe, gradient: "from-rose-500 to-orange-400", path: "/browser", descKey: "apps.browserDesc" },
+  { id: "music", nameKey: "apps.music", icon: Music2, gradient: "from-pink-500 to-rose-400", path: "/music", descKey: "apps.musicDesc" },
+  { id: "vpn", nameKey: "apps.vpn", icon: Shield, gradient: "from-orange-500 to-amber-400", path: "/vpn", descKey: "apps.vpnDesc" },
+  { id: "settings", nameKey: "apps.settings", icon: Settings, gradient: "from-slate-500 to-gray-400", path: "/settings", descKey: "apps.settingsDesc" },
 ];
 
 const fadeUp = {
@@ -36,6 +37,7 @@ const fadeUp = {
 const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
   const [counts, setCounts] = useState({ photos: 0, notes: 0, contacts: 0, files: 0 });
 
@@ -54,16 +56,15 @@ const Home = () => {
 
   const greeting = () => {
     const h = new Date().getHours();
-    if (h < 6) return "Good night 🌙";
-    if (h < 12) return "Good morning ☀️";
-    if (h < 18) return "Good afternoon 🌤️";
-    if (h < 21) return "Good evening 🌆";
-    return "Good night 🌙";
+    if (h < 6) return t("home.greeting.night");
+    if (h < 12) return t("home.greeting.morning");
+    if (h < 18) return t("home.greeting.afternoon");
+    if (h < 21) return t("home.greeting.evening");
+    return t("home.greeting.night");
   };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="flex items-center justify-between px-5 pt-[env(safe-area-inset-top)] py-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/20">
@@ -77,15 +78,13 @@ const Home = () => {
         <ProfileMenu />
       </header>
 
-      {/* Content */}
       <main className="px-5 pb-28 space-y-6">
-        {/* Quick Stats */}
         <div className="grid grid-cols-4 gap-2">
           {[
-            { label: "Photos", value: counts.photos, icon: Image },
-            { label: "Notes", value: counts.notes, icon: StickyNote },
-            { label: "People", value: counts.contacts, icon: Users },
-            { label: "Files", value: counts.files, icon: HardDrive },
+            { label: t("home.stats.photos"), value: counts.photos, icon: Image },
+            { label: t("home.stats.notes"), value: counts.notes, icon: StickyNote },
+            { label: t("home.stats.people"), value: counts.contacts, icon: Users },
+            { label: t("home.stats.files"), value: counts.files, icon: HardDrive },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -101,7 +100,6 @@ const Home = () => {
           ))}
         </div>
 
-        {/* AI Banner */}
         <motion.button
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -115,18 +113,17 @@ const Home = () => {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-bold text-white">Ask Pixel AI</h3>
-              <p className="text-[11px] text-white/70">Chat, generate, translate</p>
+              <h3 className="text-sm font-bold text-white">{t("home.askPixelAI")}</h3>
+              <p className="text-[11px] text-white/70">{t("home.aiDesc")}</p>
             </div>
             <ArrowUpRight className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
           </div>
         </motion.button>
 
-        {/* App Grid */}
         <div>
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Apps</h2>
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("home.apps")}</h2>
           <div className="grid grid-cols-2 gap-2.5">
-            {apps.map((app, i) => (
+            {appKeys.map((app, i) => (
               <motion.button
                 key={app.id}
                 custom={i}
@@ -141,8 +138,8 @@ const Home = () => {
                   <app.icon className="w-5 h-5 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground leading-tight">{app.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{app.desc}</p>
+                  <p className="text-sm font-semibold text-foreground leading-tight">{t(app.nameKey)}</p>
+                  <p className="text-[10px] text-muted-foreground">{t(app.descKey)}</p>
                 </div>
               </motion.button>
             ))}
