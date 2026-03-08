@@ -14,15 +14,18 @@ const HEADERS = {
   "Referer": "https://www.jiosaavn.com/",
 };
 
-const DES_KEY = Buffer.from("38346591");
-
 function decryptUrl(encryptedUrl: string): string {
   try {
-    const decipher = createDecipheriv("des-ecb", DES_KEY, null);
+    const keyBytes = new Uint8Array([0x33, 0x38, 0x33, 0x34, 0x36, 0x35, 0x39, 0x31]); // "38346591" as bytes
+    const decipher = createDecipheriv("des-ecb", keyBytes, null);
     decipher.setAutoPadding(true);
-    let decrypted = decipher.update(Buffer.from(encryptedUrl, "base64"));
-    decrypted = Buffer.concat([decrypted, decipher.final()]);
-    const url = decrypted.toString("utf8");
+    const encData = Uint8Array.from(atob(encryptedUrl), c => c.charCodeAt(0));
+    let decrypted = decipher.update(encData);
+    const final = decipher.final();
+    const result = new Uint8Array(decrypted.length + final.length);
+    result.set(new Uint8Array(decrypted.buffer, decrypted.byteOffset, decrypted.length));
+    result.set(new Uint8Array(final.buffer, final.byteOffset, final.length), decrypted.length);
+    const url = new TextDecoder().decode(result);
     return url.replace("_96.mp4", "_320.mp4").replace("_96_p.mp4", "_320.mp4");
   } catch (e) {
     console.error("Decrypt error:", e);
