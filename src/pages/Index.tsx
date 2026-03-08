@@ -71,9 +71,12 @@ const Index = () => {
   }, []);
 
   const filteredPhotos = useMemo(() => {
-    // If viewing an album's photos
+    // If viewing an album's photos, maintain album sort order
     if (activeAlbum) {
-      return photos.filter((p) => albumPhotoIds.includes(p.id));
+      const albumPhotos = albumPhotoIds
+        .map((id) => photos.find((p) => p.id === id))
+        .filter(Boolean) as Photo[];
+      return albumPhotos;
     }
     let result = photos;
     if (activeSection === "favorites") result = result.filter((p) => p.favorite);
