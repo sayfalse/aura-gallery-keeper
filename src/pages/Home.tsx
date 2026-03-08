@@ -6,8 +6,9 @@ import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, MessageCircle,
-  ArrowUpRight, Layers
+  ArrowUpRight, Layers, Shield
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const appKeys = [
   { id: "gallery", nameKey: "apps.gallery", icon: Image, gradient: "from-blue-500 to-cyan-400", path: "/gallery", descKey: "apps.galleryDesc" },

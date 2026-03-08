@@ -63,36 +63,40 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData?.session?.access_token;
-        if (!token) {
-          setError("Not authenticated");
-          setLoading(false);
-          return;
-        }
-
-        const { data, error: fnError } = await supabase.functions.invoke("admin-stats", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (fnError) {
-          setError(fnError.message || "Failed to load admin stats");
-        } else if (data?.error) {
-          setError(data.error);
-        } else {
-          setStats(data);
-        }
-      } catch (e: any) {
-        setError(e.message || "Unknown error");
-      } finally {
+  const fetchStats = async (isRefresh = false) => {
+    try {
+      if (!isRefresh) setLoading(true);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) {
+        setError("Not authenticated");
         setLoading(false);
+        return;
       }
-    };
 
+      const { data, error: fnError } = await supabase.functions.invoke("admin-stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (fnError) {
+        if (!isRefresh) setError(fnError.message || "Failed to load admin stats");
+      } else if (data?.error) {
+        if (!isRefresh) setError(data.error);
+      } else {
+        setStats(data);
+        setError(null);
+      }
+    } catch (e: any) {
+      if (!isRefresh) setError(e.message || "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchStats();
+    const interval = setInterval(() => fetchStats(true), 30000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
