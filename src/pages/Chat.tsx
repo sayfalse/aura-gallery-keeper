@@ -273,7 +273,7 @@ const ChatPage = () => {
                 <ArrowLeft className="w-5 h-5 text-foreground" />
               </button>
               <h2 className="font-display text-lg font-bold text-foreground">
-                {showNewGroup ? "New Group" : "New Chat"}
+                {showNewGroup ? t("chat.newGroup") : t("chat.newChat")}
               </h2>
             </header>
 
