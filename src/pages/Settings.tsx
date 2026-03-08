@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail, ChevronRight, Github } from "lucide-react";
+import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail, ChevronRight, Github, Send } from "lucide-react";
 import PersonalInfoSection from "@/components/settings/PersonalInfoSection";
 import TwoFactorSection from "@/components/settings/TwoFactorSection";
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
@@ -523,7 +523,7 @@ const SettingsPage = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between py-2">
               <span className="text-sm text-foreground">Developed by</span>
-              <span className="text-sm text-muted-foreground font-medium">Scor</span>
+              <span className="text-sm text-muted-foreground font-medium">sayfalse</span>
             </div>
             <div className="flex items-center justify-between py-2">
               <span className="flex items-center gap-2 text-sm text-foreground">
@@ -541,6 +541,15 @@ const SettingsPage = () => {
               </span>
               <a href="https://github.com/sayfalse" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-medium hover:underline">
                 @sayfalse
+              </a>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Send className="w-3.5 h-3.5 text-muted-foreground" />
+                Telegram
+              </span>
+              <a href="https://t.me/minutesbd" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-medium hover:underline">
+                @minutesbd
               </a>
             </div>
             <div className="flex items-center justify-between py-2">
