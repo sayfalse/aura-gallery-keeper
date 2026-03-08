@@ -103,7 +103,7 @@ const NotesPage = () => {
     try {
       await updateNote(note.id, { pinned: newPinned });
     } catch {
-      toast.error("Failed to update note");
+      toast.error(t("notes.failedUpdate"));
     }
   };
 
