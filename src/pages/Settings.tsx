@@ -80,6 +80,7 @@ const SettingsPage = () => {
           <Settings className="w-5 h-5 text-muted-foreground" />
           <h1 className="font-display text-lg font-bold text-foreground">Settings</h1>
         </div>
+        <QuickNavButton />
       </header>
 
       <div className="max-w-lg mx-auto p-4 md:p-6 space-y-6">
