@@ -228,7 +228,7 @@ const SettingsPage = () => {
         {/* Appearance */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Moon className="w-4 h-4" /> Appearance
+            <Moon className="w-4 h-4" /> {t("settings.appearance")}
           </h2>
           <div className="grid grid-cols-3 gap-2">
             {themeOptions.map((opt) => (
