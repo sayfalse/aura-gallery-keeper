@@ -74,21 +74,28 @@ const MusicPage = () => {
 
   const playSong = useCallback(async (song: Song, list?: Song[], idx?: number) => {
     if (!song.url) { toast.error("Song not available"); return; }
+    
+    // Start playback immediately in user gesture context
+    const audio = audioRef.current;
+    if (audio) {
+      audio.src = song.url;
+      audio.volume = muted ? 0 : volume / 100;
+      try {
+        await audio.play();
+      } catch (err) {
+        console.warn("Playback failed, retrying:", err);
+        // Retry once
+        setTimeout(() => audio.play().catch(() => {}), 100);
+      }
+    }
+    
     setCurrent(song);
     if (list) { setQueue(list); setQueueIndex(idx ?? 0); }
     setPlaying(true);
     setExpanded(true);
     if (user) addToHistory(user.id, song);
     getSongSuggestions(song.id).then(setSuggestions);
-  }, [user]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !current) return;
-    audio.src = current.url;
-    audio.volume = muted ? 0 : volume / 100;
-    audio.play().catch(() => {});
-  }, [current]);
+  }, [user, muted, volume]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = muted ? 0 : volume / 100;

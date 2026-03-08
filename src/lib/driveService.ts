@@ -34,7 +34,11 @@ export const uploadDriveFile = async (userId: string, file: File, folder: string
   const fileName = `${crypto.randomUUID()}_${file.name}`;
   const storagePath = `${userId}/${fileName}`;
 
-  const { error: uploadError } = await supabase.storage.from("drive").upload(storagePath, file);
+  const { error: uploadError } = await supabase.storage.from("drive").upload(storagePath, file, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: file.type,
+  });
   if (uploadError) throw uploadError;
 
   const { data, error } = await supabase
