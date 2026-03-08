@@ -146,9 +146,9 @@ const DrivePage = () => {
     try {
       await renameDriveFile(file.id, trimmed);
       setFiles((prev) => prev.map((f) => f.id === file.id ? { ...f, name: trimmed } : f));
-      toast.success("File renamed");
+      toast.success(t("drive.fileRenamed"));
     } catch {
-      toast.error("Rename failed");
+      toast.error(t("drive.renameFailed"));
     }
     setRenamingId(null);
   };
