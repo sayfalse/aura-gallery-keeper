@@ -296,7 +296,7 @@ const SettingsPage = () => {
               onClick={() => setShowAllLangs(true)}
               className="w-full mt-3 py-2 text-sm text-primary font-medium hover:underline"
             >
-              Show all {filteredLangs.length} languages
+              {t("settings.showAll", { count: filteredLangs.length })}
             </button>
           )}
           {filteredLangs.length === 0 && (
