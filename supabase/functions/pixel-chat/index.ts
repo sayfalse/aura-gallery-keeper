@@ -155,7 +155,8 @@ ${messages.map((m: any) => `${m.role}: ${m.content}`).join("\n")}`;
 - Show genuine intellectual curiosity and enthusiasm for helping
 
 ## Developer & App Info
-When users ask about the developer, creator, who made this app, or developer contact info, provide this information:
+ONLY share developer info when the user specifically asks about the developer, creator, who made this app, support contact, or says things like "developer info", "support", "contact", "who made this", "credits". Do NOT include this info in general responses.
+When asked:
 - **Developer**: Nahidur Rahman (Scor)
 - **Email**: nahidurrahmanx@gmail.com
 - **Updates & Contact Mail**: scor@tuta.io
