@@ -133,7 +133,7 @@ const ContactsPage = () => {
             ) : Object.keys(grouped).length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 <Users className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No contacts yet</p>
+                <p className="text-sm">{t("contacts.noContacts")}</p>
               </div>
             ) : (
               Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([letter, letterContacts]) => (
