@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Camera } from "lucide-react";
+import auraLogo from "@/assets/aura-logo.webp";
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -25,13 +25,13 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
     >
       {/* Glow ring */}
       <div className="relative">
-        <div className="absolute inset-0 w-24 h-24 rounded-3xl bg-primary/20 blur-xl animate-[pulse_1.5s_ease-in-out_infinite]" />
+        <div className="absolute inset-0 w-28 h-28 rounded-full bg-primary/20 blur-xl animate-[pulse_1.5s_ease-in-out_infinite]" />
         <div
-          className={`relative w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-2xl shadow-primary/30 transition-transform duration-700 ${
+          className={`relative w-28 h-28 rounded-full flex items-center justify-center transition-transform duration-700 ${
             phase === "pulse" ? "animate-[splash-pulse_1.5s_ease-in-out_infinite]" : "scale-90"
           }`}
         >
-          <Camera className="w-11 h-11 text-primary-foreground" />
+          <img src={auraLogo} alt="Aura" className="w-24 h-24 object-contain drop-shadow-2xl" />
         </div>
       </div>
 
