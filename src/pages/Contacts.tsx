@@ -221,7 +221,7 @@ const ContactsPage = () => {
           ) : (
             <div className="text-center text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Select a contact</p>
+              <p className="text-sm">{t("contacts.selectContact")}</p>
             </div>
           )}
         </main>
