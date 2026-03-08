@@ -87,9 +87,9 @@ const NotesPage = () => {
     if (activeNote?.id === id) { setActiveNote(null); setTitle(""); setContent(""); }
     try {
       await deleteNote(id);
-      toast.success("Note deleted");
+      toast.success(t("notes.deleted"));
     } catch {
-      toast.error("Failed to delete note");
+      toast.error(t("notes.failedDelete"));
       loadNotes();
     }
   };
