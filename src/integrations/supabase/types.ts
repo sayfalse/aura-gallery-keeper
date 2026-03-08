@@ -288,6 +288,7 @@ export type Database = {
           id: string
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -296,6 +297,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -304,6 +306,78 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      shared_items: {
+        Row: {
+          connection_id: string
+          created_at: string
+          id: string
+          item_id: string
+          item_type: string
+          saved_by_recipient: boolean
+          shared_by: string
+        }
+        Insert: {
+          connection_id: string
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          saved_by_recipient?: boolean
+          shared_by: string
+        }
+        Update: {
+          connection_id?: string
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          saved_by_recipient?: boolean
+          shared_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_items_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "sharing_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sharing_connections: {
+        Row: {
+          auto_save: boolean
+          auto_share: boolean
+          connected_user_id: string
+          created_at: string
+          id: string
+          owner_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auto_save?: boolean
+          auto_share?: boolean
+          connected_user_id: string
+          created_at?: string
+          id?: string
+          owner_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_save?: boolean
+          auto_share?: boolean
+          connected_user_id?: string
+          created_at?: string
+          id?: string
+          owner_id?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
