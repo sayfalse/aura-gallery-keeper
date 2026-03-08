@@ -264,14 +264,31 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Send message
+    // Send message (with optional attachments)
     if (action === "send" && req.method === "POST") {
-      const { to, subject, body: msgBody, inReplyTo, references, threadId } = body;
+      const { to, subject, body: msgBody, inReplyTo, references, threadId, attachments } = body;
+      // attachments: Array<{ filename: string; mimeType: string; data: string (base64) }>
 
       const boundary = "boundary_" + Date.now();
-      let raw = `From: me\r\nTo: ${to}\r\nSubject: ${subject}\r\nMIME-Version: 1.0\r\nContent-Type: text/html; charset=utf-8\r\n`;
+      let raw = `From: me\r\nTo: ${to}\r\nSubject: ${subject}\r\nMIME-Version: 1.0\r\n`;
       if (inReplyTo) raw += `In-Reply-To: ${inReplyTo}\r\nReferences: ${references || inReplyTo}\r\n`;
-      raw += `\r\n${msgBody}`;
+
+      if (attachments && attachments.length > 0) {
+        raw += `Content-Type: multipart/mixed; boundary="${boundary}"\r\n\r\n`;
+        raw += `--${boundary}\r\n`;
+        raw += `Content-Type: text/html; charset=utf-8\r\n\r\n`;
+        raw += `${msgBody}\r\n`;
+        for (const att of attachments) {
+          raw += `--${boundary}\r\n`;
+          raw += `Content-Type: ${att.mimeType}; name="${att.filename}"\r\n`;
+          raw += `Content-Disposition: attachment; filename="${att.filename}"\r\n`;
+          raw += `Content-Transfer-Encoding: base64\r\n\r\n`;
+          raw += `${att.data}\r\n`;
+        }
+        raw += `--${boundary}--`;
+      } else {
+        raw += `Content-Type: text/html; charset=utf-8\r\n\r\n${msgBody}`;
+      }
 
       // Base64url encode
       const encoded = btoa(unescape(encodeURIComponent(raw)))
