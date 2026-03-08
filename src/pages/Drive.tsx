@@ -110,7 +110,7 @@ const DrivePage = () => {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      toast.error("Download failed");
+      toast.error(t("drive.downloadFailed"));
     }
   };
 
