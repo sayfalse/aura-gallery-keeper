@@ -172,6 +172,10 @@ const SettingsPage = () => {
   const handleLanguageChange = (code: string) => {
     setSelectedLang(code);
     localStorage.setItem(LANG_STORAGE_KEY, code);
+    document.documentElement.lang = code;
+    // Set RTL direction for Arabic, Hebrew, Urdu, Persian
+    const rtlLangs = ["ar", "he", "ur", "fa"];
+    document.documentElement.dir = rtlLangs.includes(code) ? "rtl" : "ltr";
     const lang = LANGUAGES.find((l) => l.code === code);
     toast.success(`Language set to ${lang?.name || code}`);
   };
