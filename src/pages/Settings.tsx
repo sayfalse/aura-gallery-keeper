@@ -424,12 +424,12 @@ const SettingsPage = () => {
               </span>
               <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">Row-Level Security</span>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Lock className="w-3.5 h-3.5 text-primary" />
                 Auth Provider
               </span>
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Google OAuth 2.0</span>
+              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">Google OAuth 2.0</span>
             </div>
             {/* 2FA */}
             <TwoFactorSection />
