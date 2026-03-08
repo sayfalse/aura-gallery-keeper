@@ -201,7 +201,7 @@ const DrivePage = () => {
         <div className="fixed inset-0 z-50 bg-primary/10 border-4 border-dashed border-primary rounded-xl flex items-center justify-center pointer-events-none">
           <div className="text-center">
             <Upload className="w-12 h-12 text-primary mx-auto mb-2" />
-            <p className="text-lg font-bold text-primary">Drop files to upload</p>
+            <p className="text-lg font-bold text-primary">{t("drive.dropToUpload")}</p>
           </div>
         </div>
       )}
