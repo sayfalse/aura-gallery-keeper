@@ -20,6 +20,7 @@ import QuickNavButton from "@/components/QuickNavButton";
 const ChatPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [activeConv, setActiveConv] = useState<ConversationWithDetails | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
