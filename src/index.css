@@ -110,14 +110,14 @@
 
     --overlay: 0 0% 0% / 0.8;
 
-    --sidebar-background: 260 20% 7%;
-    --sidebar-foreground: 260 10% 80%;
-    --sidebar-primary: 260 10% 92%;
-    --sidebar-primary-foreground: 260 18% 8%;
-    --sidebar-accent: 271 25% 15%;
-    --sidebar-accent-foreground: 260 10% 92%;
-    --sidebar-border-default: 260 15% 17%;
-    --sidebar-ring: 271 70% 62%;
+    --sidebar-background: 220 20% 7%;
+    --sidebar-foreground: 215 12% 80%;
+    --sidebar-primary: 215 12% 92%;
+    --sidebar-primary-foreground: 220 18% 8%;
+    --sidebar-accent: 217 25% 15%;
+    --sidebar-accent-foreground: 215 12% 92%;
+    --sidebar-border-default: 220 16% 17%;
+    --sidebar-ring: 217 85% 60%;
   }
 }
 
