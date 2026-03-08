@@ -25,7 +25,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
           {/* Colorful ambient blobs */}
           <motion.div
             className="absolute w-72 h-72 rounded-full blur-3xl"
-            style={{ background: "radial-gradient(circle, hsl(271 70% 60% / 0.12), transparent)" }}
+            style={{ background: "radial-gradient(circle, hsl(217 90% 55% / 0.12), transparent)" }}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1.5, opacity: 1 }}
             transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
