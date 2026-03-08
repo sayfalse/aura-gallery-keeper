@@ -91,6 +91,36 @@ export type Database = {
           },
         ]
       }
+      announcements: {
+        Row: {
+          author: string | null
+          content: string
+          created_at: string
+          id: string
+          telegram_message_id: number | null
+          title: string | null
+          type: string | null
+        }
+        Insert: {
+          author?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          telegram_message_id?: number | null
+          title?: string | null
+          type?: string | null
+        }
+        Update: {
+          author?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          telegram_message_id?: number | null
+          title?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           address: string | null
