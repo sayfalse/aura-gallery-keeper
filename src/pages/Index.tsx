@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import AppSidebar from "@/components/AppSidebar";
+import BottomNav from "@/components/BottomNav";
 import PhotoGrid from "@/components/PhotoGrid";
 import Toolbar from "@/components/Toolbar";
 import Lightbox from "@/components/Lightbox";
