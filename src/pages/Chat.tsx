@@ -284,7 +284,7 @@ const ChatPage = () => {
                   placeholder={t("chat.groupName")}
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
                 {selectedMembers.length > 0 && (
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
