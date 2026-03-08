@@ -5,6 +5,8 @@ import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail } from "lucide-react";
 import PersonalInfoSection from "@/components/settings/PersonalInfoSection";
+import TwoFactorSection from "@/components/settings/TwoFactorSection";
+import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
@@ -364,6 +366,8 @@ const SettingsPage = () => {
               </span>
               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Google OAuth 2.0</span>
             </div>
+            {/* 2FA */}
+            <TwoFactorSection />
           </div>
         </section>
 
@@ -541,6 +545,9 @@ const SettingsPage = () => {
           <LogOut className="w-4 h-4" />
           Sign Out
         </button>
+
+        {/* Delete Account */}
+        <DeleteAccountSection />
       </div>
       <ModuleSwitcher />
     </div>
