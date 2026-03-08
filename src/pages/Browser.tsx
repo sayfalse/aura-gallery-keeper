@@ -9,20 +9,25 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  BrowserTab, normalizeUrl, getDisplayUrl, defaultQuickLinks,
+  BrowserTab, normalizeUrl, getDisplayUrl, defaultQuickLinks, getProxyUrl,
   addHistoryEntry, fetchHistory, clearHistory, deleteHistoryEntry,
   fetchBookmarks, addBookmark, deleteBookmark,
   fetchDownloads, deleteDownloadEntry,
   HistoryEntry, Bookmark as BookmarkType, DownloadEntry
 } from "@/lib/browserService";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 type Panel = "none" | "tabs" | "history" | "bookmarks" | "downloads";
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const Browser = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [proxyHtml, setProxyHtml] = useState<string | null>(null);
 
   // Tabs
   const [tabs, setTabs] = useState<BrowserTab[]>([
@@ -50,13 +55,31 @@ const Browser = () => {
     setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
   }, []);
 
+  const fetchViaProxy = useCallback(async (url: string) => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/web-proxy`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+        },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) throw new Error("Proxy error");
+      const html = await res.text();
+      setProxyHtml(html);
+    } catch (err) {
+      // Fallback: open in new tab
+      setProxyHtml(`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#666;background:#fafafa;"><div style="text-align:center;"><p>This site can't be loaded in the browser.</p><a href="${url}" target="_blank" style="color:#3b82f6;">Open in new tab →</a></div></body></html>`);
+    }
+  }, []);
+
   const navigate = useCallback(
     (url: string) => {
       if (!url) return;
       const normalized = normalizeUrl(url);
       const tabId = activeTab.id;
 
-      // Push current URL to back history
       if (activeTab.url) {
         setNavHistory((prev) => ({
           ...prev,
@@ -73,12 +96,15 @@ const Browser = () => {
         isLoading: true,
       });
       setUrlInput(normalized);
+      fetchViaProxy(normalized).finally(() => {
+        updateTab(tabId, { isLoading: false });
+      });
 
       if (user) {
         addHistoryEntry(user.id, normalized, getDisplayUrl(normalized)).catch(() => {});
       }
     },
-    [activeTab, updateTab, user]
+    [activeTab, updateTab, user, fetchViaProxy]
   );
 
   const goBack = useCallback(() => {
@@ -92,7 +118,8 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
-  }, [activeTab, navHistory, updateTab]);
+    fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
+  }, [activeTab, navHistory, updateTab, fetchViaProxy]);
 
   const goForward = useCallback(() => {
     const hist = navHistory[activeTab.id];
@@ -105,14 +132,15 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
-  }, [activeTab, navHistory, updateTab]);
+    fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
+  }, [activeTab, navHistory, updateTab, fetchViaProxy]);
 
   const reload = useCallback(() => {
-    if (iframeRef.current && activeTab.url) {
+    if (activeTab.url) {
       updateTab(activeTab.id, { isLoading: true });
-      iframeRef.current.src = activeTab.url;
+      fetchViaProxy(activeTab.url).finally(() => updateTab(activeTab.id, { isLoading: false }));
     }
-  }, [activeTab, updateTab]);
+  }, [activeTab, updateTab, fetchViaProxy]);
 
   const addTab = useCallback(() => {
     const newTab: BrowserTab = {
@@ -243,8 +271,7 @@ const Browser = () => {
             )}
             <iframe
               ref={iframeRef}
-              src={activeTab.url}
-              onLoad={handleIframeLoad}
+              srcDoc={proxyHtml || "<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#999;'>Loading...</body></html>"}
               className="w-full h-full border-0"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
