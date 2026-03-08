@@ -260,7 +260,7 @@ const SettingsPage = () => {
           </p>
           {/* Search */}
           <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
             <input
               type="text"
               placeholder={t("settings.searchLanguages")}
@@ -269,7 +269,7 @@ const SettingsPage = () => {
                 setLangSearch(e.target.value);
                 setShowAllLangs(true);
               }}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
           {/* Language grid */}
@@ -316,9 +316,9 @@ const SettingsPage = () => {
               { label: "Contacts", count: contactCount },
               { label: "Drive Files", count: driveFileCount },
             ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between py-2">
-                <span className="text-sm text-foreground">{item.label}</span>
-                <span className="text-sm text-muted-foreground font-medium">{item.count} items</span>
+              <div key={item.label} className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+                <span className="text-sm font-medium text-foreground">{item.label}</span>
+                <span className="text-sm text-primary font-semibold">{item.count} items</span>
               </div>
             ))}
 
@@ -330,7 +330,7 @@ const SettingsPage = () => {
                   {storageAnalytics ? formatFileSize(storageAnalytics.totalSize) : "—"} used
                 </span>
               </div>
-              <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
+              <div className="h-2.5 rounded-full bg-primary/10 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-700"
                   style={{ width: storageAnalytics ? `${Math.max(2, Math.min(100, (storageAnalytics.totalSize / (5 * 1024 * 1024 * 1024)) * 100))}%` : "2%" }}
@@ -403,33 +403,33 @@ const SettingsPage = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Database className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Database className="w-3.5 h-3.5 text-primary" />
                 At-rest Encryption
               </span>
-              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">AES-256</span>
+              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">AES-256</span>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Wifi className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Wifi className="w-3.5 h-3.5 text-primary" />
                 In-transit Encryption
               </span>
-              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">TLS 1.3</span>
+              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">TLS 1.3</span>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Shield className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Shield className="w-3.5 h-3.5 text-primary" />
                 Data Isolation
               </span>
-              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">Row-Level Security</span>
+              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">Row-Level Security</span>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Lock className="w-3.5 h-3.5 text-primary" />
                 Auth Provider
               </span>
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Google OAuth 2.0</span>
+              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">Google OAuth 2.0</span>
             </div>
             {/* 2FA */}
             <TwoFactorSection />
