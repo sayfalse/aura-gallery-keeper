@@ -3,10 +3,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, ChevronRight } from "lucide-react";
+import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, ChevronRight, Lock, Fingerprint } from "lucide-react";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
+import {
+  getAppLockSettings,
+  setAppLockEnabled,
+  setAppLockTimeout,
+  setAppLockPin,
+  removeAppLock,
+} from "@/components/AppLockScreen";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
