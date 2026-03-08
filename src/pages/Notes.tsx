@@ -173,7 +173,7 @@ const NotesPage = () => {
             ) : filtered.length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 <StickyNote className="w-10 h-10 mx-auto mb-3 opacity-40" />
-                <p className="text-sm">No notes yet</p>
+                <p className="text-sm">{t("notes.noNotes")}</p>
               </div>
             ) : (
               filtered.map((note) => (
