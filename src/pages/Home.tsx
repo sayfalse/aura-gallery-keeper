@@ -79,7 +79,7 @@ const Home = () => {
       {/* Parallax decorative blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div style={{ x: blobX, y: blobY }} className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <motion.div style={{ x: useTransform(scrollY, [0, 300], [0, -30]), y: useTransform(scrollY, [0, 300], [0, 40]) }} className="absolute top-1/3 -left-20 w-72 h-72 bg-primary/3 rounded-full blur-3xl" />
+        <motion.div style={{ x: blobX2, y: blobY2 }} className="absolute top-1/3 -left-20 w-72 h-72 bg-primary/3 rounded-full blur-3xl" />
       </div>
 
       {/* Parallax Header */}
