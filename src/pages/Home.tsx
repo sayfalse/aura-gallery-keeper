@@ -6,7 +6,7 @@ import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion, useScroll, useTransform, useMotionValue, useAnimation } from "framer-motion";
 import {
-  Image, StickyNote, HardDrive, Users, Mail, Settings, Clock, FileText, Sparkles,
+  Image, StickyNote, HardDrive, Users, Mail, Settings, Clock, FileText, Sparkles, Globe,
   Shield, ArrowUpRight, TrendingUp, Layers, RefreshCw
 } from "lucide-react";
 
@@ -17,6 +17,7 @@ const apps = [
   { id: "contacts", name: "Contacts", icon: Users, gradient: "from-emerald-500 via-emerald-400 to-teal-400", shadow: "shadow-emerald-500/25", desc: "People", path: "/contacts" },
   { id: "mail", name: "Mail", icon: Mail, gradient: "from-sky-500 via-sky-400 to-blue-400", shadow: "shadow-sky-500/25", desc: "Email", path: "/mail" },
   { id: "pixel-ai", name: "Pixel AI", icon: Sparkles, gradient: "from-violet-600 via-fuchsia-500 to-pink-400", shadow: "shadow-violet-500/25", desc: "AI Assistant", path: "/pixel-ai" },
+  { id: "browser", name: "Browser", icon: Globe, gradient: "from-rose-500 via-red-400 to-orange-400", shadow: "shadow-rose-500/25", desc: "Web Browser", path: "/browser" },
   { id: "settings", name: "Settings", icon: Settings, gradient: "from-slate-500 via-slate-400 to-gray-400", shadow: "shadow-slate-500/25", desc: "Preferences", path: "/settings" },
 ];
 

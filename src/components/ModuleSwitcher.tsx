@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Image, StickyNote, HardDrive, Users, Mail, Settings, Home, Sparkles } from "lucide-react";
+import { Image, StickyNote, HardDrive, Users, Mail, Settings, Home, Sparkles, Globe } from "lucide-react";
 import { motion, useAnimation, PanInfo } from "framer-motion";
 import { useCallback } from "react";
 
@@ -11,6 +11,7 @@ const modules = [
   { path: "/contacts", icon: Users, label: "Contacts", color: "text-emerald-500", activeBg: "bg-emerald-500/10" },
   { path: "/mail", icon: Mail, label: "Mail", color: "text-sky-500", activeBg: "bg-sky-500/10" },
   { path: "/pixel-ai", icon: Sparkles, label: "Pixel", color: "text-violet-500", activeBg: "bg-violet-500/10" },
+  { path: "/browser", icon: Globe, label: "Browser", color: "text-rose-500", activeBg: "bg-rose-500/10" },
   { path: "/settings", icon: Settings, label: "Settings", color: "text-slate-500", activeBg: "bg-slate-500/10" },
 ];
 

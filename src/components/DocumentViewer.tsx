@@ -50,6 +50,7 @@ const DocumentViewer = ({ fileName, storagePath, mimeType, onClose }: DocumentVi
 
   const isPdf = mimeType === "application/pdf" || fileName.endsWith(".pdf");
   const isImage = mimeType.startsWith("image/");
+  const isVideo = mimeType.startsWith("video/") || fileName.endsWith(".mp4") || fileName.endsWith(".mov") || fileName.endsWith(".webm");
   const isOffice = mimeType.includes("word") || mimeType.includes("spreadsheet") || mimeType.includes("presentation") ||
     mimeType.includes("excel") || mimeType.includes("powerpoint") ||
     fileName.endsWith(".docx") || fileName.endsWith(".xlsx") || fileName.endsWith(".pptx") ||
@@ -94,6 +95,22 @@ const DocumentViewer = ({ fileName, storagePath, mimeType, onClose }: DocumentVi
             className="max-w-full rounded-lg shadow-lg transition-transform"
             style={{ transform: `scale(${zoom / 100})` }}
           />
+        </div>
+      );
+    }
+
+    if (isVideo) {
+      return (
+        <div className="flex-1 flex items-center justify-center overflow-auto p-4 bg-black/90">
+          <video
+            src={fileUrl}
+            controls
+            autoPlay
+            className="max-w-full max-h-full rounded-lg shadow-lg"
+            style={{ transform: `scale(${zoom / 100})` }}
+          >
+            Your browser does not support video playback.
+          </video>
         </div>
       );
     }
