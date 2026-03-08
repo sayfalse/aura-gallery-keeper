@@ -91,6 +91,7 @@ const AppContent = () => {
           <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/shared/:token" element={<SharedView />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
