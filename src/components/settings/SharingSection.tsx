@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Share2, UserPlus, Search, Check, X, Users, Loader2, AtSign, ChevronDown, ChevronUp } from "lucide-react";
+import { Share2, UserPlus, Search, Check, X, Users, Loader2, AtSign } from "lucide-react";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import {
@@ -118,91 +118,90 @@ const SharingSection = ({ user }: SharingSectionProps) => {
   );
 
   return (
-    <section className="rounded-2xl bg-card border border-border p-5">
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-        <Share2 className="w-4 h-4" /> Sharing & Username
-      </h2>
-
-      {/* Username Setup */}
-      <div className="mb-5">
-        <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Username</label>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 relative">
-            <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Set a unique username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._]/g, ""))}
-              maxLength={30}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-            />
+    <>
+      {/* Username Section */}
+      <section className="rounded-2xl bg-card border border-border p-5">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+          <AtSign className="w-4 h-4" /> Username
+        </h2>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Your Username</label>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 relative">
+              <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Set a unique username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9._]/g, ""))}
+                maxLength={30}
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              />
+            </div>
+            <button
+              onClick={handleSaveUsername}
+              disabled={usernameLoading || username === savedUsername || username.length < 3}
+              className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            >
+              {usernameLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+            </button>
           </div>
-          <button
-            onClick={handleSaveUsername}
-            disabled={usernameLoading || username === savedUsername || username.length < 3}
-            className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
-          >
-            {usernameLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
-          </button>
+          {savedUsername && (
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Your username: <span className="text-foreground font-medium">@{savedUsername}</span>
+            </p>
+          )}
         </div>
-        {savedUsername && (
-          <p className="text-xs text-muted-foreground mt-1.5">
-            Your username: <span className="text-foreground font-medium">@{savedUsername}</span>
-          </p>
-        )}
-      </div>
+      </section>
 
-      {/* Pending Invites */}
-      {pendingInvites.length > 0 && (
-        <div className="mb-4">
-          <p className="text-xs text-muted-foreground font-medium mb-2">Pending Invites</p>
-          <div className="space-y-2">
-            {pendingInvites.map((c) => (
-              <div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
-                <div>
-                  <p className="text-sm font-medium text-foreground">
-                    {c.connectedDisplayName || "Unknown User"}
-                  </p>
-                  {c.connectedUsername && (
-                    <p className="text-xs text-muted-foreground">@{c.connectedUsername}</p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleAccept(c.id)}
-                    className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    <Check className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleRemove(c.id)}
-                    className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Active Connections */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-            <Users className="w-3.5 h-3.5" />
-            Shared With ({activeConnections.length})
-          </p>
+      {/* Add Friend Section */}
+      <section className="rounded-2xl bg-card border border-border p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <UserPlus className="w-4 h-4" /> Add Friend
+          </h2>
           <button
             onClick={() => setShowAddUser(!showAddUser)}
             className="flex items-center gap-1 text-xs text-primary font-medium hover:underline"
           >
-            <UserPlus className="w-3.5 h-3.5" />
-            Add
+            {showAddUser ? "Close" : "Search"}
           </button>
         </div>
+
+        {/* Pending Invites */}
+        {pendingInvites.length > 0 && (
+          <div className="mb-4">
+            <p className="text-xs text-muted-foreground font-medium mb-2">Pending Invites</p>
+            <div className="space-y-2">
+              {pendingInvites.map((c) => (
+                <div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      {c.connectedDisplayName || "Unknown User"}
+                    </p>
+                    {c.connectedUsername && (
+                      <p className="text-xs text-muted-foreground">@{c.connectedUsername}</p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleAccept(c.id)}
+                      className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleRemove(c.id)}
+                      className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {showAddUser && (
           <div className="rounded-xl bg-secondary p-3 mb-3 space-y-2 animate-fade-in">
@@ -242,9 +241,45 @@ const SharingSection = ({ user }: SharingSectionProps) => {
           </div>
         )}
 
-        {activeConnections.length === 0 && !showAddUser && (
+        {/* Sent pending */}
+        {sentPending.length > 0 && (
+          <div>
+            <p className="text-xs text-muted-foreground font-medium mb-2">Sent Invites</p>
+            <div className="space-y-2">
+              {sentPending.map((c) => (
+                <div key={c.id} className="flex items-center justify-between p-2.5 rounded-xl bg-secondary">
+                  <div>
+                    <p className="text-sm text-foreground">{c.connectedDisplayName || "User"}</p>
+                    <p className="text-xs text-muted-foreground">Pending...</p>
+                  </div>
+                  <button
+                    onClick={() => handleRemove(c.id)}
+                    className="text-xs text-destructive hover:underline"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {pendingInvites.length === 0 && sentPending.length === 0 && !showAddUser && (
+          <p className="text-xs text-muted-foreground text-center py-3">
+            Search for users by username to add friends
+          </p>
+        )}
+      </section>
+
+      {/* Shared With Me Section */}
+      <section className="rounded-2xl bg-card border border-border p-5">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+          <Users className="w-4 h-4" /> Shared With ({activeConnections.length})
+        </h2>
+
+        {activeConnections.length === 0 && (
           <p className="text-xs text-muted-foreground text-center py-4">
-            No sharing connections yet. Add someone to start sharing!
+            No sharing connections yet. Add a friend to start sharing!
           </p>
         )}
 
@@ -297,29 +332,8 @@ const SharingSection = ({ user }: SharingSectionProps) => {
             );
           })}
         </div>
-
-        {/* Sent pending */}
-        {sentPending.length > 0 && (
-          <div className="mt-3">
-            <p className="text-xs text-muted-foreground font-medium mb-2">Sent Invites</p>
-            {sentPending.map((c) => (
-              <div key={c.id} className="flex items-center justify-between p-2.5 rounded-xl bg-secondary">
-                <div>
-                  <p className="text-sm text-foreground">{c.connectedDisplayName || "User"}</p>
-                  <p className="text-xs text-muted-foreground">Pending...</p>
-                </div>
-                <button
-                  onClick={() => handleRemove(c.id)}
-                  className="text-xs text-destructive hover:underline"
-                >
-                  Cancel
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+      </section>
+    </>
   );
 };
 

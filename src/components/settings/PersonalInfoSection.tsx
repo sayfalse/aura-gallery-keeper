@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Mail, Lock, Eye, EyeOff, KeyRound, ShieldCheck, ChevronDown, ChevronUp, Calendar } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, KeyRound, ShieldCheck, ChevronDown, ChevronUp, Calendar, Camera, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -28,17 +28,76 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
 
-  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const oauthAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
+  const avatarUrl = customAvatarUrl || oauthAvatar;
   const email = user?.email || "";
   const provider = user?.app_metadata?.provider || "email";
+
+  // Load custom avatar on mount
+  useState(() => {
+    supabase
+      .from("profiles")
+      .select("avatar_url")
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.avatar_url) setCustomAvatarUrl(data.avatar_url);
+      });
+  });
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+
+    setAvatarUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `${user.id}/avatar.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(path);
+
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+      await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("user_id", user.id);
+
+      setCustomAvatarUrl(publicUrl);
+      toast.success("Profile picture updated!");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setAvatarUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleChangeEmail = async () => {
     if (!newEmail.trim()) return toast.error("Enter a valid email");
     setEmailLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
-        email: newEmail.trim(),
-      });
+      const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
       if (error) throw error;
       toast.success("Confirmation sent to both old & new email. Check your inbox!");
       setShowChangeEmail(false);
@@ -93,13 +152,33 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
 
       {/* Avatar & Basic Info */}
       <div className="flex items-center gap-4 mb-5">
-        {avatarUrl ? (
-          <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-full object-cover" />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <User className="w-8 h-8 text-primary" />
-          </div>
-        )}
+        <div className="relative group">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-full object-cover" />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <User className="w-8 h-8 text-primary" />
+            </div>
+          )}
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={avatarUploading}
+            className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+          >
+            {avatarUploading ? (
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
+            ) : (
+              <Camera className="w-5 h-5 text-white" />
+            )}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleAvatarUpload}
+            className="hidden"
+          />
+        </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
           <p className="text-xs text-muted-foreground truncate">{email}</p>
