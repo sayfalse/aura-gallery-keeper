@@ -110,11 +110,7 @@ const AppContent = () => {
           <Route path="/mail" element={<ProtectedRoute module="Mail"><MailPage /></ProtectedRoute>} />
           <Route path="/gmail-callback" element={<ProtectedRoute module="Mail"><GmailCallback /></ProtectedRoute>} />
           <Route path="/pixel-ai" element={<ProtectedRoute module="Pixel AI"><PixelAIPage /></ProtectedRoute>} />
-          <Route path="/browser" element={<ProtectedRoute module="Browser"><BrowserPage /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute module="Chat"><ChatPage /></ProtectedRoute>} />
-          <Route path="/temp-mail" element={<ProtectedRoute module="Temp Mail"><TempMailPage /></ProtectedRoute>} />
-          <Route path="/music" element={<ProtectedRoute module="Music"><MusicPage /></ProtectedRoute>} />
-          <Route path="/vpn" element={<ProtectedRoute module="VPN"><VPNPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute module="Settings"><SettingsPage /></ProtectedRoute>} />
 
           {/* Public routes */}

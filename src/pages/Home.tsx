@@ -7,8 +7,8 @@ import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion } from "framer-motion";
 import {
-  Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, Globe, MessageCircle,
-  ArrowUpRight, Layers, AtSign, Music2, Shield
+  Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, MessageCircle,
+  ArrowUpRight, Layers
 } from "lucide-react";
 
 const appKeys = [
@@ -17,12 +17,8 @@ const appKeys = [
   { id: "drive", nameKey: "apps.drive", icon: HardDrive, gradient: "from-indigo-500 to-purple-400", path: "/drive", descKey: "apps.driveDesc" },
   { id: "contacts", nameKey: "apps.people", icon: Users, gradient: "from-emerald-500 to-teal-400", path: "/contacts", descKey: "apps.peopleDesc" },
   { id: "mail", nameKey: "apps.mail", icon: Mail, gradient: "from-sky-500 to-blue-400", path: "/mail", descKey: "apps.mailDesc" },
-  { id: "temp-mail", nameKey: "apps.tempMail", icon: AtSign, gradient: "from-orange-500 to-red-400", path: "/temp-mail", descKey: "apps.tempMailDesc" },
   { id: "chat", nameKey: "apps.chat", icon: MessageCircle, gradient: "from-green-500 to-emerald-400", path: "/chat", descKey: "apps.chatDesc" },
   { id: "pixel-ai", nameKey: "apps.pixelAI", icon: Sparkles, gradient: "from-violet-500 to-fuchsia-400", path: "/pixel-ai", descKey: "apps.pixelAIDesc" },
-  { id: "browser", nameKey: "apps.browser", icon: Globe, gradient: "from-rose-500 to-orange-400", path: "/browser", descKey: "apps.browserDesc" },
-  { id: "music", nameKey: "apps.music", icon: Music2, gradient: "from-pink-500 to-rose-400", path: "/music", descKey: "apps.musicDesc" },
-  { id: "vpn", nameKey: "apps.vpn", icon: Shield, gradient: "from-orange-500 to-amber-400", path: "/vpn", descKey: "apps.vpnDesc" },
   { id: "settings", nameKey: "apps.settings", icon: Settings, gradient: "from-slate-500 to-gray-400", path: "/settings", descKey: "apps.settingsDesc" },
 ];
 
