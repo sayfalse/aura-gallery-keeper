@@ -68,11 +68,12 @@ const Browser = () => {
       }
       updateTab(tabId, { url: normalized, title: getDisplayUrl(normalized), isLoading: true });
       setUrlInput(normalized);
-      setProxyHtml(null);
-      fetchViaProxy(normalized).finally(() => updateTab(tabId, { isLoading: false }));
+      loadUrl(normalized);
+      // Mark as loaded after a brief delay (iframe handles its own loading)
+      setTimeout(() => updateTab(tabId, { isLoading: false }), 2000);
       if (user) addHistoryEntry(user.id, normalized, getDisplayUrl(normalized)).catch(() => {});
     },
-    [activeTab, updateTab, user, fetchViaProxy]
+    [activeTab, updateTab, user, loadUrl]
   );
 
   const goBack = useCallback(() => {
@@ -86,9 +87,9 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
-    setProxyHtml(null);
-    fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
-  }, [activeTab, navHistory, updateTab, fetchViaProxy]);
+    loadUrl(url);
+    setTimeout(() => updateTab(activeTab.id, { isLoading: false }), 2000);
+  }, [activeTab, navHistory, updateTab, loadUrl]);
 
   const goForward = useCallback(() => {
     const hist = navHistory[activeTab.id];
@@ -101,17 +102,17 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
-    setProxyHtml(null);
-    fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
-  }, [activeTab, navHistory, updateTab, fetchViaProxy]);
+    loadUrl(url);
+    setTimeout(() => updateTab(activeTab.id, { isLoading: false }), 2000);
+  }, [activeTab, navHistory, updateTab, loadUrl]);
 
   const reload = useCallback(() => {
     if (activeTab.url) {
       updateTab(activeTab.id, { isLoading: true });
-      setProxyHtml(null);
-      fetchViaProxy(activeTab.url).finally(() => updateTab(activeTab.id, { isLoading: false }));
+      loadUrl(activeTab.url);
+      setTimeout(() => updateTab(activeTab.id, { isLoading: false }), 2000);
     }
-  }, [activeTab, updateTab, fetchViaProxy]);
+  }, [activeTab, updateTab, loadUrl]);
 
   const addTab = useCallback(() => {
     setTabs((prev) => [
@@ -119,7 +120,7 @@ const Browser = () => {
       { id: crypto.randomUUID(), url: "", title: "New Tab", isActive: true, isLoading: false },
     ]);
     setUrlInput("");
-    setProxyHtml(null);
+    setProxyUrl(null);
     setPanel("none");
     setTimeout(() => inputRef.current?.focus(), 100);
   }, []);
@@ -129,7 +130,7 @@ const Browser = () => {
       if (tabs.length === 1) {
         updateTab(id, { url: "", title: "New Tab", isLoading: false });
         setUrlInput("");
-        setProxyHtml(null);
+        setProxyUrl(null);
         return;
       }
       const idx = tabs.findIndex((t) => t.id === id);
@@ -151,12 +152,12 @@ const Browser = () => {
       const tab = tabs.find((t) => t.id === id);
       if (tab) {
         setUrlInput(tab.url);
-        if (tab.url) fetchViaProxy(tab.url);
-        else setProxyHtml(null);
+        if (tab.url) loadUrl(tab.url);
+        else setProxyUrl(null);
       }
       setPanel("none");
     },
-    [tabs, fetchViaProxy]
+    [tabs, loadUrl]
   );
 
   const handleSubmit = (e: React.FormEvent) => {
