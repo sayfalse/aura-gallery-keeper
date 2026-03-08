@@ -18,7 +18,7 @@ const navItems: { id: SidebarSection; label: string; icon: React.ElementType }[]
   { id: "trash", label: "Trash", icon: Trash2 },
 ];
 
-const AppSidebar = ({ activeSection, onSectionChange, onUpload, photoCount, favoriteCount }: AppSidebarProps) => {
+const AppSidebar = ({ activeSection, onSectionChange, onUpload, photoCount, favoriteCount, onSignOut }: AppSidebarProps) => {
   const getCount = (id: SidebarSection) => {
     if (id === "photos") return photoCount;
     if (id === "favorites") return favoriteCount;
