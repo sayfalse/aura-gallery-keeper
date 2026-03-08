@@ -266,7 +266,7 @@ const PixelAI = () => {
   const handleClearChat = () => {
     setMessages([]);
     setLastVoiceResponse("");
-    toast.success("Chat cleared! 🗑️");
+    toast.success(t("pixelAI.chatCleared"));
   };
 
   const handleMemoryDelete = async (id: string) => {
