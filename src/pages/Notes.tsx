@@ -2,10 +2,32 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { fetchNotes, createNote, updateNote, deleteNote, type Note } from "@/lib/noteService";
-import { ArrowLeft, Plus, Pin, Trash2, Search, StickyNote } from "lucide-react";
+import { ArrowLeft, Plus, Pin, Trash2, Search, StickyNote, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import RichTextEditor from "@/components/RichTextEditor";
+
+const htmlToMarkdown = (html: string): string => {
+  let md = html;
+  md = md.replace(/<h1[^>]*>(.*?)<\/h1>/gi, "# $1\n\n");
+  md = md.replace(/<h2[^>]*>(.*?)<\/h2>/gi, "## $1\n\n");
+  md = md.replace(/<h3[^>]*>(.*?)<\/h3>/gi, "### $1\n\n");
+  md = md.replace(/<strong>(.*?)<\/strong>/gi, "**$1**");
+  md = md.replace(/<b>(.*?)<\/b>/gi, "**$1**");
+  md = md.replace(/<em>(.*?)<\/em>/gi, "*$1*");
+  md = md.replace(/<i>(.*?)<\/i>/gi, "*$1*");
+  md = md.replace(/<li><p>(.*?)<\/p><\/li>/gi, "- $1\n");
+  md = md.replace(/<li>(.*?)<\/li>/gi, "- $1\n");
+  md = md.replace(/<ul[^>]*>/gi, "\n");
+  md = md.replace(/<\/ul>/gi, "\n");
+  md = md.replace(/<ol[^>]*>/gi, "\n");
+  md = md.replace(/<\/ol>/gi, "\n");
+  md = md.replace(/<p>(.*?)<\/p>/gi, "$1\n\n");
+  md = md.replace(/<br\s*\/?>/gi, "\n");
+  md = md.replace(/<[^>]*>/g, "");
+  md = md.replace(/\n{3,}/g, "\n\n");
+  return md.trim();
+};
 
 const NotesPage = () => {
   const { user } = useAuth();
@@ -79,6 +101,19 @@ const NotesPage = () => {
     } catch {
       toast.error("Failed to update note");
     }
+  };
+
+  const handleExportMarkdown = () => {
+    if (!activeNote) return;
+    const md = `# ${title}\n\n${htmlToMarkdown(content)}`;
+    const blob = new Blob([md], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${title || "Untitled"}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Exported as Markdown!");
   };
 
   const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
@@ -166,6 +201,9 @@ const NotesPage = () => {
                   <ArrowLeft className="w-4 h-4 text-foreground" />
                 </button>
                 <div className="flex-1" />
+                <button onClick={handleExportMarkdown} className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="Export as Markdown">
+                  <FileDown className="w-4 h-4" />
+                </button>
                 <button onClick={() => handleTogglePin(activeNote)} className={`p-2 rounded-lg transition-colors ${activeNote.pinned ? "text-amber-500" : "text-muted-foreground hover:text-foreground"}`}>
                   <Pin className="w-4 h-4" />
                 </button>
