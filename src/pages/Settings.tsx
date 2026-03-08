@@ -417,12 +417,12 @@ const SettingsPage = () => {
               </span>
               <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">TLS 1.3</span>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Shield className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Shield className="w-3.5 h-3.5 text-primary" />
                 Data Isolation
               </span>
-              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">Row-Level Security</span>
+              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">Row-Level Security</span>
             </div>
             <div className="flex items-center justify-between py-2">
               <span className="flex items-center gap-2 text-sm text-foreground">
