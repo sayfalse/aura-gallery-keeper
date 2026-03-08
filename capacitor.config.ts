@@ -6,6 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   android: {
     allowMixedContent: true,
+    appendUserAgent: 'PixelVault-Android',
   },
   plugins: {
     Camera: {
@@ -13,6 +14,21 @@ const config: CapacitorConfig = {
     },
     Filesystem: {
       permissions: ['publicStorage'],
+    },
+    SplashScreen: {
+      launchShowDuration: 2000,
+      launchAutoHide: true,
+      backgroundColor: '#fafafa',
+      androidSplashResourceName: 'splash',
+      androidScaleType: 'CENTER_CROP',
+      showSpinner: false,
+    },
+    LocalNotifications: {
+      smallIcon: 'ic_stat_icon_config_sample',
+      iconColor: '#3b82f6',
+    },
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert'],
     },
   },
 };
