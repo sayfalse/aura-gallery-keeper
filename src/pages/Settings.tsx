@@ -629,7 +629,7 @@ const SettingsPage = () => {
                 href="/terms-of-service"
                 className="flex items-center justify-between py-2 rounded-lg hover:bg-accent px-2 -mx-2 transition-colors"
               >
-                <span className="text-sm text-foreground">Terms of Service</span>
+                <span className="text-sm text-foreground">{t("settings.termsOfService")}</span>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </a>
             </div>
