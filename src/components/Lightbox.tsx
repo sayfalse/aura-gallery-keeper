@@ -37,14 +37,14 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation - hidden on mobile (use swipe) */}
       {hasPrev && (
-        <button onClick={(e) => { e.stopPropagation(); onPrev(); }} className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors z-10">
+        <button onClick={(e) => { e.stopPropagation(); onPrev(); }} className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-card/10 hover:bg-card/20 items-center justify-center transition-colors z-10 hidden md:flex">
           <ChevronLeft className="w-6 h-6 text-card" />
         </button>
       )}
       {hasNext && (
-        <button onClick={(e) => { e.stopPropagation(); onNext(); }} className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors z-10">
+        <button onClick={(e) => { e.stopPropagation(); onNext(); }} className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-card/10 hover:bg-card/20 items-center justify-center transition-colors z-10 hidden md:flex">
           <ChevronRight className="w-6 h-6 text-card" />
         </button>
       )}
