@@ -372,8 +372,8 @@ const ChatPage = () => {
           ) : conversations.length === 0 ? (
             <div className="text-center py-20 px-6">
               <MessageCircle className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground">No conversations yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Tap + to start a new chat</p>
+              <p className="text-sm text-muted-foreground">{t("chat.noConversations")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("chat.tapToStart")}</p>
             </div>
           ) : (
             <div className="divide-y divide-border">
