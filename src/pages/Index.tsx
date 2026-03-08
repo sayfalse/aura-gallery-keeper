@@ -203,6 +203,18 @@ const Index = () => {
     setAlbumPhotoIds([]);
   }, []);
 
+  const handleReorderPhotos = useCallback(async (orderedIds: string[]) => {
+    if (!activeAlbum) return;
+    // Optimistic update
+    setAlbumPhotoIds(orderedIds);
+    try {
+      await reorderAlbumPhotos(activeAlbum.id, orderedIds);
+    } catch {
+      toast.error("Failed to save photo order");
+      loadAlbumPhotos(activeAlbum.id);
+    }
+  }, [activeAlbum, loadAlbumPhotos]);
+
   const lightboxIndex = lightboxPhoto ? filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id) : -1;
 
   if (loading) {
