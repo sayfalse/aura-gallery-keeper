@@ -547,9 +547,31 @@ const MailPage = () => {
                 className="w-full px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none"
               />
 
+              {/* Attachments */}
+              {attachments.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">Attachments ({attachments.length})</p>
+                  {attachments.map((att, i) => (
+                    <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent/50 text-sm">
+                      <Paperclip className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <span className="truncate flex-1 text-foreground">{att.filename}</span>
+                      <span className="text-xs text-muted-foreground shrink-0">{formatFileSize(att.size)}</span>
+                      <button onClick={() => removeAttachment(i)} className="p-0.5 rounded hover:bg-destructive/10 hover:text-destructive transition-colors">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="flex gap-2">
+                <label className="py-2.5 px-3 rounded-xl text-sm text-muted-foreground hover:bg-accent transition-colors cursor-pointer flex items-center gap-1.5">
+                  <Paperclip className="w-4 h-4" />
+                  Attach
+                  <input type="file" multiple onChange={handleAttachFiles} className="hidden" />
+                </label>
                 <button
-                  onClick={() => { setView("inbox"); setReplyTo(null); }}
+                  onClick={() => { setView("inbox"); setReplyTo(null); setAttachments([]); }}
                   className="flex-1 py-2.5 rounded-xl text-sm text-muted-foreground hover:bg-accent transition-colors"
                 >
                   Discard
