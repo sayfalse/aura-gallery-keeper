@@ -13,11 +13,6 @@ export interface Song {
 }
 
 const invokeProxy = async (params: Record<string, string>) => {
-  const { data, error } = await supabase.functions.invoke("music-proxy", {
-    body: null,
-    headers: {},
-  });
-  // Use URL params approach via fetch
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
   const queryStr = new URLSearchParams(params).toString();
   const res = await fetch(
