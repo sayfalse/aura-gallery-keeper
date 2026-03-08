@@ -214,6 +214,7 @@ const MailPage = () => {
     setComposeSubject(subject.startsWith("Re:") ? subject : `Re: ${subject}`);
     setComposeBody("");
     setReplyTo({ messageId: msg.id, threadId: msg.threadId, subject, from });
+    setAttachments([]);
     setView("compose");
   };
 
@@ -222,7 +223,43 @@ const MailPage = () => {
     setComposeSubject("");
     setComposeBody("");
     setReplyTo(null);
+    setAttachments([]);
     setView("compose");
+  };
+
+  const handleAttachFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB per file
+
+    Array.from(files).forEach((file) => {
+      if (file.size > MAX_SIZE) {
+        toast.error(`${file.name} is too large (max 10MB)`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(",")[1];
+        setAttachments((prev) => [...prev, {
+          filename: file.name,
+          mimeType: file.type || "application/octet-stream",
+          data: base64,
+          size: file.size,
+        }]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = "";
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   const formatDate = (internalDate: string) => {
