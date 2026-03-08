@@ -33,6 +33,7 @@ const Index = () => {
   const [activeAlbum, setActiveAlbum] = useState<Album | null>(null);
   const [albumPhotoIds, setAlbumPhotoIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sharedPhotos, setSharedPhotos] = useState<SharedPhoto[]>([]);
 
   const loadPhotos = useCallback(async () => {
     if (!user) return;
