@@ -247,7 +247,7 @@ const ContactsPage = () => {
               <textarea placeholder={t("common.notes")} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none" />
             </div>
             <button onClick={handleCreate} className="w-full mt-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors">
-              Add Contact
+              {t("contacts.addContact")}
             </button>
           </div>
         </div>
