@@ -19,7 +19,23 @@ interface LightboxProps {
 }
 
 const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, hasPrev, hasNext }: LightboxProps) => {
+  const { user } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const handleShareLink = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+    try {
+      const link = await createShareLink(user.id, "photo", photo.id);
+      await navigator.clipboard.writeText(link);
+      setLinkCopied(true);
+      toast.success("Share link copied!");
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      toast.error("Failed to create share link");
+    }
+  };
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
