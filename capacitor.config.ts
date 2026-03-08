@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.4c2d62506a0240d786390988ca6966e0',
+  appId: 'app.lovable.auragallerykeeper',
   appName: 'PixelVault',
   webDir: 'dist',
   server: {
