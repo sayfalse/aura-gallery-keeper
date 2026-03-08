@@ -66,15 +66,26 @@ const AppSidebar = ({ activeSection, onSectionChange, onUpload, photoCount, favo
         })}
       </nav>
 
-      {/* Storage */}
-      <div className="px-5 py-5 border-t border-sidebar-border">
-        <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-          <span>Storage</span>
-          <span>2.4 GB / 15 GB</span>
+      {/* Storage + Sign Out */}
+      <div className="px-5 py-5 border-t border-sidebar-border space-y-3">
+        <div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+            <span>Storage</span>
+            <span>Cloud</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+            <div className="h-full w-[16%] rounded-full bg-primary transition-all duration-500" />
+          </div>
         </div>
-        <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
-          <div className="h-full w-[16%] rounded-full bg-primary transition-all duration-500" />
-        </div>
+        {onSignOut && (
+          <button
+            onClick={onSignOut}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </button>
+        )}
       </div>
     </aside>
   );
