@@ -5,6 +5,8 @@ import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail } from "lucide-react";
 import PersonalInfoSection from "@/components/settings/PersonalInfoSection";
+import TwoFactorSection from "@/components/settings/TwoFactorSection";
+import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
