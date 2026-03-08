@@ -272,7 +272,7 @@ const PixelAI = () => {
   const handleMemoryDelete = async (id: string) => {
     await deleteMemory(id);
     setMemories(prev => prev.filter(m => m.id !== id));
-    toast.success("Memory deleted 🗑️");
+    toast.success(t("pixelAI.memoryDeleted"));
   };
 
   const handleMemoryClearAll = async () => {
