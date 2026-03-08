@@ -33,7 +33,21 @@ const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [isAdmin, setIsAdmin] = useState(false);
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setIsAdmin(true);
+      });
+  }, [user]);
 
   const greeting = () => {
     const h = new Date().getHours();
