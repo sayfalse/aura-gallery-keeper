@@ -6,7 +6,17 @@ const corsHeaders = {
 };
 
 // Use the public saavn.dev API which provides direct download URLs
-const SAAVN_API = "https://saavn.dev/api";
+// Multiple API endpoints for reliability
+const SAAVN_APIS = [
+  "https://saavn.dev/api",
+  "https://jiosaavn-api-privatecvc2.vercel.app/api",
+];
+
+let currentApiIndex = 0;
+
+function getSaavnApi(): string {
+  return SAAVN_APIS[currentApiIndex % SAAVN_APIS.length];
+}
 
 function mapSong(s: any): any {
   // Get best quality image
