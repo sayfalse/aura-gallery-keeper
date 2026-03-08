@@ -78,7 +78,7 @@ const ContactsPage = () => {
     try {
       await updateContact(contact.id, { favorite: newFav });
     } catch {
-      toast.error("Failed to update");
+      toast.error(t("contacts.failedUpdate"));
     }
   };
 
