@@ -69,6 +69,7 @@ interface AdminStats {
     totalContacts: number;
     totalAnnouncements: number;
     recentMessages: number;
+    totalStorageBytes: number;
   };
   dailySignups: { date: string; count: number }[];
   recentActivity: {
