@@ -364,6 +364,8 @@ const SettingsPage = () => {
               </span>
               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Google OAuth 2.0</span>
             </div>
+            {/* 2FA */}
+            <TwoFactorSection />
           </div>
         </section>
 
