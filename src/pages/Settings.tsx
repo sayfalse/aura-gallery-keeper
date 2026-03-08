@@ -7,6 +7,7 @@ import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOu
 import PersonalInfoSection from "@/components/settings/PersonalInfoSection";
 import TwoFactorSection from "@/components/settings/TwoFactorSection";
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
+import SharingSection from "@/components/settings/SharingSection";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
