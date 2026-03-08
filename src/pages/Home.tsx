@@ -60,10 +60,10 @@ const Home = () => {
   };
 
   const stats = [
-    { label: t("home.stats.photos"), value: counts.photos, icon: Image, color: "from-violet-500 to-fuchsia-500" },
+    { label: t("home.stats.photos"), value: counts.photos, icon: Image, color: "from-blue-500 to-cyan-400" },
     { label: t("home.stats.notes"), value: counts.notes, icon: StickyNote, color: "from-amber-400 to-orange-500" },
     { label: t("home.stats.people"), value: counts.contacts, icon: Users, color: "from-emerald-400 to-teal-500" },
-    { label: t("home.stats.files"), value: counts.files, icon: HardDrive, color: "from-cyan-400 to-blue-500" },
+    { label: t("home.stats.files"), value: counts.files, icon: HardDrive, color: "from-sky-400 to-blue-600" },
   ];
 
   return (
