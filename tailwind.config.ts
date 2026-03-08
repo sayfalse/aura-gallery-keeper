@@ -84,7 +84,11 @@ export default {
         },
         "splash-pulse": {
           "0%, 100%": { transform: "scale(1)" },
-          "50%": { transform: "scale(1.08)" },
+          "50%": { transform: "scale(1.06)" },
+        },
+        "splash-glow": {
+          "0%, 100%": { opacity: "0.4", transform: "scale(1)" },
+          "50%": { opacity: "1", transform: "scale(1.15)" },
         },
       },
       animation: {
