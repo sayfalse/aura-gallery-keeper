@@ -77,6 +77,7 @@ export function sendMessage(email: string, to: string, subject: string, body: st
   inReplyTo?: string;
   references?: string;
   threadId?: string;
+  attachments?: { filename: string; mimeType: string; data: string }[];
 }) {
   return callGmail("send", {
     method: "POST",
