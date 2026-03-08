@@ -288,7 +288,7 @@ const ChatPage = () => {
                 />
                 {selectedMembers.length > 0 && (
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <span className="text-xs text-muted-foreground">{selectedMembers.length} selected</span>
+                    <span className="text-xs text-muted-foreground">{t("chat.selected", { count: selectedMembers.length })}</span>
                     <button
                       onClick={handleCreateGroup}
                       disabled={!groupName.trim()}
