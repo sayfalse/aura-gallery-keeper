@@ -47,26 +47,13 @@ const Browser = () => {
     setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
   }, []);
 
-  const fetchViaProxy = useCallback(async (url: string) => {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/web-proxy`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY },
-        body: JSON.stringify({ url }),
-      });
-      if (!res.ok) throw new Error("Proxy error");
-      setProxyHtml(await res.text());
-    } catch {
-      setProxyHtml(
-        `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>` +
-        `<body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:-apple-system,system-ui,sans-serif;color:#888;background:var(--bg,#f8f9fa);margin:0;">` +
-        `<div style="text-align:center;padding:2rem;"><div style="font-size:2.5rem;margin-bottom:1rem;">🌐</div>` +
-        `<p style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;">Can't load this page</p>` +
-        `<p style="font-size:0.75rem;color:#aaa;margin-bottom:1.5rem;">This website blocked embedded loading</p>` +
-        `<a href="${url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;border-radius:12px;background:#3b82f6;color:#fff;text-decoration:none;font-size:0.8rem;font-weight:600;">Open externally ↗</a></div></body></html>`
-      );
-    }
+  const buildProxyUrl = useCallback((url: string) => {
+    return `${SUPABASE_URL}/functions/v1/web-proxy?url=${encodeURIComponent(url)}`;
   }, []);
+
+  const loadUrl = useCallback((url: string) => {
+    setProxyUrl(buildProxyUrl(url));
+  }, [buildProxyUrl]);
 
   const navigate = useCallback(
     (url: string) => {
