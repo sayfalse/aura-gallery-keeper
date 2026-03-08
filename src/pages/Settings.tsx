@@ -160,6 +160,30 @@ const SettingsPage = () => {
     getStorageAnalytics(user.id).then(setStorageAnalytics).catch(() => {});
   }, [user]);
 
+  // Fetch announcements + realtime
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      const { data } = await supabase
+        .from("announcements")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (data) setAnnouncements(data as typeof announcements);
+    };
+    fetchAnnouncements();
+
+    const channel = supabase
+      .channel("announcements-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "announcements" }, (payload) => {
+        const newAnn = payload.new as typeof announcements[0];
+        setAnnouncements((prev) => [newAnn, ...prev]);
+        toast.info(`📢 ${newAnn.title || "New announcement"}`, { description: newAnn.content.substring(0, 80) });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   const handleSaveProfile = useCallback(async () => {
     if (!user) return;
     setSaving(true);
