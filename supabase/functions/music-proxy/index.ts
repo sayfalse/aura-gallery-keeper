@@ -15,18 +15,16 @@ const HEADERS = {
 
 // Use Node.js crypto (available in Deno via node: prefix)
 import { createDecipheriv } from "node:crypto";
+import { Buffer } from "node:buffer";
 
 function decryptMediaUrl(encUrl: string): string {
   try {
-    const key = new Uint8Array([0x33,0x38,0x33,0x34,0x36,0x35,0x39,0x31]); // "38346591"
+    const key = Buffer.from("38346591", "utf8");
+    const encData = Buffer.from(encUrl, "base64");
     const decipher = createDecipheriv("des-ecb", key, null);
-    const encBuf = Uint8Array.from(atob(encUrl), c => c.charCodeAt(0));
-    const part1 = decipher.update(encBuf);
+    const part1 = decipher.update(encData);
     const part2 = decipher.final();
-    const combined = new Uint8Array(part1.length + part2.length);
-    combined.set(new Uint8Array(part1.buffer, part1.byteOffset, part1.length));
-    combined.set(new Uint8Array(part2.buffer, part2.byteOffset, part2.length), part1.length);
-    const decrypted = new TextDecoder().decode(combined);
+    const decrypted = Buffer.concat([part1, part2]).toString("utf8");
     return decrypted.replace("_96.mp4", "_320.mp4").replace("_96_p.mp4", "_320.mp4");
   } catch (e) {
     console.error("Decrypt error:", e);
