@@ -246,7 +246,7 @@ const ChatPage = () => {
           </button>
           <div className="flex-1 flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-lg font-bold text-foreground">Messages</h1>
+            <h1 className="font-display text-lg font-bold text-foreground">{t("chat.title")}</h1>
           </div>
           <QuickNavButton />
           <button
