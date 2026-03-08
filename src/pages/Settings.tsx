@@ -330,7 +330,7 @@ const SettingsPage = () => {
                   {storageAnalytics ? formatFileSize(storageAnalytics.totalSize) : "—"} used
                 </span>
               </div>
-              <div className="h-2.5 rounded-full bg-secondary overflow-hidden">
+              <div className="h-2.5 rounded-full bg-primary/10 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-700"
                   style={{ width: storageAnalytics ? `${Math.max(2, Math.min(100, (storageAnalytics.totalSize / (5 * 1024 * 1024 * 1024)) * 100))}%` : "2%" }}
