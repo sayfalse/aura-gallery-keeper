@@ -35,6 +35,7 @@ const htmlToMarkdown = (html: string): string => {
 const NotesPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const [title, setTitle] = useState("");
