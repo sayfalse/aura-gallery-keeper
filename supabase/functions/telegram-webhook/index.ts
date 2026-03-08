@@ -32,7 +32,46 @@ Deno.serve(async (req) => {
       const body = await req.json();
       console.log("Telegram update received:", JSON.stringify(body));
 
-      // Handle channel_post (posts from a channel)
+      // Handle edited posts — update existing announcement
+      const editedPost = body.edited_channel_post || body.edited_message;
+      if (editedPost) {
+        const text = editedPost.text || editedPost.caption || "";
+        if (!text.trim()) {
+          return new Response(JSON.stringify({ ok: true, skipped: "no_text" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        let type = "update";
+        if (text.includes("#announcement")) type = "announcement";
+        else if (text.includes("#maintenance")) type = "maintenance";
+        else if (text.includes("#feature")) type = "feature";
+
+        const lines = text.split("\n");
+        const title = lines[0].replace(/#\w+/g, "").trim().substring(0, 200);
+        const content = lines.length > 1 ? lines.slice(1).join("\n").trim() : title;
+
+        // Update the existing announcement by telegram_message_id
+        const { error } = await supabase
+          .from("announcements")
+          .update({ title: title || null, content: content || text, type })
+          .eq("telegram_message_id", editedPost.message_id);
+
+        if (error) {
+          console.error("DB update error:", error);
+          return new Response(JSON.stringify({ ok: false, error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        console.log("Announcement updated for message_id:", editedPost.message_id);
+        return new Response(JSON.stringify({ ok: true, action: "updated" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Handle new channel_post or message
       const post = body.channel_post || body.message;
       if (!post) {
         return new Response(JSON.stringify({ ok: true, skipped: true }), {
@@ -55,11 +94,15 @@ Deno.serve(async (req) => {
 
       // Extract title (first line) and content (rest)
       const lines = text.split("\n");
-      const title = lines[0]
-        .replace(/#\w+/g, "")
-        .trim()
-        .substring(0, 200);
+      const title = lines[0].replace(/#\w+/g, "").trim().substring(0, 200);
       const content = lines.length > 1 ? lines.slice(1).join("\n").trim() : title;
+
+      // Delete old announcements of the same type before inserting (keeps only latest per type)
+      await supabase
+        .from("announcements")
+        .delete()
+        .eq("type", type)
+        .neq("telegram_message_id", post.message_id);
 
       const { error } = await supabase.from("announcements").insert({
         telegram_message_id: post.message_id,
@@ -77,7 +120,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      return new Response(JSON.stringify({ ok: true }), {
+      return new Response(JSON.stringify({ ok: true, action: "inserted" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
