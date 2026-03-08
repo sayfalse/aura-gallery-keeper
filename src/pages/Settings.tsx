@@ -202,43 +202,16 @@ const SettingsPage = () => {
       </header>
 
       <div className="max-w-lg mx-auto p-4 md:p-6 space-y-6">
-        {/* Profile */}
-        <section className="rounded-2xl bg-card border border-border p-5">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <User className="w-4 h-4" /> Profile
-          </h2>
-          <div className="flex items-center gap-4 mb-5">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-full" />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="w-8 h-8 text-primary" />
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
-              <p className="text-xs text-muted-foreground truncate">{email}</p>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Display Name</label>
-              <input
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <button
-              onClick={handleSaveProfile}
-              disabled={saving}
-              className="w-full py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-        </section>
+        {/* Personal Info */}
+        {user && (
+          <PersonalInfoSection
+            user={user}
+            displayName={displayName}
+            setDisplayName={setDisplayName}
+            onSaveProfile={handleSaveProfile}
+            saving={saving}
+          />
+        )}
 
         {/* Appearance */}
         <section className="rounded-2xl bg-card border border-border p-5">
