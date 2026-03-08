@@ -45,6 +45,7 @@ interface UserProfile {
   created_at: string;
   role: string;
   banned_until: string | null;
+  storage?: { totalBytes: number; fileCount: number; byType: Record<string, number> };
 }
 
 interface AuditEntry {
@@ -68,6 +69,7 @@ interface AdminStats {
     totalContacts: number;
     totalAnnouncements: number;
     recentMessages: number;
+    totalStorageBytes: number;
   };
   dailySignups: { date: string; count: number }[];
   recentActivity: {
@@ -612,8 +614,73 @@ const AdminDashboard = () => {
           </motion.div>
         </div>
 
+        {/* Storage Usage Per User */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <HardDrive className="w-4 h-4 text-primary" /> Storage Usage
+                <Badge variant="secondary" className="text-[10px] ml-1">{formatBytes(stats.overview.totalStorageBytes || 0)} total</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const usersWithStorage = stats.users
+                  .filter((u) => u.storage && u.storage.totalBytes > 0)
+                  .sort((a, b) => (b.storage?.totalBytes || 0) - (a.storage?.totalBytes || 0));
+                const maxBytes = usersWithStorage[0]?.storage?.totalBytes || 1;
+
+                if (usersWithStorage.length === 0) {
+                  return <p className="text-sm text-muted-foreground text-center py-6">No storage usage yet</p>;
+                }
+
+                return (
+                  <div className="space-y-3">
+                    {usersWithStorage.slice(0, 10).map((u) => {
+                      const bytes = u.storage?.totalBytes || 0;
+                      const pct = (bytes / maxBytes) * 100;
+                      const typeEntries = Object.entries(u.storage?.byType || {}).sort((a, b) => b[1] - a[1]);
+                      return (
+                        <div key={u.user_id}>
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-[9px] font-bold shrink-0">
+                                {(u.display_name || "U")[0].toUpperCase()}
+                              </div>
+                              <span className="text-foreground font-medium truncate">{u.display_name || "Unknown"}</span>
+                              <span className="text-muted-foreground shrink-0">{u.storage?.fileCount || 0} files</span>
+                            </div>
+                            <span className="font-semibold text-foreground shrink-0 ml-2">{formatBytes(bytes)}</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                            <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${Math.max(pct, 2)}%` }} />
+                          </div>
+                          {typeEntries.length > 0 && (
+                            <div className="flex gap-2 mt-1 flex-wrap">
+                              {typeEntries.map(([cat, size]) => (
+                                <span key={cat} className="text-[9px] text-muted-foreground">
+                                  {cat}: {formatBytes(size)}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {usersWithStorage.length > 10 && (
+                      <p className="text-[10px] text-muted-foreground text-center pt-1">
+                        +{usersWithStorage.length - 10} more users with storage
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Role Distribution */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }}>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">

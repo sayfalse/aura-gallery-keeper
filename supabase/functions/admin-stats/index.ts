@@ -120,7 +120,7 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
     if (dailySignups[day] !== undefined) dailySignups[day]++;
   });
 
-  const [photosRes, notesRes, filesRes, contactsRes, messagesRes, announcementsRes, profilesRes, allRolesRes, auditRes, recentPhotosRes, recentNotesRes] = await Promise.all([
+  const [photosRes, notesRes, filesRes, contactsRes, messagesRes, announcementsRes, profilesRes, allRolesRes, auditRes, recentPhotosRes, recentNotesRes, driveFilesAllRes] = await Promise.all([
     adminClient.from("photos").select("*", { count: "exact", head: true }),
     adminClient.from("notes").select("*", { count: "exact", head: true }),
     adminClient.from("drive_files").select("*", { count: "exact", head: true }),
@@ -132,7 +132,26 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
     adminClient.from("admin_audit_log").select("id, admin_user_id, action, target_user_id, details, created_at").order("created_at", { ascending: false }).limit(50),
     adminClient.from("photos").select("id, name, created_at, user_id").order("created_at", { ascending: false }).limit(5),
     adminClient.from("notes").select("id, title, created_at, user_id").order("created_at", { ascending: false }).limit(5),
+    adminClient.from("drive_files").select("user_id, size_bytes, mime_type").limit(1000),
   ]);
+
+  // Build per-user storage breakdown
+  const driveFiles = driveFilesAllRes.data || [];
+  const storageByUser: Record<string, { totalBytes: number; fileCount: number; byType: Record<string, number> }> = {};
+  for (const f of driveFiles) {
+    if (!storageByUser[f.user_id]) storageByUser[f.user_id] = { totalBytes: 0, fileCount: 0, byType: {} };
+    const entry = storageByUser[f.user_id];
+    entry.totalBytes += f.size_bytes || 0;
+    entry.fileCount += 1;
+    const mime = f.mime_type || "";
+    let cat = "Other";
+    if (mime.startsWith("image/")) cat = "Images";
+    else if (mime.startsWith("video/")) cat = "Videos";
+    else if (mime.startsWith("audio/")) cat = "Audio";
+    else if (mime.includes("pdf") || mime.includes("document") || mime.includes("text")) cat = "Documents";
+    entry.byType[cat] = (entry.byType[cat] || 0) + (f.size_bytes || 0);
+  }
+  const totalStorageBytes = driveFiles.reduce((acc: number, f: any) => acc + (f.size_bytes || 0), 0);
 
   const profiles = profilesRes.data || [];
   const allRoles = allRolesRes.data || [];
@@ -152,6 +171,7 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
     role: roleMap[p.user_id] || "user",
     email: users.find((u: any) => u.id === p.user_id)?.email || null,
     banned_until: banMap[p.user_id] || null,
+    storage: storageByUser[p.user_id] || { totalBytes: 0, fileCount: 0, byType: {} },
   }));
 
   const enrichedAuditLogs = auditLogs.map((l: any) => ({
@@ -171,6 +191,7 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
         totalContacts: contactsRes.count || 0,
         totalAnnouncements: announcementsRes.count || 0,
         recentMessages: messagesRes.count || 0,
+        totalStorageBytes,
       },
       dailySignups: Object.entries(dailySignups).map(([date, count]) => ({ date, count })),
       recentActivity: [
