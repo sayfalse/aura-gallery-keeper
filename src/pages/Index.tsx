@@ -215,6 +215,36 @@ const Index = () => {
     }
   }, [activeAlbum, loadAlbumPhotos]);
 
+  const restoreSelected = useCallback(async () => {
+    const toRestore = deletedPhotos.filter((p) => selectedPhotos.has(p.id));
+    setDeletedPhotos((prev) => prev.filter((p) => !selectedPhotos.has(p.id)));
+    setPhotos((prev) => [...toRestore, ...prev]);
+    setSelectedPhotos(new Set());
+    setSelectionMode(false);
+    try {
+      await Promise.all(toRestore.map((p) => restorePhoto(p.id)));
+      toast.success(`${toRestore.length} photo(s) restored!`);
+    } catch {
+      toast.error("Failed to restore some photos");
+      loadPhotos();
+    }
+  }, [selectedPhotos, deletedPhotos, loadPhotos]);
+
+  const permanentDeleteSelected = useCallback(async () => {
+    const toDelete = deletedPhotos.filter((p) => selectedPhotos.has(p.id));
+    if (!confirm(`Permanently delete ${toDelete.length} photo(s)? This cannot be undone.`)) return;
+    setDeletedPhotos((prev) => prev.filter((p) => !selectedPhotos.has(p.id)));
+    setSelectedPhotos(new Set());
+    setSelectionMode(false);
+    try {
+      await Promise.all(toDelete.map((p) => permanentlyDeletePhoto(p.id, p.storagePath || "")));
+      toast.success(`${toDelete.length} photo(s) permanently deleted`);
+    } catch {
+      toast.error("Failed to delete some photos");
+      loadPhotos();
+    }
+  }, [selectedPhotos, deletedPhotos, loadPhotos]);
+
   const lightboxIndex = lightboxPhoto ? filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id) : -1;
 
   if (loading) {
