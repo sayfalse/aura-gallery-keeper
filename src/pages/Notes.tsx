@@ -155,13 +155,13 @@ const NotesPage = () => {
         <aside className={`w-full md:w-80 border-r border-border flex flex-col shrink-0 ${activeNote ? "hidden md:flex" : "flex"}`}>
           <div className="p-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
               <input
                 type="text"
                 placeholder={t("notes.searchNotes")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>

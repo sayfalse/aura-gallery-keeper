@@ -117,11 +117,11 @@ const ContactsPage = () => {
         <aside className={`w-full md:w-80 border-r border-border flex flex-col shrink-0 ${activeContact ? "hidden md:flex" : "flex"}`}>
           <div className="p-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
               <input
                 type="text" placeholder={t("contacts.searchContacts")} value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
@@ -193,27 +193,27 @@ const ContactsPage = () => {
               </div>
               <div className="space-y-4">
                 {activeContact.phone && (
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <div><p className="text-xs text-muted-foreground">{t("common.phone")}</p><p className="text-sm text-foreground">{activeContact.phone}</p></div>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20">
+                    <Phone className="w-4 h-4 text-primary" />
+                    <div><p className="text-xs text-muted-foreground">{t("common.phone")}</p><p className="text-sm font-medium text-foreground">{activeContact.phone}</p></div>
                   </div>
                 )}
                 {activeContact.email && (
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <Mail className="w-4 h-4 text-muted-foreground" />
-                    <div><p className="text-xs text-muted-foreground">{t("common.email")}</p><p className="text-sm text-foreground">{activeContact.email}</p></div>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20">
+                    <Mail className="w-4 h-4 text-primary" />
+                    <div><p className="text-xs text-muted-foreground">{t("common.email")}</p><p className="text-sm font-medium text-foreground">{activeContact.email}</p></div>
                   </div>
                 )}
                 {activeContact.address && (
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <Building className="w-4 h-4 text-muted-foreground" />
-                    <div><p className="text-xs text-muted-foreground">{t("common.address")}</p><p className="text-sm text-foreground">{activeContact.address}</p></div>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20">
+                    <Building className="w-4 h-4 text-primary" />
+                    <div><p className="text-xs text-muted-foreground">{t("common.address")}</p><p className="text-sm font-medium text-foreground">{activeContact.address}</p></div>
                   </div>
                 )}
                 {activeContact.notes && (
-                  <div className="p-3 rounded-xl bg-muted/50">
+                  <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
                      <p className="text-xs text-muted-foreground mb-1">{t("common.notes")}</p>
-                    <p className="text-sm text-foreground">{activeContact.notes}</p>
+                    <p className="text-sm font-medium text-foreground">{activeContact.notes}</p>
                   </div>
                 )}
               </div>
@@ -237,14 +237,14 @@ const ContactsPage = () => {
             </div>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <input placeholder={t("contacts.firstName")} value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className="px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-                <input placeholder={t("contacts.lastName")} value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className="px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+                <input placeholder={t("contacts.firstName")} value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className="px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+                <input placeholder={t("contacts.lastName")} value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className="px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
               </div>
-              <input placeholder={t("common.email")} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-              <input placeholder={t("common.phone")} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-              <input placeholder={t("contacts.company")} value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-              <input placeholder={t("common.address")} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-              <textarea placeholder={t("common.notes")} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none" />
+              <input placeholder={t("common.email")} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+              <input placeholder={t("common.phone")} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+              <input placeholder={t("contacts.company")} value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+              <input placeholder={t("common.address")} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+              <textarea placeholder={t("common.notes")} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none" />
             </div>
             <button onClick={handleCreate} className="w-full mt-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors">
               {t("contacts.addContact")}
