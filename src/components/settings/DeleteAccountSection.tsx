@@ -8,7 +8,8 @@ import { toast } from "sonner";
 const DeleteAccountSection = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [step, setStep] = useState<"idle" | "ask" | "confirm">("idle");
+  const [confirmText, setConfirmText] = useState("");
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
 
