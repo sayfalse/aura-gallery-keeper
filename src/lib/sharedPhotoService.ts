@@ -150,18 +150,13 @@ export const createShareLink = async (
 };
 
 export const fetchShareLinkData = async (token: string) => {
-  const { data: link, error } = await supabase
-    .from("share_links" as any)
-    .select("*")
-    .eq("token", token)
-    .single();
+  // Use security definer function to look up share links safely
+  const { data: links, error } = await supabase
+    .rpc("get_share_link_by_token", { _token: token });
 
-  if (error || !link) throw new Error("Share link not found");
+  if (error || !links || (links as any[]).length === 0) throw new Error("Share link not found or expired");
 
-  const l = link as any;
-  if (l.expires_at && new Date(l.expires_at) < new Date()) {
-    throw new Error("Share link has expired");
-  }
+  const l = (links as any[])[0];
 
   if (l.item_type === "photo") {
     const { data: photo, error: photoErr } = await supabase

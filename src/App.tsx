@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,47 +7,65 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import SplashScreen from "@/components/SplashScreen";
-import Home from "./pages/Home";
-import Index from "./pages/Index";
-import NotesPage from "./pages/Notes";
-import DrivePage from "./pages/Drive";
-import ContactsPage from "./pages/Contacts";
-import MailPage from "./pages/Mail";
-import GmailCallback from "./pages/GmailCallback";
-import PixelAIPage from "./pages/PixelAI";
-import BrowserPage from "./pages/Browser";
-import ChatPage from "./pages/Chat";
-import TempMailPage from "./pages/TempMail";
-import MusicPage from "./pages/Music";
-import VPNPage from "./pages/VPN";
-import SettingsPage from "./pages/Settings";
-import Auth from "./pages/Auth";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import SharedView from "./pages/SharedView";
-import NotFound from "./pages/NotFound";
+import ErrorBoundary from "@/core/ErrorBoundary";
+import LoadingScreen from "@/core/LoadingScreen";
 import AppLockScreen, { shouldShowLockScreen, updateLastActive } from "./components/AppLockScreen";
 
-const queryClient = new QueryClient();
+// Lazy-loaded module pages for code splitting
+const Home = lazy(() => import("./pages/Home"));
+const Index = lazy(() => import("./pages/Index"));
+const NotesPage = lazy(() => import("./pages/Notes"));
+const DrivePage = lazy(() => import("./pages/Drive"));
+const ContactsPage = lazy(() => import("./pages/Contacts"));
+const MailPage = lazy(() => import("./pages/Mail"));
+const GmailCallback = lazy(() => import("./pages/GmailCallback"));
+const PixelAIPage = lazy(() => import("./pages/PixelAI"));
+const BrowserPage = lazy(() => import("./pages/Browser"));
+const ChatPage = lazy(() => import("./pages/Chat"));
+const TempMailPage = lazy(() => import("./pages/TempMail"));
+const MusicPage = lazy(() => import("./pages/Music"));
+const VPNPage = lazy(() => import("./pages/VPN"));
+const SettingsPage = lazy(() => import("./pages/Settings"));
+const Auth = lazy(() => import("./pages/Auth"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const SharedView = lazy(() => import("./pages/SharedView"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 min cache
+      retry: 2,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const ProtectedRoute = ({ children, module }: { children: React.ReactNode; module?: string }) => {
   const { user, loading } = useAuth();
-  if (loading) return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <LoadingScreen module={module} />;
   if (!user) return <Navigate to="/auth" replace />;
-  return <>{children}</>;
+  return (
+    <ErrorBoundary moduleName={module}>
+      <Suspense fallback={<LoadingScreen module={module} />}>
+        {children}
+      </Suspense>
+    </ErrorBoundary>
+  );
 };
 
 const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (user) return <Navigate to="/" replace />;
-  return <>{children}</>;
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      {children}
+    </Suspense>
+  );
 };
 
 const AppContent = () => {
@@ -82,27 +100,32 @@ const AppContent = () => {
       {locked && <AppLockScreen onUnlock={() => setLocked(false)} />}
       <BrowserRouter>
         <Routes>
+          {/* Auth routes */}
           <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
           <Route path="/forgot-password" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          <Route path="/gallery" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
-          <Route path="/drive" element={<ProtectedRoute><DrivePage /></ProtectedRoute>} />
-          <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
-          <Route path="/mail" element={<ProtectedRoute><MailPage /></ProtectedRoute>} />
-          <Route path="/gmail-callback" element={<ProtectedRoute><GmailCallback /></ProtectedRoute>} />
-          <Route path="/pixel-ai" element={<ProtectedRoute><PixelAIPage /></ProtectedRoute>} />
-          <Route path="/browser" element={<ProtectedRoute><BrowserPage /></ProtectedRoute>} />
-          <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
-          <Route path="/temp-mail" element={<ProtectedRoute><TempMailPage /></ProtectedRoute>} />
-          <Route path="/music" element={<ProtectedRoute><MusicPage /></ProtectedRoute>} />
-          <Route path="/vpn" element={<ProtectedRoute><VPNPage /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/shared/:token" element={<SharedView />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/reset-password" element={<Suspense fallback={<LoadingScreen />}><ResetPassword /></Suspense>} />
+
+          {/* Core module routes - each wrapped in error boundary */}
+          <Route path="/" element={<ProtectedRoute module="Home"><Home /></ProtectedRoute>} />
+          <Route path="/gallery" element={<ProtectedRoute module="Gallery"><Index /></ProtectedRoute>} />
+          <Route path="/notes" element={<ProtectedRoute module="Notes"><NotesPage /></ProtectedRoute>} />
+          <Route path="/drive" element={<ProtectedRoute module="Drive"><DrivePage /></ProtectedRoute>} />
+          <Route path="/contacts" element={<ProtectedRoute module="People"><ContactsPage /></ProtectedRoute>} />
+          <Route path="/mail" element={<ProtectedRoute module="Mail"><MailPage /></ProtectedRoute>} />
+          <Route path="/gmail-callback" element={<ProtectedRoute module="Mail"><GmailCallback /></ProtectedRoute>} />
+          <Route path="/pixel-ai" element={<ProtectedRoute module="Pixel AI"><PixelAIPage /></ProtectedRoute>} />
+          <Route path="/browser" element={<ProtectedRoute module="Browser"><BrowserPage /></ProtectedRoute>} />
+          <Route path="/chat" element={<ProtectedRoute module="Chat"><ChatPage /></ProtectedRoute>} />
+          <Route path="/temp-mail" element={<ProtectedRoute module="Temp Mail"><TempMailPage /></ProtectedRoute>} />
+          <Route path="/music" element={<ProtectedRoute module="Music"><MusicPage /></ProtectedRoute>} />
+          <Route path="/vpn" element={<ProtectedRoute module="VPN"><VPNPage /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute module="Settings"><SettingsPage /></ProtectedRoute>} />
+
+          {/* Public routes */}
+          <Route path="/privacy-policy" element={<Suspense fallback={<LoadingScreen />}><PrivacyPolicy /></Suspense>} />
+          <Route path="/terms-of-service" element={<Suspense fallback={<LoadingScreen />}><TermsOfService /></Suspense>} />
+          <Route path="/shared/:token" element={<Suspense fallback={<LoadingScreen />}><SharedView /></Suspense>} />
+          <Route path="*" element={<Suspense fallback={<LoadingScreen />}><NotFound /></Suspense>} />
         </Routes>
       </BrowserRouter>
     </>
@@ -110,17 +133,19 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AppContent />
-        </TooltipProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </ThemeProvider>
+  <ErrorBoundary moduleName="App">
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppContent />
+          </TooltipProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
+  </ErrorBoundary>
 );
 
 export default App;

@@ -753,6 +753,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_share_link_by_token: {
+        Args: { _token: string }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }[]
+      }
       owns_album: {
         Args: { _album_id: string; _user_id: string }
         Returns: boolean
