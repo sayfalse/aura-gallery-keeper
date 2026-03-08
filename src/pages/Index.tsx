@@ -9,7 +9,7 @@ import UploadModal from "@/components/UploadModal";
 import CreateAlbumModal from "@/components/CreateAlbumModal";
 import AddToAlbumModal from "@/components/AddToAlbumModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchPhotos, fetchDeletedPhotos, toggleFavorite as toggleFavApi, softDeletePhoto, uploadPhoto } from "@/lib/photoService";
+import { fetchPhotos, fetchDeletedPhotos, toggleFavorite as toggleFavApi, softDeletePhoto, uploadPhoto, restorePhoto, permanentlyDeletePhoto } from "@/lib/photoService";
 import { fetchAlbums, createAlbum, deleteAlbum, addPhotosToAlbum, fetchAlbumPhotos, updateAlbumCover, reorderAlbumPhotos } from "@/lib/albumService";
 import type { Photo, Album, ViewMode, SidebarSection } from "@/types/photo";
 import { toast } from "sonner";
@@ -215,6 +215,36 @@ const Index = () => {
     }
   }, [activeAlbum, loadAlbumPhotos]);
 
+  const restoreSelected = useCallback(async () => {
+    const toRestore = deletedPhotos.filter((p) => selectedPhotos.has(p.id));
+    setDeletedPhotos((prev) => prev.filter((p) => !selectedPhotos.has(p.id)));
+    setPhotos((prev) => [...toRestore, ...prev]);
+    setSelectedPhotos(new Set());
+    setSelectionMode(false);
+    try {
+      await Promise.all(toRestore.map((p) => restorePhoto(p.id)));
+      toast.success(`${toRestore.length} photo(s) restored!`);
+    } catch {
+      toast.error("Failed to restore some photos");
+      loadPhotos();
+    }
+  }, [selectedPhotos, deletedPhotos, loadPhotos]);
+
+  const permanentDeleteSelected = useCallback(async () => {
+    const toDelete = deletedPhotos.filter((p) => selectedPhotos.has(p.id));
+    if (!confirm(`Permanently delete ${toDelete.length} photo(s)? This cannot be undone.`)) return;
+    setDeletedPhotos((prev) => prev.filter((p) => !selectedPhotos.has(p.id)));
+    setSelectedPhotos(new Set());
+    setSelectionMode(false);
+    try {
+      await Promise.all(toDelete.map((p) => permanentlyDeletePhoto(p.id, p.storagePath || "")));
+      toast.success(`${toDelete.length} photo(s) permanently deleted`);
+    } catch {
+      toast.error("Failed to delete some photos");
+      loadPhotos();
+    }
+  }, [selectedPhotos, deletedPhotos, loadPhotos]);
+
   const lightboxIndex = lightboxPhoto ? filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id) : -1;
 
   if (loading) {
@@ -256,9 +286,11 @@ const Index = () => {
           selectedCount={selectedPhotos.size}
           onDeleteSelected={deleteSelected}
           onClearSelection={() => { setSelectedPhotos(new Set()); setSelectionMode(false); }}
-          onAddToAlbum={selectedPhotos.size > 0 ? () => setShowAddToAlbum(true) : undefined}
+          onAddToAlbum={selectedPhotos.size > 0 && activeSection !== "trash" ? () => setShowAddToAlbum(true) : undefined}
           activeAlbum={activeAlbum}
           onBackFromAlbum={() => { setActiveAlbum(null); setAlbumPhotoIds([]); }}
+          onRestoreSelected={activeSection === "trash" && selectedPhotos.size > 0 ? restoreSelected : undefined}
+          onPermanentDeleteSelected={activeSection === "trash" && selectedPhotos.size > 0 ? permanentDeleteSelected : undefined}
         />
 
         <div className="p-3 md:p-6 pb-24 md:pb-6">
