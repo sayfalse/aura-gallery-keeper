@@ -317,6 +317,14 @@ const DrivePage = () => {
         currentFolder={currentFolder}
         onMove={handleMove}
       />
+      {previewFile && (
+        <DocumentViewer
+          fileName={previewFile.name}
+          storagePath={previewFile.storagePath}
+          mimeType={previewFile.mimeType}
+          onClose={() => setPreviewFile(null)}
+        />
+      )}
       <ModuleSwitcher />
     </div>
   );

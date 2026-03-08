@@ -325,6 +325,13 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
           </motion.div>
         )}
       </AnimatePresence>
+      {showEditor && (
+        <PhotoEditor
+          imageSrc={photo.src}
+          imageName={photo.name}
+          onClose={() => setShowEditor(false)}
+        />
+      )}
     </div>
   );
 };
