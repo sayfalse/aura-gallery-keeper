@@ -10,7 +10,7 @@ import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
 import SharingSection from "@/components/settings/SharingSection";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
-import QuickNavButton from "@/components/QuickNavButton";
+import { getStorageAnalytics, formatFileSize } from "@/lib/driveService";
 import {
   getAppLockSettings,
   setAppLockEnabled,
