@@ -12,7 +12,7 @@ const UploadModal = ({ isOpen, onClose, onUpload }: UploadModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = useCallback((files: FileList) => {
-    const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    const imageFiles = Array.from(files).filter((f) => f.type.startsWith("image/") || f.type.startsWith("video/"));
     if (imageFiles.length) {
       onUpload(imageFiles);
       onClose();
