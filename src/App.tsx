@@ -18,6 +18,8 @@ import SettingsPage from "./pages/Settings";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 import AppLockScreen, { shouldShowLockScreen, updateLastActive } from "./components/AppLockScreen";
 
@@ -84,6 +86,8 @@ const AppContent = () => {
           <Route path="/mail" element={<ProtectedRoute><MailPage /></ProtectedRoute>} />
           <Route path="/gmail-callback" element={<ProtectedRoute><GmailCallback /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

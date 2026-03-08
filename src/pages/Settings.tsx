@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail } from "lucide-react";
+import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail, ChevronRight } from "lucide-react";
 import PersonalInfoSection from "@/components/settings/PersonalInfoSection";
 import TwoFactorSection from "@/components/settings/TwoFactorSection";
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
@@ -533,6 +533,22 @@ const SettingsPage = () => {
             <div className="flex items-center justify-between py-2">
               <span className="text-sm text-foreground">Version</span>
               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">1.0.0</span>
+            </div>
+            <div className="pt-2 border-t border-border space-y-2">
+              <a
+                href="/privacy-policy"
+                className="flex items-center justify-between py-2 rounded-lg hover:bg-accent px-2 -mx-2 transition-colors"
+              >
+                <span className="text-sm text-foreground">Privacy Policy</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </a>
+              <a
+                href="/terms-of-service"
+                className="flex items-center justify-between py-2 rounded-lg hover:bg-accent px-2 -mx-2 transition-colors"
+              >
+                <span className="text-sm text-foreground">Terms of Service</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </a>
             </div>
           </div>
         </section>
