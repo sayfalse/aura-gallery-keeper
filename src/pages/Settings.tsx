@@ -113,7 +113,7 @@ const SettingsPage = () => {
   const [noteCount, setNoteCount] = useState(0);
   const [contactCount, setContactCount] = useState(0);
   const [driveFileCount, setDriveFileCount] = useState(0);
-
+  const [storageAnalytics, setStorageAnalytics] = useState<{totalSize: number; byType: Record<string, number>; largest: {name: string; size: number}[]; fileCount: number} | null>(null);
   // App lock state
   const [lockEnabled, setLockEnabled] = useState(() => getAppLockSettings().enabled);
   const [lockTimeout, setLockTimeoutState] = useState(() => getAppLockSettings().timeout);
