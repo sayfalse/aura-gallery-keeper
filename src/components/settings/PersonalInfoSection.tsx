@@ -351,7 +351,7 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
             {showForgotPassword ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
           </button>
           {showForgotPassword && (
-            <div className="rounded-xl bg-secondary p-4 space-y-3 animate-fade-in">
+            <div className="rounded-xl bg-primary/10 border border-primary/20 p-4 space-y-3 animate-fade-in">
               <p className="text-xs text-muted-foreground">
                 We'll send a password reset link to <span className="text-foreground font-medium">{email}</span>
               </p>
