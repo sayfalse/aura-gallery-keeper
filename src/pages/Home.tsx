@@ -107,7 +107,7 @@ const Home = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.4 }}
           onClick={() => navigate("/pixel-ai")}
-          className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 via-fuchsia-500 to-orange-400 p-4 text-left group"
+          className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 p-4 text-left group"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-500" />
           <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-10 -translate-x-6" />

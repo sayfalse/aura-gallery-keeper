@@ -100,7 +100,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
                 key={i}
                 className="w-1.5 h-1.5 rounded-full"
                 style={{
-                  background: i === 0 ? "hsl(271 65% 58%)" : i === 1 ? "hsl(340 75% 55%)" : "hsl(20 90% 58%)",
+                  background: i === 0 ? "hsl(217 90% 55%)" : i === 1 ? "hsl(199 85% 50%)" : "hsl(190 80% 48%)",
                 }}
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: [0, 1, 0.5], scale: [0, 1, 1] }}
