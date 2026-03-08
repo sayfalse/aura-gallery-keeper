@@ -171,6 +171,7 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
     role: roleMap[p.user_id] || "user",
     email: users.find((u: any) => u.id === p.user_id)?.email || null,
     banned_until: banMap[p.user_id] || null,
+    storage: storageByUser[p.user_id] || { totalBytes: 0, fileCount: 0, byType: {} },
   }));
 
   const enrichedAuditLogs = auditLogs.map((l: any) => ({
