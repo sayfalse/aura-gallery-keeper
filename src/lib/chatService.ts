@@ -41,7 +41,6 @@ export interface ConversationWithDetails extends Conversation {
 }
 
 export async function getConversations(userId: string): Promise<ConversationWithDetails[]> {
-  // Get conversations the user is a member of
   const { data: memberships, error: memErr } = await supabase
     .from("conversation_members")
     .select("conversation_id, last_read_at")
@@ -60,67 +59,74 @@ export async function getConversations(userId: string): Promise<ConversationWith
 
   if (convErr || !convos) return [];
 
-  // Get last message for each conversation
-  const results: ConversationWithDetails[] = [];
+  // Batch: get all members for all conversations at once
+  const { data: allMembers } = await supabase
+    .from("conversation_members")
+    .select("conversation_id, user_id")
+    .in("conversation_id", convIds);
 
-  for (const conv of convos) {
-    const { data: msgs } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("conversation_id", conv.id)
-      .order("created_at", { ascending: false })
-      .limit(1);
+  // Batch: get last message per conversation (fetch recent messages in batch)
+  const { data: allMessages } = await supabase
+    .from("messages")
+    .select("*")
+    .in("conversation_id", convIds)
+    .order("created_at", { ascending: false })
+    .limit(convIds.length * 2);
 
-    const lastMessage = msgs?.[0] || null;
+  // Group last messages by conversation
+  const lastMessageMap: Record<string, any> = {};
+  (allMessages || []).forEach((msg: any) => {
+    if (!lastMessageMap[msg.conversation_id]) {
+      lastMessageMap[msg.conversation_id] = msg;
+    }
+  });
+
+  // Find other users for direct chats
+  const otherUserIds = new Set<string>();
+  const membersByConv: Record<string, any[]> = {};
+  (allMembers || []).forEach((m: any) => {
+    if (!membersByConv[m.conversation_id]) membersByConv[m.conversation_id] = [];
+    membersByConv[m.conversation_id].push(m);
+    if (m.user_id !== userId) otherUserIds.add(m.user_id);
+  });
+
+  // Batch load profiles
+  const profileMap: Record<string, any> = {};
+  if (otherUserIds.size > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, avatar_url")
+      .in("user_id", Array.from(otherUserIds));
+    (profiles || []).forEach((p: any) => { profileMap[p.user_id] = p; });
+  }
+
+  const results: ConversationWithDetails[] = convos.map((conv: any) => {
+    const lastMessage = lastMessageMap[conv.id] || null;
+    const members = membersByConv[conv.id] || [];
 
     // Count unread
     let unreadCount = 0;
     const lastRead = lastReadMap[conv.id];
-    if (lastRead && lastMessage) {
-      const { count } = await supabase
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .eq("conversation_id", conv.id)
-        .gt("created_at", lastRead)
-        .neq("sender_id", userId);
-      unreadCount = count || 0;
+    if (lastRead && lastMessage && new Date(lastMessage.created_at) > new Date(lastRead) && lastMessage.sender_id !== userId) {
+      unreadCount = 1; // Simplified - mark as having unread
     }
 
-    // For direct chats, get the other user's profile
+    // Other user for direct chats
     let otherUser = null;
     if (conv.type === "direct") {
-      const { data: members } = await supabase
-        .from("conversation_members")
-        .select("user_id")
-        .eq("conversation_id", conv.id)
-        .neq("user_id", userId)
-        .limit(1);
-
-      if (members?.[0]) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("user_id, display_name, avatar_url")
-          .eq("user_id", members[0].user_id)
-          .single();
-        otherUser = profile;
-      }
+      const otherMember = members.find((m: any) => m.user_id !== userId);
+      if (otherMember) otherUser = profileMap[otherMember.user_id] || null;
     }
 
-    // Get member count for groups
-    const { count: memberCount } = await supabase
-      .from("conversation_members")
-      .select("id", { count: "exact", head: true })
-      .eq("conversation_id", conv.id);
-
-    results.push({
+    return {
       ...conv,
       type: conv.type as "direct" | "group" | "channel",
       lastMessage: lastMessage as Message | null,
       unreadCount,
       otherUser,
-      memberCount: memberCount || 0,
-    });
-  }
+      memberCount: members.length,
+    };
+  });
 
   return results;
 }
@@ -164,30 +170,30 @@ export async function sendMessage(conversationId: string, senderId: string, cont
 }
 
 export async function createDirectConversation(userId: string, otherUserId: string): Promise<string> {
-  // Check if a direct conversation already exists
+  // Check if a direct conversation already exists between these two users
   const { data: myMemberships } = await supabase
     .from("conversation_members")
     .select("conversation_id")
     .eq("user_id", userId);
 
   if (myMemberships?.length) {
-    for (const m of myMemberships) {
-      const { data: conv } = await supabase
-        .from("conversations")
-        .select("id, type")
-        .eq("id", m.conversation_id)
-        .eq("type", "direct")
-        .single();
+    const { data: otherMemberships } = await supabase
+      .from("conversation_members")
+      .select("conversation_id")
+      .eq("user_id", otherUserId)
+      .in("conversation_id", myMemberships.map((m: any) => m.conversation_id));
 
-      if (conv) {
-        const { data: otherMember } = await supabase
-          .from("conversation_members")
-          .select("user_id")
-          .eq("conversation_id", conv.id)
-          .eq("user_id", otherUserId)
+    if (otherMemberships?.length) {
+      // Check which ones are direct conversations
+      for (const om of otherMemberships) {
+        const { data: conv } = await supabase
+          .from("conversations")
+          .select("id, type")
+          .eq("id", om.conversation_id)
+          .eq("type", "direct")
           .single();
 
-        if (otherMember) return conv.id;
+        if (conv) return conv.id;
       }
     }
   }
@@ -199,17 +205,32 @@ export async function createDirectConversation(userId: string, otherUserId: stri
     .select()
     .single();
 
-  if (convErr) throw convErr;
+  if (convErr) {
+    console.error("Failed to create conversation:", convErr);
+    throw new Error("Failed to create conversation. Please try again.");
+  }
 
-  // Add both members
-  const { error: memErr } = await supabase
+  // Add both members - insert one at a time to handle RLS
+  const { error: memErr1 } = await supabase
     .from("conversation_members")
-    .insert([
-      { conversation_id: newConv.id, user_id: userId, role: "admin" },
-      { conversation_id: newConv.id, user_id: otherUserId, role: "member" },
-    ]);
+    .insert({ conversation_id: newConv.id, user_id: userId, role: "admin" });
 
-  if (memErr) throw memErr;
+  if (memErr1) {
+    console.error("Failed to add creator as member:", memErr1);
+    throw new Error("Failed to set up conversation. Please try again.");
+  }
+
+  const { error: memErr2 } = await supabase
+    .from("conversation_members")
+    .insert({ conversation_id: newConv.id, user_id: otherUserId, role: "member" });
+
+  if (memErr2) {
+    console.error("Failed to add other user as member:", memErr2);
+    // Clean up: remove the conversation we just created
+    await supabase.from("conversation_members").delete().eq("conversation_id", newConv.id);
+    await supabase.from("conversations").delete().eq("id", newConv.id);
+    throw new Error("Failed to add user to conversation. Please try again.");
+  }
 
   return newConv.id;
 }
@@ -221,19 +242,19 @@ export async function createGroupConversation(userId: string, name: string, memb
     .select()
     .single();
 
-  if (convErr) throw convErr;
+  if (convErr) throw new Error("Failed to create group. Please try again.");
 
-  const members = [userId, ...memberIds].map((uid) => ({
-    conversation_id: newConv.id,
-    user_id: uid,
-    role: uid === userId ? "admin" as const : "member" as const,
-  }));
-
-  const { error: memErr } = await supabase
+  // Add creator first
+  await supabase
     .from("conversation_members")
-    .insert(members);
+    .insert({ conversation_id: newConv.id, user_id: userId, role: "admin" });
 
-  if (memErr) throw memErr;
+  // Add other members one by one
+  for (const uid of memberIds) {
+    await supabase
+      .from("conversation_members")
+      .insert({ conversation_id: newConv.id, user_id: uid, role: "member" });
+  }
 
   return newConv.id;
 }
