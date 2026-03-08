@@ -354,10 +354,10 @@ const ChatPage = () => {
                 </button>
               ))}
               {searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground py-8">No users found</p>
+                <p className="text-center text-sm text-muted-foreground py-8">{t("chat.noUsersFound")}</p>
               )}
               {searchQuery.length < 2 && (
-                <p className="text-center text-sm text-muted-foreground py-8">Type at least 2 characters to search</p>
+                <p className="text-center text-sm text-muted-foreground py-8">{t("chat.typeToSearch")}</p>
               )}
             </div>
           </div>
