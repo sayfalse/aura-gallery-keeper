@@ -20,11 +20,7 @@ const ContactsPage = lazy(() => import("./pages/Contacts"));
 const MailPage = lazy(() => import("./pages/Mail"));
 const GmailCallback = lazy(() => import("./pages/GmailCallback"));
 const PixelAIPage = lazy(() => import("./pages/PixelAI"));
-const BrowserPage = lazy(() => import("./pages/Browser"));
 const ChatPage = lazy(() => import("./pages/Chat"));
-const TempMailPage = lazy(() => import("./pages/TempMail"));
-const MusicPage = lazy(() => import("./pages/Music"));
-const VPNPage = lazy(() => import("./pages/VPN"));
 const SettingsPage = lazy(() => import("./pages/Settings"));
 const Auth = lazy(() => import("./pages/Auth"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -114,11 +110,7 @@ const AppContent = () => {
           <Route path="/mail" element={<ProtectedRoute module="Mail"><MailPage /></ProtectedRoute>} />
           <Route path="/gmail-callback" element={<ProtectedRoute module="Mail"><GmailCallback /></ProtectedRoute>} />
           <Route path="/pixel-ai" element={<ProtectedRoute module="Pixel AI"><PixelAIPage /></ProtectedRoute>} />
-          <Route path="/browser" element={<ProtectedRoute module="Browser"><BrowserPage /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute module="Chat"><ChatPage /></ProtectedRoute>} />
-          <Route path="/temp-mail" element={<ProtectedRoute module="Temp Mail"><TempMailPage /></ProtectedRoute>} />
-          <Route path="/music" element={<ProtectedRoute module="Music"><MusicPage /></ProtectedRoute>} />
-          <Route path="/vpn" element={<ProtectedRoute module="VPN"><VPNPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute module="Settings"><SettingsPage /></ProtectedRoute>} />
 
           {/* Public routes */}
