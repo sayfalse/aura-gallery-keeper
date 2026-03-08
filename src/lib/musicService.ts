@@ -23,17 +23,19 @@ const invokeProxy = async (params: Record<string, string>) => {
       },
     }
   );
+  if (!res.ok) throw new Error(`Proxy error: ${res.status}`);
   return res.json();
 };
 
+// The proxy already maps songs to our format, so just pass through
 const mapSong = (s: any): Song => ({
   id: s.id || "",
   name: s.name || s.title || "",
-  artist: s.artists?.primary?.map((a: any) => a.name).join(", ") || s.primaryArtists || s.artist || "",
-  album: s.album?.name || s.album || "",
-  image: s.image?.[2]?.url || s.image?.[1]?.url || s.image?.[0]?.url || s.image || "",
+  artist: s.artist || s.artists?.primary?.map((a: any) => a.name).join(", ") || "",
+  album: s.album || "",
+  image: s.image || "",
   duration: s.duration ? parseInt(s.duration) : 0,
-  url: s.downloadUrl?.[4]?.url || s.downloadUrl?.[3]?.url || s.downloadUrl?.[2]?.url || s.downloadUrl?.[1]?.url || s.downloadUrl?.[0]?.url || "",
+  url: s.url || "",
   year: s.year || "",
   language: s.language || "",
 });
@@ -50,7 +52,7 @@ export const searchSongs = async (query: string): Promise<Song[]> => {
 
 export const getTrendingSongs = async (): Promise<Song[]> => {
   try {
-    const data = await invokeProxy({ path: "search", query: "trending hits 2024", limit: "20" });
+    const data = await invokeProxy({ path: "search", query: "trending hits 2025", limit: "20" });
     return (data.data?.results || []).map(mapSong);
   } catch {
     return [];
