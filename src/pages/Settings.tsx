@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail, ChevronRight, Github, Send, BarChart3 } from "lucide-react";
+import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail, ChevronRight, Github, Send, BarChart3, Megaphone, Sparkles, Wrench, Bell } from "lucide-react";
 import PersonalInfoSection from "@/components/settings/PersonalInfoSection";
 import TwoFactorSection from "@/components/settings/TwoFactorSection";
 import DeleteAccountSection from "@/components/settings/DeleteAccountSection";
@@ -105,6 +105,18 @@ const LANG_STORAGE_KEY = "app_language";
 
 export const getAppLanguage = () => localStorage.getItem(LANG_STORAGE_KEY) || "en";
 
+const getTimeAgo = (dateStr: string) => {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString();
+};
+
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -130,6 +142,17 @@ const SettingsPage = () => {
   const [langSearch, setLangSearch] = useState("");
   const [showAllLangs, setShowAllLangs] = useState(false);
 
+  // Announcements state
+  const [announcements, setAnnouncements] = useState<Array<{
+    id: string;
+    title: string | null;
+    content: string;
+    author: string;
+    type: string;
+    created_at: string;
+  }>>([]);
+  const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
+
   useEffect(() => {
     if (!user) return;
     supabase
@@ -148,6 +171,30 @@ const SettingsPage = () => {
     supabase.from("drive_files").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setDriveFileCount(count || 0));
     getStorageAnalytics(user.id).then(setStorageAnalytics).catch(() => {});
   }, [user]);
+
+  // Fetch announcements + realtime
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      const { data } = await supabase
+        .from("announcements")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (data) setAnnouncements(data as typeof announcements);
+    };
+    fetchAnnouncements();
+
+    const channel = supabase
+      .channel("announcements-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "announcements" }, (payload) => {
+        const newAnn = payload.new as typeof announcements[0];
+        setAnnouncements((prev) => [newAnn, ...prev]);
+        toast.info(`📢 ${newAnn.title || "New announcement"}`, { description: newAnn.content.substring(0, 80) });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const handleSaveProfile = useCallback(async () => {
     if (!user) return;
@@ -224,6 +271,63 @@ const SettingsPage = () => {
 
         {/* Sharing & Username */}
         {user && <SharingSection user={user} />}
+
+        {/* Announcements & Updates */}
+        <section className="rounded-2xl bg-card border border-border p-5">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Megaphone className="w-4 h-4" /> Announcements & Updates
+          </h2>
+          {announcements.length === 0 ? (
+            <div className="text-center py-6">
+              <Bell className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No announcements yet</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Updates from our Telegram channel will appear here in real-time</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {(showAllAnnouncements ? announcements : announcements.slice(0, 3)).map((ann) => {
+                const typeConfig: Record<string, { icon: typeof Sparkles; color: string; label: string }> = {
+                  feature: { icon: Sparkles, color: "text-purple-500 bg-purple-500/15", label: "Feature" },
+                  announcement: { icon: Megaphone, color: "text-primary bg-primary/15", label: "Announcement" },
+                  maintenance: { icon: Wrench, color: "text-amber-500 bg-amber-500/15", label: "Maintenance" },
+                  update: { icon: Bell, color: "text-emerald-500 bg-emerald-500/15", label: "Update" },
+                };
+                const cfg = typeConfig[ann.type] || typeConfig.update;
+                const Icon = cfg.icon;
+                const timeAgo = getTimeAgo(ann.created_at);
+
+                return (
+                  <div key={ann.id} className="rounded-xl bg-primary/5 border border-primary/10 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className={`p-1.5 rounded-lg ${cfg.color} shrink-0`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${cfg.color}`}>
+                            {cfg.label}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
+                        </div>
+                        {ann.title && <p className="text-sm font-medium text-foreground mb-1">{ann.title}</p>}
+                        <p className="text-xs text-muted-foreground leading-relaxed">{ann.content}</p>
+                        <p className="text-[10px] text-muted-foreground/60 mt-2">— {ann.author}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {announcements.length > 3 && (
+                <button
+                  onClick={() => setShowAllAnnouncements(!showAllAnnouncements)}
+                  className="w-full py-2 text-sm text-primary font-medium hover:underline"
+                >
+                  {showAllAnnouncements ? "Show less" : `View all ${announcements.length} announcements`}
+                </button>
+              )}
+            </div>
+          )}
+        </section>
 
         {/* Appearance */}
         <section className="rounded-2xl bg-card border border-border p-5">
