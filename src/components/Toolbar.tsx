@@ -1,5 +1,5 @@
-import { Search, LayoutGrid, List, CheckSquare, Trash2, X } from "lucide-react";
-import type { ViewMode, SidebarSection } from "@/types/photo";
+import { Search, LayoutGrid, List, CheckSquare, Trash2, X, FolderPlus, ArrowLeft } from "lucide-react";
+import type { ViewMode, SidebarSection, Album } from "@/types/photo";
 import ProfileMenu from "@/components/ProfileMenu";
 
 interface ToolbarProps {
@@ -13,6 +13,9 @@ interface ToolbarProps {
   selectedCount: number;
   onDeleteSelected: () => void;
   onClearSelection: () => void;
+  onAddToAlbum?: () => void;
+  activeAlbum?: Album | null;
+  onBackFromAlbum?: () => void;
 }
 
 const sectionTitles: Record<SidebarSection, string> = {
@@ -26,13 +29,23 @@ const sectionTitles: Record<SidebarSection, string> = {
 const Toolbar = ({
   section, viewMode, onViewModeChange, searchQuery, onSearchChange,
   selectionMode, onToggleSelectionMode, selectedCount, onDeleteSelected, onClearSelection,
+  onAddToAlbum, activeAlbum, onBackFromAlbum,
 }: ToolbarProps) => {
+  const title = activeAlbum ? activeAlbum.name : sectionTitles[section];
+
   return (
     <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-3 md:px-6 py-3 md:py-4">
       <div className="flex items-center justify-between gap-2 md:gap-4">
-        <h1 className="font-display text-lg md:text-2xl font-bold tracking-tight text-foreground shrink-0">
-          {sectionTitles[section]}
-        </h1>
+        <div className="flex items-center gap-2 shrink-0">
+          {activeAlbum && onBackFromAlbum && (
+            <button onClick={onBackFromAlbum} className="p-1.5 rounded-lg hover:bg-accent transition-colors">
+              <ArrowLeft className="w-5 h-5 text-foreground" />
+            </button>
+          )}
+          <h1 className="font-display text-lg md:text-2xl font-bold tracking-tight text-foreground">
+            {title}
+          </h1>
+        </div>
 
         <div className="flex items-center gap-1.5 md:gap-2">
           {/* Search */}
@@ -81,6 +94,11 @@ const Toolbar = ({
         <div className="flex items-center gap-3 mt-3 px-3 py-2 bg-primary/5 rounded-xl animate-slide-up">
           <span className="text-sm font-medium text-primary">{selectedCount} selected</span>
           <div className="flex-1" />
+          {onAddToAlbum && (
+            <button onClick={onAddToAlbum} className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors">
+              <FolderPlus className="w-3.5 h-3.5" /> Add to Album
+            </button>
+          )}
           <button onClick={onDeleteSelected} className="flex items-center gap-1.5 text-sm text-destructive hover:text-destructive/80 transition-colors">
             <Trash2 className="w-3.5 h-3.5" /> Delete
           </button>
