@@ -95,7 +95,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
           phase === "pulse" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
         }`}
       >
-        Aura
+        PixelVault
       </h1>
     </div>
   );
