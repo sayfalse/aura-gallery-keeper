@@ -130,6 +130,17 @@ const SettingsPage = () => {
   const [langSearch, setLangSearch] = useState("");
   const [showAllLangs, setShowAllLangs] = useState(false);
 
+  // Announcements state
+  const [announcements, setAnnouncements] = useState<Array<{
+    id: string;
+    title: string | null;
+    content: string;
+    author: string;
+    type: string;
+    created_at: string;
+  }>>([]);
+  const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
+
   useEffect(() => {
     if (!user) return;
     supabase
