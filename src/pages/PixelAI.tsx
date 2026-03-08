@@ -340,19 +340,19 @@ const PixelAI = () => {
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center mb-6 shadow-2xl shadow-violet-500/30">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Hey, I'm Pixel! 👋</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">{t("pixelAI.greeting")}</h2>
             <p className="text-sm text-muted-foreground max-w-sm mb-2">
-              Your professional AI assistant. Chat, code, write, translate, analyze documents, generate images, and more!
+              {t("pixelAI.description")}
             </p>
             {memories.length > 0 && (
-              <p className="text-xs text-primary mb-4">🧠 {memories.length} memories loaded</p>
+              <p className="text-xs text-primary mb-4">{t("pixelAI.memoriesLoaded", { count: memories.length })}</p>
             )}
             <div className="grid grid-cols-2 gap-2 w-full max-w-sm mb-4">
               {[
-                "Write a poem about the stars ✨",
-                "Explain quantum physics simply 🔬",
-                "Help me debug my code 💻",
-                "Summarize a long article 📄",
+                t("pixelAI.suggestions.poem"),
+                t("pixelAI.suggestions.physics"),
+                t("pixelAI.suggestions.debug"),
+                t("pixelAI.suggestions.summarize"),
               ].map((suggestion) => (
                 <button
                   key={suggestion}
