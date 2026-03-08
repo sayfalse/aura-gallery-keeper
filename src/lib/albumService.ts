@@ -51,7 +51,20 @@ export const renameAlbum = async (id: string, name: string) => {
 };
 
 export const addPhotosToAlbum = async (albumId: string, photoIds: string[]) => {
-  const rows = photoIds.map((photo_id) => ({ album_id: albumId, photo_id }));
+  // Get current max sort_order
+  const { data: existing } = await supabase
+    .from("album_photos")
+    .select("sort_order")
+    .eq("album_id", albumId)
+    .order("sort_order", { ascending: false })
+    .limit(1);
+
+  let nextOrder = (existing?.[0]?.sort_order ?? -1) + 1;
+  const rows = photoIds.map((photo_id) => ({
+    album_id: albumId,
+    photo_id,
+    sort_order: nextOrder++,
+  }));
   const { error } = await supabase.from("album_photos").insert(rows);
   if (error) throw error;
 };
@@ -69,10 +82,26 @@ export const fetchAlbumPhotos = async (albumId: string): Promise<string[]> => {
   const { data, error } = await supabase
     .from("album_photos")
     .select("photo_id")
-    .eq("album_id", albumId);
+    .eq("album_id", albumId)
+    .order("sort_order", { ascending: true });
 
   if (error) throw error;
   return (data || []).map((r) => r.photo_id);
+};
+
+export const reorderAlbumPhotos = async (
+  albumId: string,
+  orderedPhotoIds: string[]
+) => {
+  // Update sort_order for each photo in the album
+  const updates = orderedPhotoIds.map((photoId, index) =>
+    supabase
+      .from("album_photos")
+      .update({ sort_order: index })
+      .eq("album_id", albumId)
+      .eq("photo_id", photoId)
+  );
+  await Promise.all(updates);
 };
 
 export const updateAlbumCover = async (albumId: string, photoId: string) => {
