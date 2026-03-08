@@ -5,6 +5,7 @@ interface BottomNavProps {
   activeSection: SidebarSection;
   onSectionChange: (section: SidebarSection) => void;
   onUpload: () => void;
+  sharedCount?: number;
 }
 
 const navItems: { id: SidebarSection; label: string; icon: React.ElementType }[] = [
@@ -14,7 +15,7 @@ const navItems: { id: SidebarSection; label: string; icon: React.ElementType }[]
   { id: "recent", label: "Recent", icon: Clock },
 ];
 
-const BottomNav = ({ activeSection, onSectionChange, onUpload }: BottomNavProps) => {
+const BottomNav = ({ activeSection, onSectionChange, onUpload, sharedCount = 0 }: BottomNavProps) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-xl border-t border-border md:hidden safe-area-bottom">
       <div className="flex items-center justify-around px-2 pt-2 pb-1">
@@ -22,13 +23,20 @@ const BottomNav = ({ activeSection, onSectionChange, onUpload }: BottomNavProps)
           <button
             key={item.id}
             onClick={() => onSectionChange(item.id)}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors min-w-[56px] ${
+            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-colors min-w-[56px] relative ${
               activeSection === item.id
                 ? "text-primary"
                 : "text-muted-foreground"
             }`}
           >
-            <item.icon className={`w-5 h-5 ${activeSection === item.id ? "stroke-[2.5]" : ""}`} />
+            <div className="relative">
+              <item.icon className={`w-5 h-5 ${activeSection === item.id ? "stroke-[2.5]" : ""}`} />
+              {item.id === "shared" && sharedCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 bg-primary text-primary-foreground text-[9px] font-bold px-1 py-0 rounded-full min-w-[16px] text-center leading-[16px]">
+                  {sharedCount > 99 ? "99+" : sharedCount}
+                </span>
+              )}
+            </div>
             <span className="text-[10px] font-medium leading-tight">{item.label}</span>
           </button>
         ))}

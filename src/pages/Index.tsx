@@ -276,6 +276,7 @@ const Index = () => {
         onUpload={() => setShowUpload(true)}
         photoCount={photos.length}
         favoriteCount={photos.filter((p) => p.favorite).length}
+        sharedCount={sharedPhotos.length}
         onSignOut={signOut}
       />
 
@@ -283,6 +284,7 @@ const Index = () => {
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
         onUpload={() => setShowUpload(true)}
+        sharedCount={sharedPhotos.length}
       />
 
       <main className="md:ml-[260px]">
