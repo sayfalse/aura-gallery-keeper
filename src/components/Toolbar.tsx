@@ -27,27 +27,27 @@ const Toolbar = ({
   selectionMode, onToggleSelectionMode, selectedCount, onDeleteSelected, onClearSelection,
 }: ToolbarProps) => {
   return (
-    <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-6 py-4">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">
+    <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-3 md:px-6 py-3 md:py-4">
+      <div className="flex items-center justify-between gap-2 md:gap-4">
+        <h1 className="font-display text-lg md:text-2xl font-bold tracking-tight text-foreground shrink-0">
           {sectionTitles[section]}
         </h1>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search photos..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-9 pr-4 py-2 w-52 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground border-none outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              className="pl-9 pr-3 py-2 w-32 md:w-52 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground border-none outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
 
-          {/* View mode */}
-          <div className="flex items-center rounded-xl bg-secondary p-1">
+          {/* View mode - hidden on small mobile */}
+          <div className="hidden sm:flex items-center rounded-xl bg-secondary p-1">
             <button
               onClick={() => onViewModeChange("grid")}
               className={`p-1.5 rounded-lg transition-colors ${viewMode === "grid" ? "bg-card shadow-sm" : ""}`}

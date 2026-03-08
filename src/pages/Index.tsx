@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import AppSidebar from "@/components/AppSidebar";
+import BottomNav from "@/components/BottomNav";
 import PhotoGrid from "@/components/PhotoGrid";
 import Toolbar from "@/components/Toolbar";
 import Lightbox from "@/components/Lightbox";
@@ -77,7 +78,13 @@ const Index = () => {
         favoriteCount={photos.filter((p) => p.favorite).length}
       />
 
-      <main className="ml-[260px]">
+      <BottomNav
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        onUpload={() => setShowUpload(true)}
+      />
+
+      <main className="md:ml-[260px]">
         <Toolbar
           section={activeSection}
           viewMode={viewMode}
@@ -91,7 +98,7 @@ const Index = () => {
           onClearSelection={() => { setSelectedPhotos(new Set()); setSelectionMode(false); }}
         />
 
-        <div className="p-6">
+        <div className="p-3 md:p-6 pb-24 md:pb-6">
           <PhotoGrid
             photos={filteredPhotos}
             selectedPhotos={selectedPhotos}

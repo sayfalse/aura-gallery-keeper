@@ -104,4 +104,7 @@
     background: hsl(var(--overlay));
     backdrop-filter: blur(20px);
   }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
 }
