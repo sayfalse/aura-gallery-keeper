@@ -44,7 +44,8 @@ const Home = () => {
   const headerY = useTransform(scrollY, [0, 120], [0, -30]);
   const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.85]);
   const headerScale = useTransform(scrollY, [0, 120], [1, 0.97]);
-  const blobY = useTransform(scrollY, [0, 300], [0, -60]);
+  const blobX1 = useTransform(scrollY, [0, 300], [0, 40]);
+  const blobY1 = useTransform(scrollY, [0, 300], [0, -60]);
   const blobX2 = useTransform(scrollY, [0, 300], [0, -30]);
   const blobY2 = useTransform(scrollY, [0, 300], [0, 40]);
 
