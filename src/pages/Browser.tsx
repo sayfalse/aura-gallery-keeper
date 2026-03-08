@@ -26,7 +26,7 @@ const Browser = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [proxyHtml, setProxyHtml] = useState<string | null>(null);
+  const [proxyUrl, setProxyUrl] = useState<string | null>(null);
 
   const [tabs, setTabs] = useState<BrowserTab[]>([
     { id: crypto.randomUUID(), url: "", title: "New Tab", isActive: true, isLoading: false },
