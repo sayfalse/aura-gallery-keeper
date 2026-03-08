@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { action, targetUserId, role } = body;
+    const { action, targetUserId, role, quotaBytes } = body;
 
     if (!targetUserId || !action) {
       return new Response(JSON.stringify({ error: "Missing action or targetUserId" }), {
