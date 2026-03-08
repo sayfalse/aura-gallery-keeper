@@ -130,9 +130,9 @@ const DrivePage = () => {
     setFiles((prev) => prev.filter((f) => f.id !== file.id));
     try {
       await moveDriveFile(file.id, targetFolder);
-      toast.success(`Moved to ${targetFolder === "/" ? "Root" : targetFolder.split("/").filter(Boolean).pop()}`);
+      toast.success(t("drive.movedTo", { folder: targetFolder === "/" ? "Root" : targetFolder.split("/").filter(Boolean).pop() }));
     } catch {
-      toast.error("Failed to move file");
+      toast.error(t("drive.failedMove"));
       loadFiles();
     }
   };
