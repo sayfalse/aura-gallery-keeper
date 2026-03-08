@@ -294,7 +294,7 @@ const ChatPage = () => {
                       disabled={!groupName.trim()}
                       className="ml-auto px-3 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium disabled:opacity-50"
                     >
-                      Create
+                      {t("common.create")}
                     </button>
                   </div>
                 )}
