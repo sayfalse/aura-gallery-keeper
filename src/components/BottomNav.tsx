@@ -5,6 +5,7 @@ interface BottomNavProps {
   activeSection: SidebarSection;
   onSectionChange: (section: SidebarSection) => void;
   onUpload: () => void;
+  sharedCount?: number;
 }
 
 const navItems: { id: SidebarSection; label: string; icon: React.ElementType }[] = [
