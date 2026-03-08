@@ -12,7 +12,24 @@ export interface Song {
   language?: string;
 }
 
-const SAAVN_API = "https://saavn.dev/api";
+const invokeProxy = async (params: Record<string, string>) => {
+  const { data, error } = await supabase.functions.invoke("music-proxy", {
+    body: null,
+    headers: {},
+  });
+  // Use URL params approach via fetch
+  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+  const queryStr = new URLSearchParams(params).toString();
+  const res = await fetch(
+    `https://${projectId}.supabase.co/functions/v1/music-proxy?${queryStr}`,
+    {
+      headers: {
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+    }
+  );
+  return res.json();
+};
 
 const mapSong = (s: any): Song => ({
   id: s.id || "",
@@ -28,18 +45,17 @@ const mapSong = (s: any): Song => ({
 
 export const searchSongs = async (query: string): Promise<Song[]> => {
   try {
-    const res = await fetch(`${SAAVN_API}/search/songs?query=${encodeURIComponent(query)}&limit=20`);
-    const data = await res.json();
+    const data = await invokeProxy({ path: "search", query, limit: "20" });
     return (data.data?.results || []).map(mapSong);
-  } catch {
+  } catch (e) {
+    console.error("Search error:", e);
     return [];
   }
 };
 
 export const getTrendingSongs = async (): Promise<Song[]> => {
   try {
-    const res = await fetch(`${SAAVN_API}/search/songs?query=trending+hindi+2024&limit=20`);
-    const data = await res.json();
+    const data = await invokeProxy({ path: "search", query: "trending hits 2024", limit: "20" });
     return (data.data?.results || []).map(mapSong);
   } catch {
     return [];
@@ -48,8 +64,7 @@ export const getTrendingSongs = async (): Promise<Song[]> => {
 
 export const getSongDetails = async (id: string): Promise<Song | null> => {
   try {
-    const res = await fetch(`${SAAVN_API}/songs/${id}`);
-    const data = await res.json();
+    const data = await invokeProxy({ path: "song", id });
     if (data.data?.[0]) return mapSong(data.data[0]);
     return null;
   } catch {
@@ -59,8 +74,7 @@ export const getSongDetails = async (id: string): Promise<Song | null> => {
 
 export const getSongSuggestions = async (id: string): Promise<Song[]> => {
   try {
-    const res = await fetch(`${SAAVN_API}/songs/${id}/suggestions?limit=10`);
-    const data = await res.json();
+    const data = await invokeProxy({ path: "suggestions", id, limit: "10" });
     return (data.data || []).map(mapSong);
   } catch {
     return [];

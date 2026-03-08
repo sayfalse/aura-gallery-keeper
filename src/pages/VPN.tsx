@@ -52,9 +52,15 @@ const VPNPage = () => {
 
   const dohQuery = async (domain: string) => {
     try {
-      const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${domain}&type=A`, {
-        headers: { Accept: "application/dns-json" },
-      });
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/vpn-proxy?action=dns&domain=${encodeURIComponent(domain)}&type=A`,
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
+      );
       const data = await res.json();
       return data.Answer?.map((a: any) => a.data).join(", ") || "No records found";
     } catch {
