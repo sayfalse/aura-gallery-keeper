@@ -66,7 +66,7 @@ const NotesPage = () => {
       setTitle(note.title);
       setContent(note.content);
     } catch {
-      toast.error("Failed to create note");
+      toast.error(t("notes.failedCreate"));
     }
   };
 
