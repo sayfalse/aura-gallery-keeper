@@ -7,7 +7,7 @@ import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion, useScroll, useTransform, useMotionValue, useAnimation } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Clock, FileText, Sparkles,
-  Shield, ArrowUpRight, TrendingUp, Layers
+  Shield, ArrowUpRight, TrendingUp, Layers, RefreshCw
 } from "lucide-react";
 
 const apps = [
