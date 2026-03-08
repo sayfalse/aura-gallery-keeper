@@ -11,6 +11,7 @@ import NotesPage from "./pages/Notes";
 import DrivePage from "./pages/Drive";
 import ContactsPage from "./pages/Contacts";
 import MailPage from "./pages/Mail";
+import GmailCallback from "./pages/GmailCallback";
 import SettingsPage from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/drive" element={<ProtectedRoute><DrivePage /></ProtectedRoute>} />
               <Route path="/contacts" element={<ProtectedRoute><ContactsPage /></ProtectedRoute>} />
               <Route path="/mail" element={<ProtectedRoute><MailPage /></ProtectedRoute>} />
+              <Route path="/gmail-callback" element={<ProtectedRoute><GmailCallback /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
