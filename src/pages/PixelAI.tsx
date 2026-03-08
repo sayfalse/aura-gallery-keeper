@@ -387,7 +387,7 @@ const PixelAI = () => {
                   </div>
                 )}
                 {msg.role === "user" && msg.fileName && (
-                  <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-lg bg-primary-foreground/10">
+                  <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-lg bg-foreground/10">
                     <FileText className="w-3.5 h-3.5" />
                     <span className="text-[11px] font-medium truncate">{msg.fileName}</span>
                   </div>
