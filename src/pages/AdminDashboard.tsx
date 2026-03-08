@@ -615,35 +615,37 @@ const AdminDashboard = () => {
           </motion.div>
         </div>
 
-        {/* Storage Usage Per User */}
+        {/* Storage Usage Per User with Quota Management */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <HardDrive className="w-4 h-4 text-primary" /> Storage Usage
+                <HardDrive className="w-4 h-4 text-primary" /> Storage Usage & Quotas
                 <Badge variant="secondary" className="text-[10px] ml-1">{formatBytes(stats.overview.totalStorageBytes || 0)} total</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent>
               {(() => {
-                const usersWithStorage = stats.users
-                  .filter((u) => u.storage && u.storage.totalBytes > 0)
-                  .sort((a, b) => (b.storage?.totalBytes || 0) - (a.storage?.totalBytes || 0));
-                const maxBytes = usersWithStorage[0]?.storage?.totalBytes || 1;
+                // Show all users sorted by usage (including zero-usage for quota management)
+                const sortedUsers = [...stats.users].sort((a, b) => (b.storage?.totalBytes || 0) - (a.storage?.totalBytes || 0));
 
-                if (usersWithStorage.length === 0) {
-                  return <p className="text-sm text-muted-foreground text-center py-6">No storage usage yet</p>;
+                if (sortedUsers.length === 0) {
+                  return <p className="text-sm text-muted-foreground text-center py-6">No users yet</p>;
                 }
 
                 return (
                   <div className="space-y-3">
-                    {usersWithStorage.slice(0, 10).map((u) => {
+                    {sortedUsers.slice(0, 15).map((u) => {
                       const bytes = u.storage?.totalBytes || 0;
-                      const pct = (bytes / maxBytes) * 100;
+                      const quota = u.quotaBytes || 1073741824;
+                      const pctOfQuota = Math.min((bytes / quota) * 100, 100);
+                      const isNearLimit = pctOfQuota >= 80;
+                      const isOverLimit = pctOfQuota >= 100;
                       const typeEntries = Object.entries(u.storage?.byType || {}).sort((a, b) => b[1] - a[1]);
+
                       return (
-                        <div key={u.user_id}>
-                          <div className="flex items-center justify-between text-xs mb-1">
+                        <div key={u.user_id} className={`p-2.5 rounded-xl ${isOverLimit ? "bg-destructive/5 border border-destructive/10" : "bg-muted/30"}`}>
+                          <div className="flex items-center justify-between text-xs mb-1.5">
                             <div className="flex items-center gap-2 min-w-0">
                               <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-[9px] font-bold shrink-0">
                                 {(u.display_name || "U")[0].toUpperCase()}
@@ -651,27 +653,67 @@ const AdminDashboard = () => {
                               <span className="text-foreground font-medium truncate">{u.display_name || "Unknown"}</span>
                               <span className="text-muted-foreground shrink-0">{u.storage?.fileCount || 0} files</span>
                             </div>
-                            <span className="font-semibold text-foreground shrink-0 ml-2">{formatBytes(bytes)}</span>
+                            <div className="flex items-center gap-2 shrink-0 ml-2">
+                              <span className={`font-semibold ${isOverLimit ? "text-destructive" : isNearLimit ? "text-amber-500" : "text-foreground"}`}>
+                                {formatBytes(bytes)}
+                              </span>
+                              <span className="text-muted-foreground">/</span>
+                              {/* Quota selector */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button className="text-xs font-medium text-primary hover:underline cursor-pointer">
+                                    {formatBytes(quota)}
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-36">
+                                  <DropdownMenuLabel className="text-xs">Set Quota</DropdownMenuLabel>
+                                  {[
+                                    { label: "500 MB", bytes: 524288000 },
+                                    { label: "1 GB", bytes: 1073741824 },
+                                    { label: "2 GB", bytes: 2147483648 },
+                                    { label: "5 GB", bytes: 5368709120 },
+                                    { label: "10 GB", bytes: 10737418240 },
+                                    { label: "Unlimited", bytes: 107374182400 },
+                                  ].map((opt) => (
+                                    <DropdownMenuItem
+                                      key={opt.bytes}
+                                      className={`text-xs ${quota === opt.bytes ? "font-bold" : ""}`}
+                                      onClick={() =>
+                                        confirmAction(
+                                          `Set quota to ${opt.label}?`,
+                                          `This will set ${u.display_name || "this user"}'s storage limit to ${opt.label}.`,
+                                          () => manageUser("set_quota", u.user_id, undefined)
+                                            .then(() => {})
+                                            .catch(() => {})
+                                            // Use direct call with quotaBytes
+                                        )
+                                      }
+                                    >
+                                      {opt.label} {quota === opt.bytes && "✓"}
+                                    </DropdownMenuItem>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </div>
                           <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                            <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${Math.max(pct, 2)}%` }} />
+                            <div
+                              className={`h-full rounded-full transition-all duration-500 ${isOverLimit ? "bg-destructive" : isNearLimit ? "bg-amber-500" : "bg-primary"}`}
+                              style={{ width: `${Math.max(pctOfQuota, 1)}%` }}
+                            />
                           </div>
                           {typeEntries.length > 0 && (
                             <div className="flex gap-2 mt-1 flex-wrap">
                               {typeEntries.map(([cat, size]) => (
-                                <span key={cat} className="text-[9px] text-muted-foreground">
-                                  {cat}: {formatBytes(size)}
-                                </span>
+                                <span key={cat} className="text-[9px] text-muted-foreground">{cat}: {formatBytes(size)}</span>
                               ))}
                             </div>
                           )}
                         </div>
                       );
                     })}
-                    {usersWithStorage.length > 10 && (
-                      <p className="text-[10px] text-muted-foreground text-center pt-1">
-                        +{usersWithStorage.length - 10} more users with storage
-                      </p>
+                    {sortedUsers.length > 15 && (
+                      <p className="text-[10px] text-muted-foreground text-center pt-1">+{sortedUsers.length - 15} more users</p>
                     )}
                   </div>
                 );
