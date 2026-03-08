@@ -167,12 +167,17 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
   const profileMap: Record<string, string> = {};
   profiles.forEach((p: any) => { profileMap[p.user_id] = p.display_name || p.username || "Unknown"; });
 
+  // Build quota map
+  const quotaMap: Record<string, number> = {};
+  (quotasRes.data || []).forEach((q: any) => { quotaMap[q.user_id] = q.quota_bytes; });
+
   const enrichedProfiles = profiles.map((p: any) => ({
     ...p,
     role: roleMap[p.user_id] || "user",
     email: users.find((u: any) => u.id === p.user_id)?.email || null,
     banned_until: banMap[p.user_id] || null,
     storage: storageByUser[p.user_id] || { totalBytes: 0, fileCount: 0, byType: {} },
+    quotaBytes: quotaMap[p.user_id] || 1073741824, // default 1GB
   }));
 
   const enrichedAuditLogs = auditLogs.map((l: any) => ({
