@@ -31,6 +31,7 @@ const DrivePage = () => {
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [moveFile, setMoveFile] = useState<DriveFile | null>(null);
+  const [previewFile, setPreviewFile] = useState<DriveFile | null>(null);
 
   const loadFiles = useCallback(async () => {
     if (!user) return;
