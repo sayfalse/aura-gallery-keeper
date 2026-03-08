@@ -53,9 +53,9 @@ const ContactsPage = () => {
       setContacts((prev) => [...prev, contact].sort((a, b) => a.firstName.localeCompare(b.firstName)));
       setShowForm(false);
       setForm({ firstName: "", lastName: "", email: "", phone: "", company: "", address: "", notes: "" });
-      toast.success("Contact added!");
+      toast.success(t("contacts.contactAdded"));
     } catch {
-      toast.error("Failed to add contact");
+      toast.error(t("contacts.failedAdd"));
     }
   };
 
