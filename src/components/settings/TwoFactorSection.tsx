@@ -148,7 +148,7 @@ const TwoFactorSection = () => {
 
       {/* QR Code enrollment */}
       {qrCode && (
-        <div classNamprimary/10 border border-primary/20d-xl bg-secondary p-4 space-y-4 animate-fade-in">
+        <div className="rounded-xl bg-primary/10 border border-primary/20 p-4 space-y-4 animate-fade-in">
           <p className="text-xs text-muted-foreground">
             Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
           </p>

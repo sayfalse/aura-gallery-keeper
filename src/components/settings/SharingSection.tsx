@@ -294,7 +294,7 @@ const SharingSection = ({ user }: SharingSectionProps) => {
             const otherName = c.connectedDisplayName || "User";
             const otherUsername = c.connectedUsername;
             return (
-              <div key={c.id}primary/10 border border-primary/20e="rounded-xl bg-primary/10 border border-primary/200 border border-primary/20 p-3">
+              <div key={c.id} className="rounded-xl bg-primary/10 border border-primary/20 p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <p className="text-sm font-medium text-foreground">{otherName}</p>
