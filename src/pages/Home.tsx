@@ -1,8 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { supabase } from "@/integrations/supabase/client";
 import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion } from "framer-motion";
@@ -35,20 +33,6 @@ const Home = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
-  const [counts, setCounts] = useState({ photos: 0, notes: 0, contacts: 0, files: 0 });
-
-  const loadData = useCallback(async () => {
-    if (!user) return;
-    const [p, n, c, f] = await Promise.all([
-      supabase.from("photos").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("deleted", false),
-      supabase.from("notes").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-      supabase.from("contacts").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-      supabase.from("drive_files").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-    ]);
-    setCounts({ photos: p.count || 0, notes: n.count || 0, contacts: c.count || 0, files: f.count || 0 });
-  }, [user]);
-
-  useEffect(() => { loadData(); }, [loadData]);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -58,13 +42,6 @@ const Home = () => {
     if (h < 21) return t("home.greeting.evening");
     return t("home.greeting.night");
   };
-
-  const stats = [
-    { label: t("home.stats.photos"), value: counts.photos, icon: Image, color: "from-blue-500 to-cyan-400" },
-    { label: t("home.stats.notes"), value: counts.notes, icon: StickyNote, color: "from-amber-400 to-orange-500" },
-    { label: t("home.stats.people"), value: counts.contacts, icon: Users, color: "from-emerald-400 to-teal-500" },
-    { label: t("home.stats.files"), value: counts.files, icon: HardDrive, color: "from-sky-400 to-blue-600" },
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,30 +59,11 @@ const Home = () => {
       </header>
 
       <main className="px-5 pb-28 space-y-6">
-        {/* Stats with colorful icons */}
-        <div className="grid grid-cols-4 gap-2">
-          {stats.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.05 * i, duration: 0.35 }}
-              className="p-3 rounded-2xl bg-card border border-border text-center"
-            >
-              <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${s.color} flex items-center justify-center mx-auto mb-1.5`}>
-                <s.icon className="w-3.5 h-3.5 text-white" />
-              </div>
-              <p className="text-lg font-bold text-foreground leading-none">{s.value}</p>
-              <p className="text-[9px] text-muted-foreground mt-1">{s.label}</p>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* AI CTA with vibrant gradient */}
+        {/* AI CTA */}
         <motion.button
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.4 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
           onClick={() => navigate("/pixel-ai")}
           className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 p-4 text-left group"
         >
