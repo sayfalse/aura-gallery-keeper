@@ -12,7 +12,8 @@ import QuickNavButton from "@/components/QuickNavButton";
 import {
   getGmailAuthUrl, getGmailAccounts, removeGmailAccount,
   listMessages, getMessage, sendMessage, modifyMessage, trashMessage,
-  getHeader, getMessageBody, type GmailMessage,
+  getHeader, getMessageBody, getAttachments, getAttachment, base64UrlToBlob,
+  type GmailMessage, type AttachmentInfo,
 } from "@/lib/gmailService";
 
 type View = "accounts" | "inbox" | "message" | "compose";
