@@ -11,9 +11,10 @@ import AddToAlbumModal from "@/components/AddToAlbumModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchPhotos, fetchDeletedPhotos, toggleFavorite as toggleFavApi, softDeletePhoto, uploadPhoto, restorePhoto, permanentlyDeletePhoto } from "@/lib/photoService";
 import { fetchAlbums, createAlbum, deleteAlbum, addPhotosToAlbum, fetchAlbumPhotos, updateAlbumCover, reorderAlbumPhotos } from "@/lib/albumService";
+import { fetchSharedWithMe, saveSharedPhoto, type SharedPhoto } from "@/lib/sharedPhotoService";
 import type { Photo, Album, ViewMode, SidebarSection } from "@/types/photo";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download, Share2 } from "lucide-react";
 
 const Index = () => {
   const { user, signOut } = useAuth();
