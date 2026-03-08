@@ -10,6 +10,7 @@ import SplashScreen from "@/components/SplashScreen";
 import ErrorBoundary from "@/core/ErrorBoundary";
 import LoadingScreen from "@/core/LoadingScreen";
 import AppLockScreen, { shouldShowLockScreen, updateLastActive } from "./components/AppLockScreen";
+import { WallpaperProvider } from "@/contexts/WallpaperContext";
 
 // Lazy-loaded module pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
