@@ -211,7 +211,7 @@ const ChatPage = () => {
       const found = updated.find(c => c.id === convId);
       if (found) setActiveConv(found);
     } catch {
-      toast.error("Failed to create group");
+      toast.error(t("chat.failedCreateGroup"));
     }
   };
 
