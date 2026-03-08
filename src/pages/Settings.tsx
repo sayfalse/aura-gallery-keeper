@@ -26,6 +26,14 @@ const SettingsPage = () => {
   const [contactCount, setContactCount] = useState(0);
   const [driveFileCount, setDriveFileCount] = useState(0);
 
+  // App lock state
+  const [lockEnabled, setLockEnabled] = useState(() => getAppLockSettings().enabled);
+  const [lockTimeout, setLockTimeout] = useState(() => getAppLockSettings().timeout);
+  const [showPinSetup, setShowPinSetup] = useState(false);
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [pinStep, setPinStep] = useState<"enter" | "confirm">("enter");
+
   useEffect(() => {
     if (!user) return;
     // Load profile
