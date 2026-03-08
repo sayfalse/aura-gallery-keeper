@@ -14,7 +14,7 @@ const VoiceChat = ({ onTranscript, onClose, isProcessing, lastResponse }: VoiceC
   const [transcript, setTranscript] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const pulseRef = useRef<HTMLDivElement>(null);
+  const pulseRef = useRef<HTMLButtonElement>(null);
 
   const startListening = useCallback(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
