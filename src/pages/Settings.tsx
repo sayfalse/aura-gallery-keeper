@@ -570,7 +570,7 @@ const SettingsPage = () => {
                 }}
                 className="text-sm text-primary font-medium hover:underline"
               >
-                Change PIN
+                {t("settings.changePin")}
               </button>
             )}
           </div>
