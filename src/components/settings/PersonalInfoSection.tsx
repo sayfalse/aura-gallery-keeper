@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Mail, Lock, Eye, EyeOff, KeyRound, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, KeyRound, ShieldCheck, ChevronDown, ChevronUp, Calendar } from "lucide-react";
+import { format } from "date-fns";
 import { toast } from "sonner";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
@@ -138,6 +139,15 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
           <div className="px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground capitalize flex items-center gap-2">
             <KeyRound className="w-4 h-4 text-muted-foreground" />
             {provider === "google" ? "Google Account" : "Email & Password"}
+          </div>
+        </div>
+
+        {/* Account Creation Date */}
+        <div>
+          <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Account Created</label>
+          <div className="px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+            {user.created_at ? format(new Date(user.created_at), "MMMM d, yyyy 'at' h:mm a") : "Unknown"}
           </div>
         </div>
 
