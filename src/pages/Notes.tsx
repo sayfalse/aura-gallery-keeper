@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchNotes, createNote, updateNote, deleteNote, type Note } from "@/lib/noteService";
 import { ArrowLeft, Plus, Pin, Trash2, Search, StickyNote, FileDown } from "lucide-react";
 import { toast } from "sonner";
@@ -34,6 +35,7 @@ const htmlToMarkdown = (html: string): string => {
 const NotesPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const [title, setTitle] = useState("");
@@ -47,7 +49,7 @@ const NotesPage = () => {
       const data = await fetchNotes(user.id);
       setNotes(data);
     } catch {
-      toast.error("Failed to load notes");
+      toast.error(t("notes.failedLoad"));
     } finally {
       setLoading(false);
     }
@@ -58,13 +60,13 @@ const NotesPage = () => {
   const handleCreate = async () => {
     if (!user) return;
     try {
-      const note = await createNote(user.id, "Untitled Note", "");
+      const note = await createNote(user.id, t("notes.untitled") + " Note", "");
       setNotes((prev) => [note, ...prev]);
       setActiveNote(note);
       setTitle(note.title);
       setContent(note.content);
     } catch {
-      toast.error("Failed to create note");
+      toast.error(t("notes.failedCreate"));
     }
   };
 
@@ -76,7 +78,7 @@ const NotesPage = () => {
         prev.map((n) => (n.id === activeNote.id ? { ...n, title, content, updatedAt: new Date() } : n))
       );
     } catch {
-      toast.error("Failed to save note");
+      toast.error(t("notes.failedSave"));
     }
   }, [activeNote, title, content]);
 
@@ -85,9 +87,9 @@ const NotesPage = () => {
     if (activeNote?.id === id) { setActiveNote(null); setTitle(""); setContent(""); }
     try {
       await deleteNote(id);
-      toast.success("Note deleted");
+      toast.success(t("notes.deleted"));
     } catch {
-      toast.error("Failed to delete note");
+      toast.error(t("notes.failedDelete"));
       loadNotes();
     }
   };
@@ -101,7 +103,7 @@ const NotesPage = () => {
     try {
       await updateNote(note.id, { pinned: newPinned });
     } catch {
-      toast.error("Failed to update note");
+      toast.error(t("notes.failedUpdate"));
     }
   };
 
@@ -115,7 +117,7 @@ const NotesPage = () => {
     a.download = `${title || "Untitled"}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Exported as Markdown!");
+    toast.success(t("notes.exported"));
   };
 
   const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
@@ -141,7 +143,7 @@ const NotesPage = () => {
         </button>
         <div className="flex-1 flex items-center gap-2">
           <StickyNote className="w-5 h-5 text-amber-500" />
-          <h1 className="font-display text-lg font-bold text-foreground">Notes</h1>
+          <h1 className="font-display text-lg font-bold text-foreground">{t("notes.title")}</h1>
         </div>
         <QuickNavButton />
         <button onClick={handleCreate} className="p-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
@@ -156,7 +158,7 @@ const NotesPage = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search notes..."
+                placeholder={t("notes.searchNotes")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
@@ -171,7 +173,7 @@ const NotesPage = () => {
             ) : filtered.length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 <StickyNote className="w-10 h-10 mx-auto mb-3 opacity-40" />
-                <p className="text-sm">No notes yet</p>
+                <p className="text-sm">{t("notes.noNotes")}</p>
               </div>
             ) : (
               filtered.map((note) => (
@@ -185,8 +187,8 @@ const NotesPage = () => {
                   <div className="flex items-start gap-2">
                     {note.pinned && <Pin className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />}
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm text-foreground truncate">{note.title || "Untitled"}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">{stripHtml(note.content).slice(0, 60) || "No content"}</p>
+                      <p className="font-medium text-sm text-foreground truncate">{note.title || t("notes.untitled")}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{stripHtml(note.content).slice(0, 60) || t("notes.noContent")}</p>
                       <p className="text-[10px] text-muted-foreground/60 mt-1">{format(note.updatedAt, "MMM d, h:mm a")}</p>
                     </div>
                   </div>
@@ -204,7 +206,7 @@ const NotesPage = () => {
                   <ArrowLeft className="w-4 h-4 text-foreground" />
                 </button>
                 <div className="flex-1" />
-                <button onClick={handleExportMarkdown} className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="Export as Markdown">
+                <button onClick={handleExportMarkdown} className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title={t("notes.exportMarkdown")}>
                   <FileDown className="w-4 h-4" />
                 </button>
                 <button onClick={() => handleTogglePin(activeNote)} className={`p-2 rounded-lg transition-colors ${activeNote.pinned ? "text-amber-500" : "text-muted-foreground hover:text-foreground"}`}>
@@ -220,7 +222,7 @@ const NotesPage = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   onBlur={() => handleSave()}
-                  placeholder="Title"
+                  placeholder={t("notes.titlePlaceholder")}
                   className="w-full text-2xl font-display font-bold text-foreground bg-transparent outline-none mb-4 placeholder:text-muted-foreground/40"
                 />
                 <RichTextEditor
@@ -234,7 +236,7 @@ const NotesPage = () => {
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
                 <StickyNote className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Select a note or create a new one</p>
+                <p className="text-sm">{t("notes.selectNote")}</p>
               </div>
             </div>
           )}

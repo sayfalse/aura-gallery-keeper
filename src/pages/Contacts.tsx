@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchContacts, createContact, updateContact, deleteContact, type Contact } from "@/lib/contactService";
 import { ArrowLeft, Plus, Trash2, Search, Users, Phone, Mail, Building, Star, X } from "lucide-react";
 import { toast } from "sonner";
@@ -12,6 +13,7 @@ const AVATAR_COLORS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#
 const ContactsPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [activeContact, setActiveContact] = useState<Contact | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -29,7 +31,7 @@ const ContactsPage = () => {
       const data = await fetchContacts(user.id);
       setContacts(data);
     } catch {
-      toast.error("Failed to load contacts");
+      toast.error(t("contacts.failedLoad"));
     } finally {
       setLoading(false);
     }
@@ -39,7 +41,7 @@ const ContactsPage = () => {
 
   const handleCreate = async () => {
     if (!user || !form.firstName.trim()) {
-      toast.error("First name is required");
+      toast.error(t("contacts.firstNameRequired"));
       return;
     }
     try {
@@ -51,22 +53,21 @@ const ContactsPage = () => {
       setContacts((prev) => [...prev, contact].sort((a, b) => a.firstName.localeCompare(b.firstName)));
       setShowForm(false);
       setForm({ firstName: "", lastName: "", email: "", phone: "", company: "", address: "", notes: "" });
-      toast.success("Contact added!");
+      toast.success(t("contacts.contactAdded"));
     } catch {
-      toast.error("Failed to add contact");
+      toast.error(t("contacts.failedAdd"));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this contact?")) return;
+    if (!confirm(t("contacts.deleteConfirm"))) return;
     setContacts((prev) => prev.filter((c) => c.id !== id));
     if (activeContact?.id === id) setActiveContact(null);
     try {
       await deleteContact(id);
-      toast.success("Contact deleted");
+      toast.success(t("contacts.contactDeleted"));
     } catch {
-      toast.error("Failed to delete");
-      loadContacts();
+      toast.error(t("contacts.failedDelete"));
     }
   };
 
@@ -77,7 +78,7 @@ const ContactsPage = () => {
     try {
       await updateContact(contact.id, { favorite: newFav });
     } catch {
-      toast.error("Failed to update");
+      toast.error(t("contacts.failedUpdate"));
     }
   };
 
@@ -102,7 +103,7 @@ const ContactsPage = () => {
         </button>
         <div className="flex-1 flex items-center gap-2">
           <Users className="w-5 h-5 text-emerald-500" />
-          <h1 className="font-display text-lg font-bold text-foreground">Contacts</h1>
+          <h1 className="font-display text-lg font-bold text-foreground">{t("contacts.title")}</h1>
           <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{contacts.length}</span>
         </div>
         <QuickNavButton />
@@ -118,7 +119,7 @@ const ContactsPage = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
-                type="text" placeholder="Search contacts..." value={searchQuery}
+                type="text" placeholder={t("contacts.searchContacts")} value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
               />
@@ -132,7 +133,7 @@ const ContactsPage = () => {
             ) : Object.keys(grouped).length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 <Users className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No contacts yet</p>
+                <p className="text-sm">{t("contacts.noContacts")}</p>
               </div>
             ) : (
               Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b)).map(([letter, letterContacts]) => (
@@ -194,24 +195,24 @@ const ContactsPage = () => {
                 {activeContact.phone && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                     <Phone className="w-4 h-4 text-muted-foreground" />
-                    <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm text-foreground">{activeContact.phone}</p></div>
+                    <div><p className="text-xs text-muted-foreground">{t("common.phone")}</p><p className="text-sm text-foreground">{activeContact.phone}</p></div>
                   </div>
                 )}
                 {activeContact.email && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                     <Mail className="w-4 h-4 text-muted-foreground" />
-                    <div><p className="text-xs text-muted-foreground">Email</p><p className="text-sm text-foreground">{activeContact.email}</p></div>
+                    <div><p className="text-xs text-muted-foreground">{t("common.email")}</p><p className="text-sm text-foreground">{activeContact.email}</p></div>
                   </div>
                 )}
                 {activeContact.address && (
                   <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                     <Building className="w-4 h-4 text-muted-foreground" />
-                    <div><p className="text-xs text-muted-foreground">Address</p><p className="text-sm text-foreground">{activeContact.address}</p></div>
+                    <div><p className="text-xs text-muted-foreground">{t("common.address")}</p><p className="text-sm text-foreground">{activeContact.address}</p></div>
                   </div>
                 )}
                 {activeContact.notes && (
                   <div className="p-3 rounded-xl bg-muted/50">
-                    <p className="text-xs text-muted-foreground mb-1">Notes</p>
+                     <p className="text-xs text-muted-foreground mb-1">{t("common.notes")}</p>
                     <p className="text-sm text-foreground">{activeContact.notes}</p>
                   </div>
                 )}
@@ -220,7 +221,7 @@ const ContactsPage = () => {
           ) : (
             <div className="text-center text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Select a contact</p>
+              <p className="text-sm">{t("contacts.selectContact")}</p>
             </div>
           )}
         </main>
@@ -231,22 +232,22 @@ const ContactsPage = () => {
         <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
           <div className="bg-card rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-display text-lg font-bold text-foreground">New Contact</h2>
+              <h2 className="font-display text-lg font-bold text-foreground">{t("contacts.newContact")}</h2>
               <button onClick={() => setShowForm(false)} className="p-1 rounded-lg hover:bg-accent"><X className="w-5 h-5 text-muted-foreground" /></button>
             </div>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <input placeholder="First name *" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className="px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-                <input placeholder="Last name" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className="px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+                <input placeholder={t("contacts.firstName")} value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className="px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+                <input placeholder={t("contacts.lastName")} value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className="px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
               </div>
-              <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-              <input placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-              <input placeholder="Company" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-              <input placeholder="Address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
-              <textarea placeholder="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none" />
+              <input placeholder={t("common.email")} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+              <input placeholder={t("common.phone")} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+              <input placeholder={t("contacts.company")} value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+              <input placeholder={t("common.address")} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground" />
+              <textarea placeholder={t("common.notes")} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none" />
             </div>
             <button onClick={handleCreate} className="w-full mt-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors">
-              Add Contact
+              {t("contacts.addContact")}
             </button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, DragEvent } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchDriveFiles, uploadDriveFile, deleteDriveFile, downloadDriveFile, getDriveFolders, moveDriveFile, renameDriveFile, formatFileSize, type DriveFile } from "@/lib/driveService";
 import { ArrowLeft, Upload, Trash2, Download, HardDrive, File, Image, FileText, Film, Music, Search, FolderPlus, Folder, ChevronRight, Home, FolderInput, Eye, Pencil, X, Check } from "lucide-react";
 import { toast } from "sonner";
@@ -21,6 +22,7 @@ const getFileIcon = (mimeType: string) => {
 const DrivePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<DriveFile[]>([]);
   const [folders, setFolders] = useState<string[]>([]);
@@ -47,7 +49,7 @@ const DrivePage = () => {
       setFiles(data);
       setFolders(allFolders);
     } catch {
-      toast.error("Failed to load files");
+      toast.error(t("drive.failedLoad"));
     } finally {
       setLoading(false);
     }
@@ -73,9 +75,9 @@ const DrivePage = () => {
         Array.from(fileList).map((f) => uploadDriveFile(user.id, f, currentFolder))
       );
       setFiles((prev) => [...uploadedFiles, ...prev]);
-      toast.success(`${uploadedFiles.length} file(s) uploaded!`);
+      toast.success(t("drive.filesUploaded", { count: uploadedFiles.length }));
     } catch {
-      toast.error("Upload failed");
+      toast.error(t("drive.uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -108,18 +110,18 @@ const DrivePage = () => {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      toast.error("Download failed");
+      toast.error(t("drive.downloadFailed"));
     }
   };
 
   const handleDelete = async (file: DriveFile) => {
-    if (!confirm(`Delete "${file.name}"?`)) return;
+    if (!confirm(t("drive.deleteConfirm", { name: file.name }))) return;
     setFiles((prev) => prev.filter((f) => f.id !== file.id));
     try {
       await deleteDriveFile(file.id, file.storagePath);
-      toast.success("File deleted");
+      toast.success(t("drive.fileDeleted"));
     } catch {
-      toast.error("Failed to delete file");
+      toast.error(t("drive.failedDelete"));
       loadFiles();
     }
   };
@@ -128,9 +130,9 @@ const DrivePage = () => {
     setFiles((prev) => prev.filter((f) => f.id !== file.id));
     try {
       await moveDriveFile(file.id, targetFolder);
-      toast.success(`Moved to ${targetFolder === "/" ? "Root" : targetFolder.split("/").filter(Boolean).pop()}`);
+      toast.success(t("drive.movedTo", { folder: targetFolder === "/" ? "Root" : targetFolder.split("/").filter(Boolean).pop() }));
     } catch {
-      toast.error("Failed to move file");
+      toast.error(t("drive.failedMove"));
       loadFiles();
     }
   };
@@ -144,9 +146,9 @@ const DrivePage = () => {
     try {
       await renameDriveFile(file.id, trimmed);
       setFiles((prev) => prev.map((f) => f.id === file.id ? { ...f, name: trimmed } : f));
-      toast.success("File renamed");
+      toast.success(t("drive.fileRenamed"));
     } catch {
-      toast.error("Rename failed");
+      toast.error(t("drive.renameFailed"));
     }
     setRenamingId(null);
   };
@@ -162,9 +164,9 @@ const DrivePage = () => {
       setFolders((prev) => [...prev, folderPath].sort());
       setShowNewFolder(false);
       setNewFolderName("");
-      toast.success("Folder created!");
+      toast.success(t("drive.folderCreated"));
     } catch {
-      toast.error("Failed to create folder");
+      toast.error(t("drive.failedCreateFolder"));
     }
   };
 
@@ -199,7 +201,7 @@ const DrivePage = () => {
         <div className="fixed inset-0 z-50 bg-primary/10 border-4 border-dashed border-primary rounded-xl flex items-center justify-center pointer-events-none">
           <div className="text-center">
             <Upload className="w-12 h-12 text-primary mx-auto mb-2" />
-            <p className="text-lg font-bold text-primary">Drop files to upload</p>
+            <p className="text-lg font-bold text-primary">{t("drive.dropToUpload")}</p>
           </div>
         </div>
       )}
@@ -210,9 +212,9 @@ const DrivePage = () => {
         </button>
         <div className="flex-1 flex items-center gap-2">
           <HardDrive className="w-5 h-5 text-primary" />
-          <h1 className="font-display text-lg font-bold text-foreground">Drive</h1>
+          <h1 className="font-display text-lg font-bold text-foreground">{t("drive.title")}</h1>
           <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-            {formatFileSize(totalSize)} used
+            {formatFileSize(totalSize)} {t("drive.used")}
           </span>
         </div>
         <QuickNavButton />
@@ -243,15 +245,15 @@ const DrivePage = () => {
         {showNewFolder && (
           <div className="mb-4 p-3 rounded-xl bg-card border border-border flex items-center gap-2">
             <Folder className="w-5 h-5 text-muted-foreground shrink-0" />
-            <input type="text" placeholder="Folder name..." value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()} autoFocus className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
-            <button onClick={handleCreateFolder} className="px-3 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90">Create</button>
-            <button onClick={() => { setShowNewFolder(false); setNewFolderName(""); }} className="px-3 py-1 rounded-lg text-muted-foreground text-xs hover:bg-accent">Cancel</button>
+            <input type="text" placeholder={t("drive.folderName")} value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()} autoFocus className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
+            <button onClick={handleCreateFolder} className="px-3 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90">{t("common.create")}</button>
+            <button onClick={() => { setShowNewFolder(false); setNewFolderName(""); }} className="px-3 py-1 rounded-lg text-muted-foreground text-xs hover:bg-accent">{t("common.cancel")}</button>
           </div>
         )}
 
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input type="text" placeholder="Search files..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20" />
+          <input type="text" placeholder={t("drive.searchFiles")} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20" />
         </div>
 
         {loading ? (
@@ -262,7 +264,7 @@ const DrivePage = () => {
           <>
             {subfolders.length > 0 && (
               <div className="mb-4">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Folders</p>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("drive.folders")}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {subfolders.map((folder) => (
                     <button key={folder} onClick={() => navigateToFolder(folder)} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 hover:bg-accent/50 transition-all">
@@ -277,12 +279,12 @@ const DrivePage = () => {
             {filtered.length === 0 && subfolders.length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 <HardDrive className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No files yet</p>
-                <p className="text-xs mt-1">Upload files or drag & drop</p>
+                <p className="text-sm">{t("drive.noFiles")}</p>
+                <p className="text-xs mt-1">{t("drive.uploadOrDrag")}</p>
               </div>
             ) : filtered.length > 0 && (
               <div>
-                {subfolders.length > 0 && <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Files</p>}
+                {subfolders.length > 0 && <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("drive.files")}</p>}
                 <div className="space-y-1">
                   {filtered.map((file) => {
                     const FileIcon = getFileIcon(file.mimeType);

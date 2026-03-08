@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getConversations, getMessages, sendMessage, createDirectConversation,
@@ -19,6 +20,7 @@ import QuickNavButton from "@/components/QuickNavButton";
 const ChatPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [conversations, setConversations] = useState<ConversationWithDetails[]>([]);
   const [activeConv, setActiveConv] = useState<ConversationWithDetails | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -80,7 +82,7 @@ const ChatPage = () => {
           }
         }
       } catch {
-        toast.error("Failed to load messages");
+        toast.error(t("chat.failedLoad"));
       }
     };
     load();
@@ -134,7 +136,7 @@ const ChatPage = () => {
       await sendMessage(activeConv.id, user.id, content);
       loadConversations();
     } catch {
-      toast.error("Failed to send message");
+      toast.error(t("chat.failedSend"));
       setNewMsg(content);
     } finally {
       setSending(false);
@@ -191,7 +193,7 @@ const ChatPage = () => {
       }
     } catch (err: any) {
       console.error("Failed to start conversation:", err);
-      toast.error(err?.message || "Failed to start conversation. Please try again.");
+      toast.error(err?.message || t("chat.failedStart"));
     }
   };
 
@@ -209,7 +211,7 @@ const ChatPage = () => {
       const found = updated.find(c => c.id === convId);
       if (found) setActiveConv(found);
     } catch {
-      toast.error("Failed to create group");
+      toast.error(t("chat.failedCreateGroup"));
     }
   };
 
@@ -244,20 +246,20 @@ const ChatPage = () => {
           </button>
           <div className="flex-1 flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-primary" />
-            <h1 className="font-display text-lg font-bold text-foreground">Messages</h1>
+            <h1 className="font-display text-lg font-bold text-foreground">{t("chat.title")}</h1>
           </div>
           <QuickNavButton />
           <button
             onClick={() => setShowNewGroup(true)}
             className="p-2 rounded-xl hover:bg-accent transition-colors text-muted-foreground"
-            title="New group"
+            title={t("chat.newGroup")}
           >
             <Users className="w-5 h-5" />
           </button>
           <button
             onClick={() => setShowNewChat(true)}
             className="p-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            title="New chat"
+            title={t("chat.newChat")}
           >
             <Plus className="w-5 h-5" />
           </button>
@@ -271,7 +273,7 @@ const ChatPage = () => {
                 <ArrowLeft className="w-5 h-5 text-foreground" />
               </button>
               <h2 className="font-display text-lg font-bold text-foreground">
-                {showNewGroup ? "New Group" : "New Chat"}
+                {showNewGroup ? t("chat.newGroup") : t("chat.newChat")}
               </h2>
             </header>
 
@@ -279,20 +281,20 @@ const ChatPage = () => {
               <div className="px-4 py-3 border-b border-border">
                 <input
                   type="text"
-                  placeholder="Group name..."
+                  placeholder={t("chat.groupName")}
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
                 />
                 {selectedMembers.length > 0 && (
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
-                    <span className="text-xs text-muted-foreground">{selectedMembers.length} selected</span>
+                    <span className="text-xs text-muted-foreground">{t("chat.selected", { count: selectedMembers.length })}</span>
                     <button
                       onClick={handleCreateGroup}
                       disabled={!groupName.trim()}
                       className="ml-auto px-3 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium disabled:opacity-50"
                     >
-                      Create
+                      {t("common.create")}
                     </button>
                   </div>
                 )}
@@ -304,7 +306,7 @@ const ChatPage = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search users..."
+                  placeholder={t("chat.searchUsers")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
@@ -352,10 +354,10 @@ const ChatPage = () => {
                 </button>
               ))}
               {searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
-                <p className="text-center text-sm text-muted-foreground py-8">No users found</p>
+                <p className="text-center text-sm text-muted-foreground py-8">{t("chat.noUsersFound")}</p>
               )}
               {searchQuery.length < 2 && (
-                <p className="text-center text-sm text-muted-foreground py-8">Type at least 2 characters to search</p>
+                <p className="text-center text-sm text-muted-foreground py-8">{t("chat.typeToSearch")}</p>
               )}
             </div>
           </div>
@@ -370,8 +372,8 @@ const ChatPage = () => {
           ) : conversations.length === 0 ? (
             <div className="text-center py-20 px-6">
               <MessageCircle className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground">No conversations yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Tap + to start a new chat</p>
+              <p className="text-sm text-muted-foreground">{t("chat.noConversations")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("chat.tapToStart")}</p>
             </div>
           ) : (
             <div className="divide-y divide-border">

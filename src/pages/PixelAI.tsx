@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Send, Sparkles, Loader2, Trash2, Bot, ChevronDown, Paperclip, FileText, X, Brain, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,6 +64,7 @@ const readFileAsText = (file: File): Promise<string> =>
 const PixelAI = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -96,12 +98,12 @@ const PixelAI = () => {
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("File too large. Max 10MB 📁"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error(t("pixelAI.fileTooLarge")); return; }
     try {
       const content = await readFileAsText(file);
       setAttachedFile({ name: file.name, content: content.slice(0, 50000) });
-      toast.success(`📎 ${file.name} attached!`);
-    } catch { toast.error("Couldn't read this file 😔"); }
+      toast.success(t("pixelAI.fileAttached", { name: file.name }));
+    } catch { toast.error(t("pixelAI.cantReadFile")); }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -179,19 +181,19 @@ const PixelAI = () => {
       }
 
       if (!assistantSoFar) {
-        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: "Couldn't generate a response. Please try again. 😅", isLoading: false } : m));
+        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: t("pixelAI.noResponse"), isLoading: false } : m));
       } else {
         setLastVoiceResponse(assistantSoFar);
       }
     } catch (e: any) {
-      toast.error(e.message || "Failed to get response");
+      toast.error(e.message || t("pixelAI.failedResponse"));
       setMessages(prev => prev.filter(m => m.id !== assistantId));
     }
   };
 
   const sendImageMessage = async (prompt: string) => {
     const assistantId = crypto.randomUUID();
-    setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "🎨 Creating your masterpiece...", isLoading: true, model: currentModel.name }]);
+    setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: t("pixelAI.creating"), isLoading: true, model: currentModel.name }]);
 
     try {
       const resp = await fetch(CHAT_URL, {
@@ -210,7 +212,7 @@ const PixelAI = () => {
       const text = data.choices?.[0]?.message?.content || "Here's your image! ✨";
       setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: text, images, isLoading: false } : m));
     } catch (e: any) {
-      toast.error(e.message || "Image generation failed");
+      toast.error(e.message || t("pixelAI.imageFailed"));
       setMessages(prev => prev.filter(m => m.id !== assistantId));
     }
   };
@@ -264,20 +266,20 @@ const PixelAI = () => {
   const handleClearChat = () => {
     setMessages([]);
     setLastVoiceResponse("");
-    toast.success("Chat cleared! 🗑️");
+    toast.success(t("pixelAI.chatCleared"));
   };
 
   const handleMemoryDelete = async (id: string) => {
     await deleteMemory(id);
     setMemories(prev => prev.filter(m => m.id !== id));
-    toast.success("Memory deleted 🗑️");
+    toast.success(t("pixelAI.memoryDeleted"));
   };
 
   const handleMemoryClearAll = async () => {
     if (!user) return;
     await clearAllMemories(user.id);
     setMemories([]);
-    toast.success("All memories cleared 🧹");
+    toast.success(t("pixelAI.memoriesCleared"));
   };
 
   const handleAddMemory = async (content: string, category: string) => {
@@ -285,7 +287,7 @@ const PixelAI = () => {
     await addMemory(user.id, content, category);
     const updated = await getMemories(user.id);
     setMemories(updated);
-    toast.success("Memory saved! 🧠");
+    toast.success(t("pixelAI.memorySaved"));
   };
 
   const handleVoiceTranscript = (text: string) => {
@@ -338,19 +340,19 @@ const PixelAI = () => {
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center mb-6 shadow-2xl shadow-violet-500/30">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Hey, I'm Pixel! 👋</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">{t("pixelAI.greeting")}</h2>
             <p className="text-sm text-muted-foreground max-w-sm mb-2">
-              Your professional AI assistant. Chat, code, write, translate, analyze documents, generate images, and more!
+              {t("pixelAI.description")}
             </p>
             {memories.length > 0 && (
-              <p className="text-xs text-primary mb-4">🧠 {memories.length} memories loaded</p>
+              <p className="text-xs text-primary mb-4">{t("pixelAI.memoriesLoaded", { count: memories.length })}</p>
             )}
             <div className="grid grid-cols-2 gap-2 w-full max-w-sm mb-4">
               {[
-                "Write a poem about the stars ✨",
-                "Explain quantum physics simply 🔬",
-                "Help me debug my code 💻",
-                "Summarize a long article 📄",
+                t("pixelAI.suggestions.poem"),
+                t("pixelAI.suggestions.physics"),
+                t("pixelAI.suggestions.debug"),
+                t("pixelAI.suggestions.summarize"),
               ].map((suggestion) => (
                 <button
                   key={suggestion}
@@ -366,7 +368,7 @@ const PixelAI = () => {
               className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-sm font-semibold shadow-lg shadow-violet-500/20 hover:opacity-90 transition-opacity"
             >
               <Mic className="w-4 h-4" />
-              Start Voice Chat 🎙️
+              {t("pixelAI.startVoice")}
             </button>
           </div>
         )}
@@ -395,7 +397,7 @@ const PixelAI = () => {
                 {msg.isLoading ? (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>{msg.content || "Thinking... 🤔"}</span>
+                    <span>{msg.content || t("pixelAI.thinking")}</span>
                   </div>
                 ) : (
                   <>
