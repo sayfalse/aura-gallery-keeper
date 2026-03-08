@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { LayoutGrid, Image, StickyNote, HardDrive, Users, Mail, Settings, Home, Globe, Sparkles, MessageCircle } from "lucide-react";
+import { LayoutGrid, Image, StickyNote, HardDrive, Users, Mail, Settings, Home, Globe, Sparkles, MessageCircle, Music2, Shield } from "lucide-react";
 
 const modules = [
   { path: "/", icon: Home, label: "Home" },
@@ -12,6 +12,8 @@ const modules = [
   { path: "/chat", icon: MessageCircle, label: "Chat" },
   { path: "/pixel-ai", icon: Sparkles, label: "Pixel AI" },
   { path: "/browser", icon: Globe, label: "Browser" },
+  { path: "/music", icon: Music2, label: "Music" },
+  { path: "/vpn", icon: Shield, label: "VPN & DNS" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
 

@@ -18,6 +18,8 @@ import PixelAIPage from "./pages/PixelAI";
 import BrowserPage from "./pages/Browser";
 import ChatPage from "./pages/Chat";
 import TempMailPage from "./pages/TempMail";
+import MusicPage from "./pages/Music";
+import VPNPage from "./pages/VPN";
 import SettingsPage from "./pages/Settings";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -94,6 +96,8 @@ const AppContent = () => {
           <Route path="/browser" element={<ProtectedRoute><BrowserPage /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/temp-mail" element={<ProtectedRoute><TempMailPage /></ProtectedRoute>} />
+          <Route path="/music" element={<ProtectedRoute><MusicPage /></ProtectedRoute>} />
+          <Route path="/vpn" element={<ProtectedRoute><VPNPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />

@@ -7,7 +7,7 @@ import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, Globe, MessageCircle,
-  ArrowUpRight, Layers, AtSign
+  ArrowUpRight, Layers, AtSign, Music2, Shield
 } from "lucide-react";
 
 const apps = [
@@ -20,6 +20,8 @@ const apps = [
   { id: "chat", name: "Chat", icon: MessageCircle, gradient: "from-green-500 to-emerald-400", path: "/chat", desc: "Messages" },
   { id: "pixel-ai", name: "Pixel AI", icon: Sparkles, gradient: "from-violet-500 to-fuchsia-400", path: "/pixel-ai", desc: "AI Assistant" },
   { id: "browser", name: "Browser", icon: Globe, gradient: "from-rose-500 to-orange-400", path: "/browser", desc: "Web" },
+  { id: "music", name: "Music", icon: Music2, gradient: "from-pink-500 to-rose-400", path: "/music", desc: "Stream music" },
+  { id: "vpn", name: "VPN & DNS", icon: Shield, gradient: "from-orange-500 to-amber-400", path: "/vpn", desc: "Privacy tools" },
   { id: "settings", name: "Settings", icon: Settings, gradient: "from-slate-500 to-gray-400", path: "/settings", desc: "Preferences" },
 ];
 
