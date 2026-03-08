@@ -32,7 +32,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
           />
           <motion.div
             className="absolute w-48 h-48 rounded-full blur-3xl -translate-x-24 translate-y-16"
-            style={{ background: "radial-gradient(circle, hsl(340 75% 55% / 0.08), transparent)" }}
+            style={{ background: "radial-gradient(circle, hsl(199 85% 50% / 0.08), transparent)" }}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1.3, opacity: 1 }}
             transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
