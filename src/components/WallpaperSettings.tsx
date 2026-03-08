@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { useWallpaper } from "@/contexts/WallpaperContext";
-import { ImageIcon, Trash2, SlidersHorizontal, Upload } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 const PRESET_WALLPAPERS = [
@@ -20,14 +20,8 @@ const WallpaperSettings = () => {
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image must be under 10MB");
-      return;
-    }
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Image must be under 10MB"); return; }
     const reader = new FileReader();
     reader.onload = () => {
       setWallpaper(reader.result as string);
@@ -39,119 +33,78 @@ const WallpaperSettings = () => {
   }, [setWallpaper]);
 
   return (
-    <section className="rounded-2xl bg-card border border-border p-5">
-      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-        <ImageIcon className="w-4 h-4" /> Wallpaper
-      </h2>
-
+    <div>
       {/* Current preview */}
       {wallpaperUrl && (
-        <div className="relative mb-4 rounded-xl overflow-hidden h-32 border border-border">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url(${wallpaperUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              opacity: wallpaperOpacity,
-              filter: wallpaperBlur > 0 ? `blur(${wallpaperBlur}px)` : undefined,
-            }}
-          />
+        <div className="relative mb-3 rounded-xl overflow-hidden h-28 border border-border">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `url(${wallpaperUrl})`, backgroundSize: "cover", backgroundPosition: "center",
+            opacity: wallpaperOpacity, filter: wallpaperBlur > 0 ? `blur(${wallpaperBlur}px)` : undefined,
+          }} />
           <div className="absolute inset-0 bg-background/50" />
           <div className="relative flex items-center justify-center h-full">
-            <p className="text-xs font-medium text-foreground">Preview</p>
+            <p className="text-xs font-medium text-foreground">Home Screen Preview</p>
           </div>
         </div>
       )}
 
-      {/* Upload button */}
+      {/* Upload */}
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
       <button
         onClick={() => fileInputRef.current?.click()}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-border hover:border-primary/50 text-sm font-medium text-muted-foreground hover:text-primary transition-all mb-4"
+        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border hover:border-primary/50 text-sm font-medium text-muted-foreground hover:text-primary transition-all mb-3"
       >
-        <Upload className="w-4 h-4" />
-        Upload Custom Wallpaper
+        <Upload className="w-4 h-4" /> Upload Custom Wallpaper
       </button>
 
       {/* Presets */}
       <p className="text-xs text-muted-foreground mb-2">Or choose a preset:</p>
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div className="grid grid-cols-3 gap-2 mb-3">
         {PRESET_WALLPAPERS.map((preset) => (
           <button
             key={preset.name}
-            onClick={() => {
-              setWallpaper(preset.url);
-              setShowControls(true);
-              toast.success(`Wallpaper: ${preset.name}`);
-            }}
-            className={`h-16 rounded-xl overflow-hidden border-2 transition-all ${
+            onClick={() => { setWallpaper(preset.url); setShowControls(true); toast.success(`Wallpaper: ${preset.name}`); }}
+            className={`h-14 rounded-xl overflow-hidden border-2 transition-all ${
               wallpaperUrl === preset.url ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/30"
             }`}
           >
-            <div
-              className="w-full h-full"
-              style={{ backgroundImage: `url(${preset.url})`, backgroundSize: "cover", backgroundPosition: "center" }}
-            />
+            <div className="w-full h-full" style={{ backgroundImage: `url(${preset.url})`, backgroundSize: "cover", backgroundPosition: "center" }} />
           </button>
         ))}
       </div>
 
       {/* Controls */}
       {showControls && wallpaperUrl && (
-        <div className="space-y-4 pt-3 border-t border-border">
-          <button
-            onClick={() => setShowControls(!showControls)}
-            className="flex items-center gap-2 text-xs text-primary font-medium"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5" /> Adjust Settings
-          </button>
-
+        <div className="space-y-3 pt-3 border-t border-border">
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-muted-foreground">Opacity</span>
               <span className="text-xs text-foreground font-medium">{Math.round(wallpaperOpacity * 100)}%</span>
             </div>
-            <input
-              type="range"
-              min="0.02"
-              max="0.5"
-              step="0.01"
-              value={wallpaperOpacity}
+            <input type="range" min="0.02" max="0.5" step="0.01" value={wallpaperOpacity}
               onChange={(e) => setWallpaperOpacity(parseFloat(e.target.value))}
               className="w-full h-2 bg-primary/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-md"
             />
           </div>
-
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-muted-foreground">Blur</span>
               <span className="text-xs text-foreground font-medium">{wallpaperBlur}px</span>
             </div>
-            <input
-              type="range"
-              min="0"
-              max="20"
-              step="1"
-              value={wallpaperBlur}
+            <input type="range" min="0" max="20" step="1" value={wallpaperBlur}
               onChange={(e) => setWallpaperBlur(parseInt(e.target.value))}
               className="w-full h-2 bg-primary/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-md"
             />
           </div>
-
           <button
-            onClick={() => {
-              clearWallpaper();
-              setShowControls(false);
-              toast.success("Wallpaper removed");
-            }}
+            onClick={() => { clearWallpaper(); setShowControls(false); toast.success("Wallpaper removed"); }}
             className="flex items-center gap-2 text-sm text-destructive font-medium hover:underline"
           >
             <Trash2 className="w-3.5 h-3.5" /> Remove Wallpaper
           </button>
         </div>
       )}
-    </section>
+    </div>
   );
 };
 
