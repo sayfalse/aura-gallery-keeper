@@ -97,6 +97,26 @@ const Home = () => {
           </div>
         </motion.button>
 
+        {/* Admin link */}
+        {isAdmin && (
+          <motion.button
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.4 }}
+            onClick={() => navigate("/admin")}
+            className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-destructive/20 hover:border-destructive/40 hover:shadow-lg transition-all duration-200 text-left"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-sm">
+              <Shield className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground leading-tight">Admin Dashboard</p>
+              <p className="text-[10px] text-muted-foreground">System stats & user management</p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
+          </motion.button>
+        )}
+
         {/* App grid */}
         <div>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("home.apps")}</h2>
