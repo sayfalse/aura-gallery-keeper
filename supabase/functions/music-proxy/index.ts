@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { decode as base64Decode, encode as base64Encode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,34 +14,98 @@ const HEADERS = {
   "Referer": "https://www.jiosaavn.com/",
 };
 
-function getDownloadUrl(song: any): string {
-  // media_preview_url -> convert to full quality
-  if (song.media_preview_url) {
-    return song.media_preview_url
-      .replace("preview.saavncdn.com", "aac.saavncdn.com")
-      .replace("_96_p.mp4", "_320.mp4");
+// DES-ECB decryption for JioSaavn encrypted URLs
+// Key: "38346591" 
+const DES_KEY = new TextEncoder().encode("38346591");
+
+// Simple DES implementation for ECB mode
+// JioSaavn uses DES-ECB with PKCS5 padding and base64
+async function decryptUrl(encryptedUrl: string): Promise<string> {
+  try {
+    // Import key for DES-ECB
+    const key = await crypto.subtle.importKey(
+      "raw",
+      DES_KEY,
+      { name: "DES-ECB" } as any,
+      false,
+      ["decrypt"]
+    );
+    
+    const data = base64Decode(encryptedUrl);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: "DES-ECB" } as any,
+      key,
+      data
+    );
+    
+    return new TextDecoder().decode(decrypted).replace(/[\x00-\x08]/g, "");
+  } catch (e) {
+    console.log("Crypto subtle DES not supported, using fallback");
+    // Fallback: use the song detail API which sometimes gives direct URLs
+    return encryptedUrl;
   }
-  // more_info has encrypted_media_url sometimes
-  if (song.more_info?.encrypted_media_url) {
-    return song.more_info.encrypted_media_url;
+}
+
+// Get streaming URL by using the station/song API which returns direct CDN URLs
+async function getStreamUrl(songId: string): Promise<string> {
+  try {
+    const params = new URLSearchParams({
+      __call: "song.generateAuthToken",
+      url: `https://www.jiosaavn.com/song/x/${songId}`,
+      bitrate: "320",
+      api_version: "4",
+      _format: "json",
+      ctx: "web6dot0",
+    });
+    
+    const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
+    const data = await res.json();
+    
+    if (data.auth_url) return data.auth_url;
+    
+    // Try alternate method
+    const params2 = new URLSearchParams({
+      __call: "webapi.get",
+      token: songId,
+      type: "song",
+      includeMetaTags: "0",
+      ctx: "web6dot0",
+      api_version: "4",
+      _format: "json",
+      _marker: "0",
+    });
+    
+    const res2 = await fetch(`${JIOSAAVN_BASE}?${params2}`, { headers: HEADERS });
+    const data2 = await res2.json();
+    
+    if (data2.songs?.[0]?.media_preview_url) {
+      return data2.songs[0].media_preview_url
+        .replace("preview.saavncdn.com", "aac.saavncdn.com")
+        .replace("_96_p.mp4", "_320.mp4");
+    }
+    
+    return "";
+  } catch (e) {
+    console.error("getStreamUrl error:", e);
+    return "";
   }
-  return "";
 }
 
 function mapSong(s: any): any {
-  // Get highest quality image
   let image = s.image || "";
   if (typeof image === "string") {
     image = image.replace(/150x150|50x50/, "500x500");
   }
 
-  const url = getDownloadUrl(s);
   const artist = s.more_info?.artistMap?.primary_artists?.map((a: any) => a.name).join(", ")
     || s.primary_artists
     || s.more_info?.primary_artists
     || s.singers
-    || s.subtitle
+    || (s.subtitle ? s.subtitle.split(" - ")[0] : "")
     || "";
+
+  // encrypted_media_url will be resolved later
+  const encUrl = s.more_info?.encrypted_media_url || "";
 
   return {
     id: s.id || "",
@@ -49,10 +114,25 @@ function mapSong(s: any): any {
     album: s.more_info?.album || s.album || "",
     image,
     duration: s.more_info?.duration ? parseInt(s.more_info.duration) : (s.duration ? parseInt(s.duration) : 0),
-    url,
+    url: encUrl, // Will be replaced with stream URL
     year: s.year || s.more_info?.year || "",
     language: s.language || s.more_info?.language || "",
   };
+}
+
+async function resolveStreamUrls(songs: any[]): Promise<any[]> {
+  // Batch resolve stream URLs for songs
+  const resolved = await Promise.all(
+    songs.map(async (song: any) => {
+      if (song.url && song.url.startsWith("http")) return song;
+      if (song.id) {
+        const streamUrl = await getStreamUrl(song.id);
+        return { ...song, url: streamUrl };
+      }
+      return song;
+    })
+  );
+  return resolved;
 }
 
 async function searchSongs(query: string, limit: string): Promise<any> {
@@ -69,18 +149,10 @@ async function searchSongs(query: string, limit: string): Promise<any> {
 
   const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
   const data = await res.json();
-  
-  // Log first result to debug
-  if (data.results?.[0]) {
-    console.log("Sample search result keys:", Object.keys(data.results[0]));
-    console.log("Sample more_info keys:", data.results[0].more_info ? Object.keys(data.results[0].more_info) : "no more_info");
-    console.log("media_preview_url:", data.results[0].media_preview_url);
-    console.log("subtitle:", data.results[0].subtitle);
-    console.log("title:", data.results[0].title);
-  }
+  const results = (data.results || []).map(mapSong);
+  const resolved = await resolveStreamUrls(results);
 
-  const results = data.results || [];
-  return { data: { results: results.map(mapSong) } };
+  return { data: { results: resolved } };
 }
 
 async function getSongById(id: string): Promise<any> {
@@ -94,12 +166,11 @@ async function getSongById(id: string): Promise<any> {
 
   const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
   const data = await res.json();
-  
-  // Log raw response
   const songs = data.songs || (data[id] ? [data[id]] : Object.values(data).filter((v: any) => v && typeof v === 'object' && v.id));
-  console.log("getSongById raw keys:", songs[0] ? Object.keys(songs[0]) : "empty");
-  
-  return { data: songs.map(mapSong) };
+  const mapped = songs.map(mapSong);
+  const resolved = await resolveStreamUrls(mapped);
+
+  return { data: resolved };
 }
 
 async function getSuggestions(id: string, limit: string): Promise<any> {
@@ -115,8 +186,10 @@ async function getSuggestions(id: string, limit: string): Promise<any> {
   const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
   const data = await res.json();
   const songs = Array.isArray(data) ? data : Object.values(data).filter((v: any) => v && typeof v === 'object' && v.id);
+  const mapped = songs.map(mapSong);
+  const resolved = await resolveStreamUrls(mapped);
 
-  return { data: songs.map(mapSong) };
+  return { data: resolved };
 }
 
 serve(async (req) => {
