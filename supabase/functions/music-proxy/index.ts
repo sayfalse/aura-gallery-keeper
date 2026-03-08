@@ -63,9 +63,18 @@ function mapSong(s: any): any {
 
 async function fetchJioSaavn(params: Record<string, string>): Promise<any> {
   const qs = new URLSearchParams(params).toString();
-  const res = await fetch(`${JIOSAAVN_BASE}?${qs}`, { headers: HEADERS });
+  const url = `${JIOSAAVN_BASE}?${qs}`;
+  const res = await fetch(url, { headers: HEADERS });
   if (!res.ok) throw new Error(`JioSaavn API error: ${res.status}`);
-  return res.json();
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    // Sometimes JioSaavn returns JSONP or HTML, try to extract JSON
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error("Invalid JSON response");
+  }
 }
 
 async function searchSongs(query: string, limit: string): Promise<any> {
