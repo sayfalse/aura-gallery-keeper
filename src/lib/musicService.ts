@@ -27,11 +27,10 @@ const invokeProxy = async (params: Record<string, string>) => {
   return res.json();
 };
 
-// The proxy already maps songs to our format, so just pass through
 const mapSong = (s: any): Song => ({
   id: s.id || "",
   name: s.name || s.title || "",
-  artist: s.artist || s.artists?.primary?.map((a: any) => a.name).join(", ") || "",
+  artist: s.artist || "",
   album: s.album || "",
   image: s.image || "",
   duration: s.duration ? parseInt(s.duration) : 0,
