@@ -1,6 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createDecipheriv } from "node:crypto";
-import { Buffer } from "node:buffer";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,19 +12,16 @@ const HEADERS = {
   "Referer": "https://www.jiosaavn.com/",
 };
 
-function decryptUrl(encryptedUrl: string): string {
-  try {
-    const key = Buffer.from("38346591", "utf8");
-    const data = Buffer.from(encryptedUrl, "base64");
-    const decipher = createDecipheriv("des-ecb", key, Buffer.alloc(0));
-    decipher.setAutoPadding(true);
-    const decrypted = Buffer.concat([decipher.update(data), decipher.final()]);
-    const url = decrypted.toString("utf8");
-    return url.replace("_96.mp4", "_320.mp4").replace("_96_p.mp4", "_320.mp4");
-  } catch (e) {
-    console.error("Decrypt error:", e);
-    return "";
+function getStreamUrl(s: any): string {
+  // Use media_preview_url and upgrade quality
+  const previewUrl = s.media_preview_url || s.more_info?.media_preview_url;
+  if (previewUrl) {
+    return previewUrl
+      .replace("preview.saavncdn.com", "aac.saavncdn.com")
+      .replace("_96_p.mp4", "_320.mp4")
+      .replace("_96.mp4", "_320.mp4");
   }
+  return "";
 }
 
 function mapSong(s: any): any {
@@ -37,16 +32,6 @@ function mapSong(s: any): any {
     || s.primary_artists || s.more_info?.primary_artists || s.singers
     || (s.subtitle ? s.subtitle.split(" - ")[0] : "") || "";
 
-  let url = "";
-  const encUrl = s.encrypted_media_url || s.more_info?.encrypted_media_url;
-  if (encUrl) url = decryptUrl(encUrl);
-  if (!url) {
-    const previewUrl = s.media_preview_url || s.more_info?.media_preview_url;
-    if (previewUrl) {
-      url = previewUrl.replace("preview.saavncdn.com", "aac.saavncdn.com").replace("_96_p.mp4", "_320.mp4");
-    }
-  }
-
   return {
     id: s.id || "",
     name: s.title || s.song || "",
@@ -54,7 +39,7 @@ function mapSong(s: any): any {
     album: s.more_info?.album || s.album || "",
     image,
     duration: s.more_info?.duration ? parseInt(s.more_info.duration) : (s.duration ? parseInt(s.duration) : 0),
-    url,
+    url: getStreamUrl(s),
     year: s.year || "",
     language: s.language || "",
   };
@@ -69,16 +54,7 @@ async function resolveSongUrl(songId: string): Promise<string> {
     const data = await res.json();
     const song = data.songs?.[0] || data[songId];
     if (!song) return "";
-    const encUrl = song.encrypted_media_url || song.more_info?.encrypted_media_url;
-    if (encUrl) {
-      const decrypted = decryptUrl(encUrl);
-      if (decrypted) return decrypted;
-    }
-    const previewUrl = song.media_preview_url || song.more_info?.media_preview_url;
-    if (previewUrl) {
-      return previewUrl.replace("preview.saavncdn.com", "aac.saavncdn.com").replace("_96_p.mp4", "_320.mp4");
-    }
-    return "";
+    return getStreamUrl(song);
   } catch { return ""; }
 }
 
