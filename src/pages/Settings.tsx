@@ -205,7 +205,7 @@ const SettingsPage = () => {
         </button>
         <div className="flex-1 flex items-center gap-2">
           <Settings className="w-5 h-5 text-muted-foreground" />
-          <h1 className="font-display text-lg font-bold text-foreground">Settings</h1>
+          <h1 className="font-display text-lg font-bold text-foreground">{t("settings.title")}</h1>
         </div>
         <QuickNavButton />
       </header>
