@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, ImageIcon, Loader2, Trash2, Bot } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Loader2, Trash2, Bot, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
@@ -14,7 +13,36 @@ interface Message {
   content: string;
   images?: string[];
   isLoading?: boolean;
+  model?: string;
 }
+
+interface AIModel {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  category: string;
+  supportsImages?: boolean;
+}
+
+const AI_MODELS: AIModel[] = [
+  // Gemini
+  { id: "google/gemini-3-flash-preview", name: "Gemini 3 Flash", emoji: "⚡", description: "Fast & capable", category: "🔷 Gemini" },
+  { id: "google/gemini-2.5-pro", name: "Gemini 2.5 Pro", emoji: "💎", description: "Top-tier reasoning", category: "🔷 Gemini" },
+  { id: "google/gemini-2.5-flash", name: "Gemini 2.5 Flash", emoji: "🚀", description: "Balanced speed & quality", category: "🔷 Gemini" },
+  { id: "google/gemini-2.5-flash-lite", name: "Gemini 2.5 Flash Lite", emoji: "🪶", description: "Lightweight & fast", category: "🔷 Gemini" },
+  { id: "google/gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", emoji: "🧠", description: "Next-gen reasoning", category: "🔷 Gemini" },
+  // ChatGPT
+  { id: "openai/gpt-5", name: "GPT-5", emoji: "🌟", description: "Powerful all-rounder", category: "🟢 ChatGPT" },
+  { id: "openai/gpt-5-mini", name: "GPT-5 Mini", emoji: "✨", description: "Fast & affordable", category: "🟢 ChatGPT" },
+  { id: "openai/gpt-5-nano", name: "GPT-5 Nano", emoji: "⚙️", description: "Ultra-fast & efficient", category: "🟢 ChatGPT" },
+  { id: "openai/gpt-5.2", name: "GPT-5.2", emoji: "🔮", description: "Enhanced reasoning", category: "🟢 ChatGPT" },
+  // Image Gen
+  { id: "google/gemini-2.5-flash-image", name: "Gemini Image", emoji: "🎨", description: "Generate images from text", category: "🖼️ Image Generation", supportsImages: true },
+  { id: "google/gemini-3-pro-image-preview", name: "Gemini 3 Pro Image", emoji: "🖌️", description: "Next-gen image creation", category: "🖼️ Image Generation", supportsImages: true },
+];
+
+const DEFAULT_MODEL = "google/gemini-3-flash-preview";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pixel-chat`;
 
@@ -23,9 +51,13 @@ const PixelAI = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [imageMode, setImageMode] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+  const [showModelPicker, setShowModelPicker] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const currentModel = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
+  const isImageModel = currentModel.supportsImages;
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -38,18 +70,15 @@ const PixelAI = () => {
   const sendTextMessage = async (userContent: string, allMessages: Message[]) => {
     let assistantSoFar = "";
     const assistantId = crypto.randomUUID();
-
-    setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "", isLoading: true }]);
+    setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "", isLoading: true, model: currentModel.name }]);
 
     try {
       const resp = await fetch(CHAT_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: JSON.stringify({
           messages: allMessages.filter(m => !m.images).map(m => ({ role: m.role, content: m.content })),
+          model: selectedModel,
         }),
       });
 
@@ -66,7 +95,6 @@ const PixelAI = () => {
         const { done, value } = await reader.read();
         if (done) break;
         buf += decoder.decode(value, { stream: true });
-
         let idx: number;
         while ((idx = buf.indexOf("\n")) !== -1) {
           let line = buf.slice(0, idx);
@@ -82,12 +110,12 @@ const PixelAI = () => {
               assistantSoFar += delta;
               setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: assistantSoFar, isLoading: false } : m));
             }
-          } catch { /* partial */ }
+          } catch {}
         }
       }
 
       if (!assistantSoFar) {
-        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: "I couldn't generate a response. Please try again.", isLoading: false } : m));
+        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: "Couldn't generate a response. Please try again. 😅", isLoading: false } : m));
       }
     } catch (e: any) {
       toast.error(e.message || "Failed to get response");
@@ -97,16 +125,13 @@ const PixelAI = () => {
 
   const sendImageMessage = async (prompt: string) => {
     const assistantId = crypto.randomUUID();
-    setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "🎨 Generating image...", isLoading: true }]);
+    setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "🎨 Creating your masterpiece...", isLoading: true, model: currentModel.name }]);
 
     try {
       const resp = await fetch(CHAT_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ messages: [{ role: "user", content: prompt }], generateImage: true }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        body: JSON.stringify({ messages: [{ role: "user", content: prompt }], generateImage: true, model: selectedModel }),
       });
 
       if (!resp.ok) {
@@ -116,8 +141,7 @@ const PixelAI = () => {
 
       const data = await resp.json();
       const images = data.choices?.[0]?.message?.images?.map((img: any) => img.image_url?.url) || [];
-      const text = data.choices?.[0]?.message?.content || "Here's your generated image:";
-
+      const text = data.choices?.[0]?.message?.content || "Here's your image! ✨";
       setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: text, images, isLoading: false } : m));
     } catch (e: any) {
       toast.error(e.message || "Image generation failed");
@@ -128,27 +152,21 @@ const PixelAI = () => {
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
-
     const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: trimmed };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setInput("");
     setIsLoading(true);
-
-    if (imageMode) {
-      await sendImageMessage(trimmed);
-    } else {
-      await sendTextMessage(trimmed, updatedMessages);
-    }
+    if (isImageModel) await sendImageMessage(trimmed);
+    else await sendTextMessage(trimmed, updatedMessages);
     setIsLoading(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
+
+  const categories = [...new Set(AI_MODELS.map(m => m.category))];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -162,8 +180,8 @@ const PixelAI = () => {
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-foreground">Pixel AI</h1>
-            <p className="text-[10px] text-muted-foreground">Your intelligent assistant</p>
+            <h1 className="text-base font-bold text-foreground">Pixel AI ✨</h1>
+            <p className="text-[10px] text-muted-foreground">{currentModel.emoji} {currentModel.name}</p>
           </div>
         </div>
         {messages.length > 0 && (
@@ -174,15 +192,15 @@ const PixelAI = () => {
       </header>
 
       {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 pb-48 space-y-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 pb-52 space-y-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full min-h-[50vh] text-center px-6">
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center mb-6 shadow-2xl shadow-violet-500/30">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">Hey, I'm Pixel!</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Hey, I'm Pixel! 👋</h2>
             <p className="text-sm text-muted-foreground max-w-sm mb-6">
-              Your AI assistant that can chat, write, translate, code, analyze, and generate images. Ask me anything in any language!
+              Your AI assistant powered by multiple models. Chat, write, translate, code, analyze, and create images! 🌍
             </p>
             <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
               {[
@@ -213,12 +231,13 @@ const PixelAI = () => {
                 <div className="flex items-center gap-1.5 mb-1">
                   <Bot className="w-3.5 h-3.5 text-violet-500" />
                   <span className="text-[10px] font-semibold text-violet-500">Pixel</span>
+                  {msg.model && <span className="text-[9px] text-muted-foreground">· {msg.model}</span>}
                 </div>
               )}
               {msg.isLoading ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>{msg.content || "Thinking..."}</span>
+                  <span>{msg.content || "Thinking... 🤔"}</span>
                 </div>
               ) : (
                 <>
@@ -228,12 +247,7 @@ const PixelAI = () => {
                   {msg.images && msg.images.length > 0 && (
                     <div className="mt-3 space-y-2">
                       {msg.images.map((imgUrl, i) => (
-                        <img
-                          key={i}
-                          src={imgUrl}
-                          alt={`Generated image ${i + 1}`}
-                          className="rounded-xl max-w-full border border-border shadow-sm"
-                        />
+                        <img key={i} src={imgUrl} alt={`Generated image ${i + 1}`} className="rounded-xl max-w-full border border-border shadow-sm" />
                       ))}
                     </div>
                   )}
@@ -244,34 +258,63 @@ const PixelAI = () => {
         ))}
       </div>
 
+      {/* Model Picker Modal */}
+      {showModelPicker && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end justify-center" onClick={() => setShowModelPicker(false)}>
+          <div className="w-full max-w-lg bg-card rounded-t-3xl border-t border-border max-h-[70vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-center pt-3 pb-2">
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            </div>
+            <h3 className="text-lg font-bold text-foreground text-center mb-4 px-5">Choose AI Model 🤖</h3>
+            
+            {categories.map(category => (
+              <div key={category} className="mb-4">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-5 mb-2">{category}</p>
+                <div className="space-y-0.5 px-3">
+                  {AI_MODELS.filter(m => m.category === category).map(model => (
+                    <button
+                      key={model.id}
+                      onClick={() => { setSelectedModel(model.id); setShowModelPicker(false); }}
+                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
+                        selectedModel === model.id ? "bg-primary/10" : "hover:bg-accent/60"
+                      }`}
+                    >
+                      <span className="text-xl">{model.emoji}</span>
+                      <div className="flex-1 text-left">
+                        <p className={`text-sm font-semibold ${selectedModel === model.id ? "text-primary" : "text-foreground"}`}>{model.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{model.description}</p>
+                      </div>
+                      {selectedModel === model.id && <Check className="w-5 h-5 text-primary" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div className="h-8" />
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 bg-gradient-to-t from-background via-background to-transparent pt-6">
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-1.5 mb-2">
-            <button
-              onClick={() => setImageMode(false)}
-              className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
-                !imageMode ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              💬 Chat
-            </button>
-            <button
-              onClick={() => setImageMode(true)}
-              className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all ${
-                imageMode ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white" : "bg-card border border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              🎨 Image
-            </button>
-          </div>
+          {/* Model selector pill */}
+          <button
+            onClick={() => setShowModelPicker(true)}
+            className="flex items-center gap-1.5 mb-2 px-3 py-1.5 rounded-full bg-card border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
+          >
+            <span>{currentModel.emoji}</span>
+            <span>{currentModel.name}</span>
+            <ChevronDown className="w-3 h-3" />
+          </button>
+
           <div className="flex items-end gap-2 bg-card border border-border rounded-2xl p-2 shadow-lg">
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={imageMode ? "Describe the image you want to create..." : "Ask Pixel anything in any language..."}
+              placeholder={isImageModel ? "Describe the image you want to create... 🎨" : "Ask Pixel anything... 💬"}
               className="min-h-[40px] max-h-[120px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm"
               rows={1}
             />
@@ -279,13 +322,13 @@ const PixelAI = () => {
               size="icon"
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className={`shrink-0 rounded-xl h-9 w-9 ${imageMode ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:opacity-90" : ""}`}
+              className={`shrink-0 rounded-xl h-9 w-9 ${isImageModel ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:opacity-90" : ""}`}
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-            {imageMode ? "Pixel will generate an image from your description" : "Pixel supports all languages • Powered by AI"}
+            {isImageModel ? "Image generation mode 🖼️" : "Supports all languages 🌐 • Powered by AI ⚡"}
           </p>
         </div>
       </div>
