@@ -533,7 +533,7 @@ const SettingsPage = () => {
 
             {lockEnabled && (
               <div>
-                <p className="text-xs text-muted-foreground mb-2">Lock after</p>
+                <p className="text-xs text-muted-foreground mb-2">{t("settings.lockAfter")}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { label: "Immediately", value: 0 },
