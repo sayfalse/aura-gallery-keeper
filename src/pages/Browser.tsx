@@ -1,36 +1,57 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Globe, RefreshCw, Search, ExternalLink, Home } from "lucide-react";
+import { ArrowLeft, ArrowRight, Globe, RefreshCw, Share2, BookOpen, ChevronLeft, ChevronRight, RotateCw, Lock } from "lucide-react";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
-import QuickNavButton from "@/components/QuickNavButton";
 
 const BrowserPage = () => {
   const navigate = useNavigate();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [url, setUrl] = useState("https://www.google.com/webhp?igu=1");
-  const [inputUrl, setInputUrl] = useState("https://www.google.com");
+  const [inputUrl, setInputUrl] = useState("google.com");
   const [loading, setLoading] = useState(true);
+  const [focused, setFocused] = useState(false);
+  const [history, setHistory] = useState<string[]>(["https://www.google.com/webhp?igu=1"]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+
+  const navigateTo = (target: string) => {
+    setUrl(target);
+    setLoading(true);
+    const newHistory = [...history.slice(0, historyIndex + 1), target];
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
 
   const handleNavigate = (e: React.FormEvent) => {
     e.preventDefault();
     let target = inputUrl.trim();
     if (!target) return;
     if (!target.startsWith("http://") && !target.startsWith("https://")) {
-      // If it looks like a URL, add https, otherwise search Google
       if (target.includes(".") && !target.includes(" ")) {
         target = "https://" + target;
       } else {
         target = `https://www.google.com/search?igu=1&q=${encodeURIComponent(target)}`;
       }
     }
-    setUrl(target);
-    setLoading(true);
+    navigateTo(target);
+    setFocused(false);
   };
 
-  const handleHome = () => {
-    setUrl("https://www.google.com/webhp?igu=1");
-    setInputUrl("https://www.google.com");
-    setLoading(true);
+  const goBack = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      setUrl(history[newIndex]);
+      setLoading(true);
+    }
+  };
+
+  const goForward = () => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      setUrl(history[newIndex]);
+      setLoading(true);
+    }
   };
 
   const handleRefresh = () => {
@@ -40,60 +61,108 @@ const BrowserPage = () => {
     }
   };
 
-  const handleOpenExternal = () => {
-    window.open(url, "_blank", "noopener,noreferrer");
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({ title: "Shared from Browser", url });
+    } else {
+      navigator.clipboard.writeText(url);
+    }
   };
+
+  const displayUrl = () => {
+    try {
+      const u = new URL(url);
+      return u.hostname.replace("www.", "");
+    } catch {
+      return url;
+    }
+  };
+
+  const isSecure = url.startsWith("https://");
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="flex items-center gap-2 px-3 py-2 border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-20 shrink-0">
-        <button onClick={() => navigate("/")} className="p-2 rounded-xl hover:bg-accent transition-colors shrink-0">
-          <ArrowLeft className="w-5 h-5 text-foreground" />
-        </button>
-        <div className="flex items-center gap-2 flex-1">
-          <Globe className="w-4 h-4 text-primary shrink-0" />
-          <form onSubmit={handleNavigate} className="flex-1 flex items-center">
-            <input
-              type="text"
-              value={inputUrl}
-              onChange={(e) => setInputUrl(e.target.value)}
-              placeholder="Search or enter URL..."
-              className="w-full px-3 py-1.5 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </form>
-        </div>
-        <button onClick={handleHome} className="p-2 rounded-xl hover:bg-accent transition-colors shrink-0" title="Home">
-          <Home className="w-4 h-4 text-muted-foreground" />
-        </button>
-        <button onClick={handleRefresh} className="p-2 rounded-xl hover:bg-accent transition-colors shrink-0" title="Refresh">
-          <RefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? "animate-spin" : ""}`} />
-        </button>
-        <button onClick={handleOpenExternal} className="p-2 rounded-xl hover:bg-accent transition-colors shrink-0" title="Open externally">
-          <ExternalLink className="w-4 h-4 text-muted-foreground" />
-        </button>
-        <QuickNavButton />
-      </header>
-
-      {/* Browser Content */}
+      {/* Page content */}
       <div className="flex-1 relative">
+        {/* Loading progress bar - Safari style */}
         {loading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="absolute top-0 left-0 right-0 z-20 h-[2px] bg-secondary overflow-hidden">
+            <div className="h-full bg-primary animate-pulse" style={{ width: "70%", animation: "safari-load 1.5s ease-in-out infinite" }} />
           </div>
         )}
         <iframe
           ref={iframeRef}
           src={url}
-          className="w-full h-full border-0"
-          style={{ minHeight: "calc(100vh - 56px)" }}
+          className="w-full border-0"
+          style={{ height: "calc(100vh - 88px)" }}
           onLoad={() => setLoading(false)}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
           title="Browser"
         />
       </div>
 
-      <ModuleSwitcher />
+      {/* Safari-style bottom toolbar */}
+      <div className="shrink-0 bg-card/95 backdrop-blur-2xl border-t border-border pb-[env(safe-area-inset-bottom)]">
+        {/* URL Bar */}
+        <div className="px-3 pt-2 pb-1">
+          {focused ? (
+            <form onSubmit={handleNavigate} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={inputUrl}
+                onChange={(e) => setInputUrl(e.target.value)}
+                placeholder="Search or enter website name"
+                autoFocus
+                onBlur={() => setTimeout(() => setFocused(false), 150)}
+                className="flex-1 px-4 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none ring-2 ring-primary/30"
+              />
+              <button
+                type="button"
+                onClick={() => setFocused(false)}
+                className="text-sm text-primary font-medium px-2 py-2"
+              >
+                Cancel
+              </button>
+            </form>
+          ) : (
+            <button
+              onClick={() => { setFocused(true); setInputUrl(url); }}
+              className="w-full flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-secondary/80 hover:bg-secondary transition-colors"
+            >
+              {isSecure && <Lock className="w-3 h-3 text-muted-foreground" />}
+              <span className="text-sm text-foreground font-medium truncate">{displayUrl()}</span>
+              {loading && <RotateCw className="w-3 h-3 text-muted-foreground animate-spin ml-1" />}
+            </button>
+          )}
+        </div>
+
+        {/* Navigation buttons */}
+        <div className="flex items-center justify-between px-6 py-1.5">
+          <button
+            onClick={goBack}
+            disabled={historyIndex <= 0}
+            className="p-2 disabled:opacity-30 text-primary transition-opacity"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={goForward}
+            disabled={historyIndex >= history.length - 1}
+            className="p-2 disabled:opacity-30 text-primary transition-opacity"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <button onClick={handleShare} className="p-2 text-primary">
+            <Share2 className="w-5 h-5" />
+          </button>
+          <button onClick={() => navigate("/")} className="p-2 text-primary">
+            <BookOpen className="w-5 h-5" />
+          </button>
+          <button onClick={handleRefresh} className="p-2 text-primary">
+            <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
