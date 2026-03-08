@@ -8,6 +8,7 @@ interface AppSidebarProps {
   onUpload: () => void;
   photoCount: number;
   favoriteCount: number;
+  sharedCount?: number;
   onSignOut?: () => void;
 }
 
