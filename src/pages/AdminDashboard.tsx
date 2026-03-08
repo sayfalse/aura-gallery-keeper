@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,12 +7,14 @@ import {
   Users, Image, StickyNote, HardDrive, MessageCircle,
   UserPlus, Megaphone, Contact, ArrowLeft, Shield,
   TrendingUp, Activity, Clock, Ban, ShieldCheck, ShieldAlert,
-  ChevronDown, UserCog, Loader2
+  ChevronDown, UserCog, Loader2, Search, Filter, FileText,
+  ArrowUpDown
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel
@@ -38,6 +40,17 @@ interface UserProfile {
   banned_until: string | null;
 }
 
+interface AuditEntry {
+  id: string;
+  admin_user_id: string;
+  action: string;
+  target_user_id: string;
+  details: string | null;
+  created_at: string;
+  admin_name: string;
+  target_name: string;
+}
+
 interface AdminStats {
   overview: {
     totalUsers: number;
@@ -58,6 +71,7 @@ interface AdminStats {
     created_at: string;
   }[];
   users: UserProfile[];
+  auditLog: AuditEntry[];
 }
 
 const statCards = [
@@ -77,6 +91,14 @@ const roleBadgeStyles: Record<string, string> = {
   user: "bg-muted text-muted-foreground border-border",
 };
 
+type RoleFilter = "all" | "admin" | "moderator" | "user" | "banned";
+
+const auditActionLabels: Record<string, { label: string; color: string }> = {
+  set_role: { label: "Role Changed", color: "bg-primary/10 text-primary" },
+  ban_user: { label: "User Banned", color: "bg-destructive/10 text-destructive" },
+  unban_user: { label: "User Unbanned", color: "bg-emerald-500/10 text-emerald-600" },
+};
+
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -85,6 +107,8 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean;
     title: string;
@@ -160,6 +184,31 @@ const AdminDashboard = () => {
     return new Date(u.banned_until) > new Date();
   };
 
+  const filteredUsers = useMemo(() => {
+    if (!stats) return [];
+    let users = stats.users;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      users = users.filter(
+        (u) =>
+          (u.display_name || "").toLowerCase().includes(q) ||
+          (u.email || "").toLowerCase().includes(q) ||
+          (u.username || "").toLowerCase().includes(q)
+      );
+    }
+
+    // Role filter
+    if (roleFilter === "banned") {
+      users = users.filter(isBanned);
+    } else if (roleFilter !== "all") {
+      users = users.filter((u) => u.role === roleFilter);
+    }
+
+    return users;
+  }, [stats, searchQuery, roleFilter]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-5 space-y-6">
@@ -199,8 +248,7 @@ const AdminDashboard = () => {
   if (!stats) return null;
 
   const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
   const formatChartDate = (dateStr: string) => {
@@ -214,6 +262,12 @@ const AdminDashboard = () => {
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs}h ago`;
     return `${Math.floor(hrs / 24)}d ago`;
+  };
+
+  const formatTimestamp = (dateStr: string) => {
+    return new Date(dateStr).toLocaleString("en-US", {
+      month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+    });
   };
 
   return (
@@ -262,11 +316,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Signups chart */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.4 }}>
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -285,32 +335,10 @@ const AdminDashboard = () => {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis
-                      dataKey="date"
-                      tickFormatter={formatChartDate}
-                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                      interval="preserveStartEnd"
-                    />
-                    <YAxis
-                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                      allowDecimals={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "0.75rem",
-                        fontSize: 12,
-                      }}
-                      labelFormatter={formatChartDate}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="count"
-                      stroke="hsl(var(--primary))"
-                      fill="url(#signupGrad)"
-                      strokeWidth={2}
-                    />
+                    <XAxis dataKey="date" tickFormatter={formatChartDate} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval="preserveStartEnd" />
+                    <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} allowDecimals={false} />
+                    <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: 12 }} labelFormatter={formatChartDate} />
+                    <Area type="monotone" dataKey="count" stroke="hsl(var(--primary))" fill="url(#signupGrad)" strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -318,24 +346,64 @@ const AdminDashboard = () => {
           </Card>
         </motion.div>
 
-        {/* User Management */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.4 }}
-        >
+        {/* User Management with Search & Filter */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.4 }}>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <UserCog className="w-4 h-4 text-primary" />
-                User Management
-              </CardTitle>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <UserCog className="w-4 h-4 text-primary" />
+                  User Management
+                  <Badge variant="secondary" className="text-[10px] ml-1">
+                    {filteredUsers.length} of {stats.users.length}
+                  </Badge>
+                </CardTitle>
+              </div>
+              {/* Search & Filter bar */}
+              <div className="flex items-center gap-2 mt-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name, email, or username..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 h-9 text-sm"
+                  />
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 gap-1.5 shrink-0">
+                      <Filter className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">
+                        {roleFilter === "all" ? "All Roles" : roleFilter === "banned" ? "Banned" : roleFilter.charAt(0).toUpperCase() + roleFilter.slice(1) + "s"}
+                      </span>
+                      <ChevronDown className="w-3 h-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    {(["all", "admin", "moderator", "user", "banned"] as RoleFilter[]).map((f) => (
+                      <DropdownMenuItem
+                        key={f}
+                        onClick={() => setRoleFilter(f)}
+                        className={`text-xs ${roleFilter === f ? "font-semibold" : ""}`}
+                      >
+                        {f === "all" ? "All Roles" : f === "banned" ? "🚫 Banned" : f.charAt(0).toUpperCase() + f.slice(1) + "s"}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              {stats.users.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No users yet</p>
+              {filteredUsers.length === 0 ? (
+                <div className="text-center py-8">
+                  <Search className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    {searchQuery || roleFilter !== "all" ? "No users match your filters" : "No users yet"}
+                  </p>
+                </div>
               ) : (
-                stats.users.map((profile) => {
+                filteredUsers.map((profile) => {
                   const banned = isBanned(profile);
                   const isCurrentUser = profile.user_id === user?.id;
                   const isLoading = actionLoading === profile.user_id;
@@ -351,14 +419,11 @@ const AdminDashboard = () => {
                         {(profile.display_name || "U")[0].toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-xs font-medium text-foreground truncate">
                             {profile.display_name || "Unknown"}
                           </p>
-                          <Badge
-                            variant="outline"
-                            className={`text-[9px] px-1.5 py-0 h-4 ${roleBadgeStyles[profile.role] || roleBadgeStyles.user}`}
-                          >
+                          <Badge variant="outline" className={`text-[9px] px-1.5 py-0 h-4 ${roleBadgeStyles[profile.role] || roleBadgeStyles.user}`}>
                             {profile.role}
                           </Badge>
                           {banned && (
@@ -381,17 +446,8 @@ const AdminDashboard = () => {
                       {!isCurrentUser && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 shrink-0"
-                              disabled={isLoading}
-                            >
-                              {isLoading ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <ChevronDown className="w-4 h-4" />
-                              )}
+                            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" disabled={isLoading}>
+                              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronDown className="w-4 h-4" />}
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
@@ -458,12 +514,63 @@ const AdminDashboard = () => {
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-4">
+          {/* Admin Audit Log */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.4 }}>
+            <Card className="h-full">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" />
+                  Admin Audit Log
+                  {stats.auditLog?.length > 0 && (
+                    <Badge variant="secondary" className="text-[10px]">{stats.auditLog.length}</Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 max-h-[400px] overflow-y-auto">
+                {!stats.auditLog || stats.auditLog.length === 0 ? (
+                  <div className="text-center py-8">
+                    <FileText className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No admin actions recorded yet</p>
+                  </div>
+                ) : (
+                  stats.auditLog.map((entry) => {
+                    const actionMeta = auditActionLabels[entry.action] || { label: entry.action, color: "bg-muted text-muted-foreground" };
+                    return (
+                      <div
+                        key={entry.id}
+                        className="flex items-start gap-3 p-2.5 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors"
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${actionMeta.color}`}>
+                          {entry.action === "ban_user" && <Ban className="w-4 h-4" />}
+                          {entry.action === "unban_user" && <ShieldCheck className="w-4 h-4" />}
+                          {entry.action === "set_role" && <ArrowUpDown className="w-4 h-4" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-foreground">
+                            {actionMeta.label}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            <span className="font-medium">{entry.admin_name}</span>
+                            {" → "}
+                            <span className="font-medium">{entry.target_name}</span>
+                          </p>
+                          {entry.details && (
+                            <p className="text-[10px] text-muted-foreground/70 mt-0.5">{entry.details}</p>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                          {formatTimestamp(entry.created_at)}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
           {/* Recent Activity */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.4 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7, duration: 0.4 }}>
             <Card className="h-full">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -476,98 +583,78 @@ const AdminDashboard = () => {
                   <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
                 ) : (
                   stats.recentActivity.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors"
-                    >
+                    <div key={item.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        item.type === "photo"
-                          ? "bg-violet-500/10 text-violet-500"
-                          : "bg-amber-500/10 text-amber-500"
+                        item.type === "photo" ? "bg-violet-500/10 text-violet-500" : "bg-amber-500/10 text-amber-500"
                       }`}>
-                        {item.type === "photo" ? (
-                          <Image className="w-4 h-4" />
-                        ) : (
-                          <StickyNote className="w-4 h-4" />
-                        )}
+                        {item.type === "photo" ? <Image className="w-4 h-4" /> : <StickyNote className="w-4 h-4" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-foreground truncate">
-                          {item.title}
-                        </p>
+                        <p className="text-xs font-medium text-foreground truncate">{item.title}</p>
                         <p className="text-[10px] text-muted-foreground">
                           {item.type === "photo" ? "Photo uploaded" : "Note created"}
                         </p>
                       </div>
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                        {timeAgo(item.created_at)}
-                      </span>
+                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">{timeAgo(item.created_at)}</span>
                     </div>
                   ))
                 )}
               </CardContent>
             </Card>
           </motion.div>
-
-          {/* Role Distribution */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.4 }}
-          >
-            <Card className="h-full">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-primary" />
-                  Role Distribution
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {(() => {
-                  const roleCounts = stats.users.reduce<Record<string, number>>((acc, u) => {
-                    acc[u.role] = (acc[u.role] || 0) + 1;
-                    return acc;
-                  }, {});
-                  const bannedCount = stats.users.filter(isBanned).length;
-                  return (
-                    <div className="space-y-3">
-                      {[
-                        { role: "admin", label: "Admins", color: "bg-destructive" },
-                        { role: "moderator", label: "Moderators", color: "bg-amber-500" },
-                        { role: "user", label: "Users", color: "bg-primary" },
-                      ].map(({ role, label, color }) => {
-                        const count = roleCounts[role] || 0;
-                        const pct = stats.users.length > 0 ? (count / stats.users.length) * 100 : 0;
-                        return (
-                          <div key={role}>
-                            <div className="flex items-center justify-between text-xs mb-1">
-                              <span className="text-muted-foreground">{label}</span>
-                              <span className="font-medium text-foreground">{count}</span>
-                            </div>
-                            <div className="h-2 rounded-full bg-secondary overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${color} transition-all duration-500`}
-                                style={{ width: `${Math.max(pct, 2)}%` }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                      {bannedCount > 0 && (
-                        <div className="flex items-center gap-2 pt-2 border-t border-border">
-                          <Ban className="w-3.5 h-3.5 text-destructive" />
-                          <span className="text-xs text-muted-foreground">
-                            {bannedCount} banned user{bannedCount !== 1 ? "s" : ""}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
+
+        {/* Role Distribution */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, duration: 0.4 }}>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Shield className="w-4 h-4 text-primary" />
+                Role Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const roleCounts = stats.users.reduce<Record<string, number>>((acc, u) => {
+                  acc[u.role] = (acc[u.role] || 0) + 1;
+                  return acc;
+                }, {});
+                const bannedCount = stats.users.filter(isBanned).length;
+                return (
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    {[
+                      { role: "admin", label: "Admins", color: "bg-destructive" },
+                      { role: "moderator", label: "Moderators", color: "bg-amber-500" },
+                      { role: "user", label: "Users", color: "bg-primary" },
+                    ].map(({ role, label, color }) => {
+                      const count = roleCounts[role] || 0;
+                      const pct = stats.users.length > 0 ? (count / stats.users.length) * 100 : 0;
+                      return (
+                        <div key={role}>
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="text-muted-foreground">{label}</span>
+                            <span className="font-medium text-foreground">{count}</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                            <div className={`h-full rounded-full ${color} transition-all duration-500`} style={{ width: `${Math.max(pct, 2)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {bannedCount > 0 && (
+                      <div className="sm:col-span-3 flex items-center gap-2 pt-2 border-t border-border">
+                        <Ban className="w-3.5 h-3.5 text-destructive" />
+                        <span className="text-xs text-muted-foreground">
+                          {bannedCount} banned user{bannedCount !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        </motion.div>
       </main>
 
       {/* Confirmation Dialog */}
