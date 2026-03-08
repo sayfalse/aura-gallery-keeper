@@ -118,7 +118,8 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
-  }, [activeTab, navHistory, updateTab]);
+    fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
+  }, [activeTab, navHistory, updateTab, fetchViaProxy]);
 
   const goForward = useCallback(() => {
     const hist = navHistory[activeTab.id];
@@ -131,7 +132,8 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
-  }, [activeTab, navHistory, updateTab]);
+    fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
+  }, [activeTab, navHistory, updateTab, fetchViaProxy]);
 
   const reload = useCallback(() => {
     if (iframeRef.current && activeTab.url) {
