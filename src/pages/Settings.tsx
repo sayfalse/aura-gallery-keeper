@@ -256,7 +256,7 @@ const SettingsPage = () => {
             <Globe className="w-4 h-4" /> {t("settings.language")}
           </h2>
           <p className="text-xs text-muted-foreground mb-3">
-            Current: <span className="text-foreground font-medium">{LANGUAGES.find((l) => l.code === selectedLang)?.name || "English"}</span>
+            {t("settings.currentLang")}: <span className="text-foreground font-medium">{LANGUAGES.find((l) => l.code === selectedLang)?.name || "English"}</span>
           </p>
           {/* Search */}
           <div className="relative mb-3">
