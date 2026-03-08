@@ -11,9 +11,10 @@ import AddToAlbumModal from "@/components/AddToAlbumModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchPhotos, fetchDeletedPhotos, toggleFavorite as toggleFavApi, softDeletePhoto, uploadPhoto, restorePhoto, permanentlyDeletePhoto } from "@/lib/photoService";
 import { fetchAlbums, createAlbum, deleteAlbum, addPhotosToAlbum, fetchAlbumPhotos, updateAlbumCover, reorderAlbumPhotos } from "@/lib/albumService";
+import { fetchSharedWithMe, saveSharedPhoto, type SharedPhoto } from "@/lib/sharedPhotoService";
 import type { Photo, Album, ViewMode, SidebarSection } from "@/types/photo";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download, Share2 } from "lucide-react";
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -32,6 +33,7 @@ const Index = () => {
   const [activeAlbum, setActiveAlbum] = useState<Album | null>(null);
   const [albumPhotoIds, setAlbumPhotoIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sharedPhotos, setSharedPhotos] = useState<SharedPhoto[]>([]);
 
   const loadPhotos = useCallback(async () => {
     if (!user) return;
@@ -59,7 +61,15 @@ const Index = () => {
     }
   }, [user]);
 
-  useEffect(() => { loadPhotos(); loadAlbums(); }, [loadPhotos, loadAlbums]);
+  const loadSharedPhotos = useCallback(async () => {
+    if (!user) return;
+    try {
+      const shared = await fetchSharedWithMe(user.id);
+      setSharedPhotos(shared);
+    } catch { /* silent */ }
+  }, [user]);
+
+  useEffect(() => { loadPhotos(); loadAlbums(); loadSharedPhotos(); }, [loadPhotos, loadAlbums, loadSharedPhotos]);
 
   const loadAlbumPhotos = useCallback(async (albumId: string) => {
     try {
@@ -82,12 +92,13 @@ const Index = () => {
     if (activeSection === "favorites") result = result.filter((p) => p.favorite);
     if (activeSection === "recent") result = result.slice().sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
     if (activeSection === "trash") return deletedPhotos;
+    if (activeSection === "shared") return sharedPhotos as unknown as Photo[];
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(q) || p.album?.toLowerCase().includes(q));
     }
     return result;
-  }, [photos, activeSection, searchQuery, deletedPhotos, activeAlbum, albumPhotoIds]);
+  }, [photos, activeSection, searchQuery, deletedPhotos, activeAlbum, albumPhotoIds, sharedPhotos]);
 
   const handleToggleFavorite = useCallback(async (id: string) => {
     const photo = photos.find((p) => p.id === id);

@@ -1,8 +1,11 @@
-import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info, Calendar, HardDrive, ImageIcon, Clock } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info, Calendar, HardDrive, ImageIcon, Clock, Share2, Link, Check } from "lucide-react";
 import type { Photo } from "@/types/photo";
 import { format } from "date-fns";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { createShareLink } from "@/lib/sharedPhotoService";
+import { toast } from "sonner";
 
 interface LightboxProps {
   photo: Photo;
@@ -16,7 +19,23 @@ interface LightboxProps {
 }
 
 const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, hasPrev, hasNext }: LightboxProps) => {
+  const { user } = useAuth();
   const [showInfo, setShowInfo] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const handleShareLink = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+    try {
+      const link = await createShareLink(user.id, "photo", photo.id);
+      await navigator.clipboard.writeText(link);
+      setLinkCopied(true);
+      toast.success("Share link copied!");
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      toast.error("Failed to create share link");
+    }
+  };
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -51,6 +70,9 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
           </button>
           <button onClick={handleDownload} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
             <Download className="w-5 h-5 text-card" />
+          </button>
+          <button onClick={handleShareLink} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
+            {linkCopied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5 text-card" />}
           </button>
           <button onClick={(e) => { e.stopPropagation(); setShowInfo(!showInfo); }} className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${showInfo ? "bg-primary/30" : "bg-card/10 hover:bg-card/20"}`}>
             <Info className="w-5 h-5 text-card" />

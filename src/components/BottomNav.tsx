@@ -1,4 +1,4 @@
-import { Images, Heart, Clock, Trash2, Upload } from "lucide-react";
+import { Images, Heart, Clock, Trash2, Upload, Share2 } from "lucide-react";
 import type { SidebarSection } from "@/types/photo";
 
 interface BottomNavProps {
@@ -10,8 +10,8 @@ interface BottomNavProps {
 const navItems: { id: SidebarSection; label: string; icon: React.ElementType }[] = [
   { id: "photos", label: "Photos", icon: Images },
   { id: "favorites", label: "Favorites", icon: Heart },
+  { id: "shared", label: "Shared", icon: Share2 },
   { id: "recent", label: "Recent", icon: Clock },
-  { id: "trash", label: "Trash", icon: Trash2 },
 ];
 
 const BottomNav = ({ activeSection, onSectionChange, onUpload }: BottomNavProps) => {

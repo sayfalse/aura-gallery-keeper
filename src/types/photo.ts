@@ -19,4 +19,4 @@ export interface Album {
 }
 
 export type ViewMode = "grid" | "list";
-export type SidebarSection = "photos" | "favorites" | "albums" | "recent" | "trash";
+export type SidebarSection = "photos" | "favorites" | "albums" | "recent" | "trash" | "shared";

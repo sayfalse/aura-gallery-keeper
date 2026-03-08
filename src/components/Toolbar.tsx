@@ -25,6 +25,7 @@ const sectionTitles: Record<SidebarSection, string> = {
   photos: "All Photos",
   favorites: "Favorites",
   albums: "Albums",
+  shared: "Shared With Me",
   recent: "Recent",
   trash: "Trash",
 };
