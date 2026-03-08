@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Image, StickyNote, HardDrive, Users, Mail, Settings, Home } from "lucide-react";
+import { Image, StickyNote, HardDrive, Users, Mail, Settings, Home, Sparkles } from "lucide-react";
 
 const modules = [
   { path: "/", icon: Home, label: "Home" },
@@ -8,6 +8,7 @@ const modules = [
   { path: "/drive", icon: HardDrive, label: "Drive" },
   { path: "/contacts", icon: Users, label: "Contacts" },
   { path: "/mail", icon: Mail, label: "Mail" },
+  { path: "/pixel-ai", icon: Sparkles, label: "Pixel AI" },
   { path: "/settings", icon: Settings, label: "Settings" },
 ];
 
