@@ -65,10 +65,9 @@ const ContactsPage = () => {
     if (activeContact?.id === id) setActiveContact(null);
     try {
       await deleteContact(id);
-      toast.success("Contact deleted");
+      toast.success(t("contacts.contactDeleted"));
     } catch {
-      toast.error("Failed to delete");
-      loadContacts();
+      toast.error(t("contacts.failedDelete"));
     }
   };
 
