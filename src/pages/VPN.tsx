@@ -15,6 +15,8 @@ interface DnsResult {
 const VPNPage = () => {
   const [dnsResult, setDnsResult] = useState<DnsResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   const [dnsMode, setDnsMode] = useState<"standard" | "secure">("standard");
   const [copied, setCopied] = useState("");
 
