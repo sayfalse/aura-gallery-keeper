@@ -169,7 +169,7 @@ const SharingSection = ({ user }: SharingSectionProps) => {
         </div>
 
         {showAddUser ? (
-          <div className="rounded-xl bg-secondary p-3 space-y-2 animate-fade-in">
+          <div className="rounded-xl bg-primary/10 border border-primary/20 p-3 space-y-2 animate-fade-in">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -257,7 +257,7 @@ const SharingSection = ({ user }: SharingSectionProps) => {
               <p className="text-xs text-muted-foreground font-medium mb-2">Sent</p>
               <div className="space-y-2">
                 {sentPending.map((c) => (
-                  <div key={c.id} className="flex items-center justify-between p-2.5 rounded-xl bg-secondary">
+                  <div key={c.id} className="flex items-center justify-between p-2.5 rounded-xl bg-primary/10 border border-primary/200 border border-primary/20">
                     <div>
                       <p className="text-sm text-foreground">{c.connectedDisplayName || "User"}</p>
                       <p className="text-xs text-muted-foreground">Pending...</p>
@@ -294,7 +294,7 @@ const SharingSection = ({ user }: SharingSectionProps) => {
             const otherName = c.connectedDisplayName || "User";
             const otherUsername = c.connectedUsername;
             return (
-              <div key={c.id} className="rounded-xl bg-secondary p-3">
+              <div key={c.id} className="rounded-xl bg-primary/10 border border-primary/20 p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <p className="text-sm font-medium text-foreground">{otherName}</p>
