@@ -50,6 +50,7 @@ const DocumentViewer = ({ fileName, storagePath, mimeType, onClose }: DocumentVi
 
   const isPdf = mimeType === "application/pdf" || fileName.endsWith(".pdf");
   const isImage = mimeType.startsWith("image/");
+  const isVideo = mimeType.startsWith("video/") || fileName.endsWith(".mp4") || fileName.endsWith(".mov") || fileName.endsWith(".webm");
   const isOffice = mimeType.includes("word") || mimeType.includes("spreadsheet") || mimeType.includes("presentation") ||
     mimeType.includes("excel") || mimeType.includes("powerpoint") ||
     fileName.endsWith(".docx") || fileName.endsWith(".xlsx") || fileName.endsWith(".pptx") ||
