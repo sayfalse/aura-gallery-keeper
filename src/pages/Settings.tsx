@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { getStorageAnalytics, formatFileSize } from "@/lib/driveService";
 import QuickNavButton from "@/components/QuickNavButton";
+import WallpaperSettings from "@/components/WallpaperSettings";
 import {
   getAppLockSettings,
   setAppLockEnabled,
