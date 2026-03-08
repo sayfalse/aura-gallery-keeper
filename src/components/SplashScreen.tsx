@@ -84,7 +84,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
               lineHeight: 1,
             }}
           >
-            A
+             P
           </span>
         </div>
       </div>
