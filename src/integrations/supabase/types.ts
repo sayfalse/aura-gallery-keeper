@@ -330,6 +330,164 @@ export type Database = {
           },
         ]
       }
+      music_favorites: {
+        Row: {
+          album_name: string | null
+          artist_name: string
+          created_at: string
+          duration: number | null
+          id: string
+          image_url: string | null
+          song_id: string
+          song_name: string
+          source_url: string | null
+          user_id: string
+        }
+        Insert: {
+          album_name?: string | null
+          artist_name?: string
+          created_at?: string
+          duration?: number | null
+          id?: string
+          image_url?: string | null
+          song_id: string
+          song_name: string
+          source_url?: string | null
+          user_id: string
+        }
+        Update: {
+          album_name?: string | null
+          artist_name?: string
+          created_at?: string
+          duration?: number | null
+          id?: string
+          image_url?: string | null
+          song_id?: string
+          song_name?: string
+          source_url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      music_history: {
+        Row: {
+          album_name: string | null
+          artist_name: string
+          duration: number | null
+          id: string
+          image_url: string | null
+          played_at: string
+          song_id: string
+          song_name: string
+          source_url: string | null
+          user_id: string
+        }
+        Insert: {
+          album_name?: string | null
+          artist_name?: string
+          duration?: number | null
+          id?: string
+          image_url?: string | null
+          played_at?: string
+          song_id: string
+          song_name: string
+          source_url?: string | null
+          user_id: string
+        }
+        Update: {
+          album_name?: string | null
+          artist_name?: string
+          duration?: number | null
+          id?: string
+          image_url?: string | null
+          played_at?: string
+          song_id?: string
+          song_name?: string
+          source_url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      music_playlist_songs: {
+        Row: {
+          added_at: string
+          album_name: string | null
+          artist_name: string
+          duration: number | null
+          id: string
+          image_url: string | null
+          playlist_id: string
+          song_id: string
+          song_name: string
+          sort_order: number | null
+          source_url: string | null
+        }
+        Insert: {
+          added_at?: string
+          album_name?: string | null
+          artist_name?: string
+          duration?: number | null
+          id?: string
+          image_url?: string | null
+          playlist_id: string
+          song_id: string
+          song_name: string
+          sort_order?: number | null
+          source_url?: string | null
+        }
+        Update: {
+          added_at?: string
+          album_name?: string | null
+          artist_name?: string
+          duration?: number | null
+          id?: string
+          image_url?: string | null
+          playlist_id?: string
+          song_id?: string
+          song_name?: string
+          sort_order?: number | null
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "music_playlist_songs_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "music_playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      music_playlists: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           content: string
