@@ -7,6 +7,14 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: true,
   },
+  plugins: {
+    Camera: {
+      permissions: ['camera', 'photos'],
+    },
+    Filesystem: {
+      permissions: ['publicStorage'],
+    },
+  },
 };
 
 export default config;
