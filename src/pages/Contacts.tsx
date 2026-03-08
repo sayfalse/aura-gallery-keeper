@@ -212,7 +212,7 @@ const ContactsPage = () => {
                 )}
                 {activeContact.notes && (
                   <div className="p-3 rounded-xl bg-muted/50">
-                    <p className="text-xs text-muted-foreground mb-1">Notes</p>
+                     <p className="text-xs text-muted-foreground mb-1">{t("common.notes")}</p>
                     <p className="text-sm text-foreground">{activeContact.notes}</p>
                   </div>
                 )}
