@@ -121,6 +121,9 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
           <button onClick={handleShareLink} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
             {linkCopied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5 text-card" />}
           </button>
+          <button onClick={(e) => { e.stopPropagation(); setShowEditor(true); }} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
+            <Pencil className="w-5 h-5 text-card" />
+          </button>
           <button onClick={(e) => { e.stopPropagation(); setShowInfo(!showInfo); }} className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${showInfo ? "bg-primary/30" : "bg-card/10 hover:bg-card/20"}`}>
             <Info className="w-5 h-5 text-card" />
           </button>
