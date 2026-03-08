@@ -287,7 +287,7 @@ const PixelAI = () => {
     await addMemory(user.id, content, category);
     const updated = await getMemories(user.id);
     setMemories(updated);
-    toast.success("Memory saved! 🧠");
+    toast.success(t("pixelAI.memorySaved"));
   };
 
   const handleVoiceTranscript = (text: string) => {
