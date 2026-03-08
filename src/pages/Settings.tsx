@@ -622,7 +622,7 @@ const SettingsPage = () => {
                 href="/privacy-policy"
                 className="flex items-center justify-between py-2 rounded-lg hover:bg-accent px-2 -mx-2 transition-colors"
               >
-                <span className="text-sm text-foreground">Privacy Policy</span>
+                <span className="text-sm text-foreground">{t("settings.privacyPolicy")}</span>
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </a>
               <a
