@@ -117,7 +117,7 @@ const NotesPage = () => {
     a.download = `${title || "Untitled"}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Exported as Markdown!");
+    toast.success(t("notes.exported"));
   };
 
   const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "");
