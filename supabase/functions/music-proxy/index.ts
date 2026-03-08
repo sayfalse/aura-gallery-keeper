@@ -5,98 +5,90 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const JIOSAAVN_BASE = "https://www.jiosaavn.com/api.php";
-const HEADERS = {
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  "Accept": "application/json, text/javascript, */*; q=0.01",
-  "Referer": "https://www.jiosaavn.com/",
-};
-
-function getStreamUrl(s: any): string {
-  // Use media_preview_url and upgrade quality
-  const previewUrl = s.media_preview_url || s.more_info?.media_preview_url;
-  if (previewUrl) {
-    return previewUrl
-      .replace("preview.saavncdn.com", "aac.saavncdn.com")
-      .replace("_96_p.mp4", "_320.mp4")
-      .replace("_96.mp4", "_320.mp4");
-  }
-  return "";
-}
+// Use the public saavn.dev API which provides direct download URLs
+const SAAVN_API = "https://saavn.dev/api";
 
 function mapSong(s: any): any {
-  let image = s.image || "";
-  if (typeof image === "string") image = image.replace(/150x150|50x50/, "500x500");
+  // Get best quality image
+  let image = "";
+  if (Array.isArray(s.image)) {
+    const best = s.image.find((i: any) => i.quality === "500x500") || s.image[s.image.length - 1];
+    image = best?.url || "";
+  } else if (typeof s.image === "string") {
+    image = s.image;
+  }
 
-  const artist = s.more_info?.artistMap?.primary_artists?.map((a: any) => a.name).join(", ")
-    || s.primary_artists || s.more_info?.primary_artists || s.singers
-    || (s.subtitle ? s.subtitle.split(" - ")[0] : "") || "";
+  // Get best quality download URL
+  let url = "";
+  if (Array.isArray(s.downloadUrl)) {
+    const best = s.downloadUrl.find((d: any) => d.quality === "320kbps") 
+      || s.downloadUrl.find((d: any) => d.quality === "160kbps")
+      || s.downloadUrl[s.downloadUrl.length - 1];
+    url = best?.url || "";
+  } else if (typeof s.downloadUrl === "string") {
+    url = s.downloadUrl;
+  }
+
+  // Get artist names
+  let artist = "";
+  if (s.artists?.primary?.length) {
+    artist = s.artists.primary.map((a: any) => a.name).join(", ");
+  } else if (s.artists?.all?.length) {
+    artist = s.artists.all.slice(0, 3).map((a: any) => a.name).join(", ");
+  } else if (typeof s.artist === "string") {
+    artist = s.artist;
+  }
 
   return {
     id: s.id || "",
-    name: s.title || s.song || "",
+    name: s.name || s.title || "",
     artist,
-    album: s.more_info?.album || s.album || "",
+    album: s.album?.name || s.album || "",
     image,
-    duration: s.more_info?.duration ? parseInt(s.more_info.duration) : (s.duration ? parseInt(s.duration) : 0),
-    url: getStreamUrl(s),
-    year: s.year || "",
+    duration: s.duration ? parseInt(s.duration) : 0,
+    url,
+    year: s.year || s.releaseDate?.split("-")[0] || "",
     language: s.language || "",
   };
 }
 
-async function resolveSongUrl(songId: string): Promise<string> {
-  try {
-    const params = new URLSearchParams({
-      pids: songId, _format: "json", __call: "song.getDetails", ctx: "web6dot0", api_version: "4",
-    });
-    const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
-    const data = await res.json();
-    const song = data.songs?.[0] || data[songId];
-    if (!song) return "";
-    return getStreamUrl(song);
-  } catch { return ""; }
-}
-
-async function resolveUrls(songs: any[]): Promise<any[]> {
-  return Promise.all(songs.slice(0, 15).map(async (song) => {
-    if (song.url) return song;
-    if (!song.id) return song;
-    const url = await resolveSongUrl(song.id);
-    return { ...song, url };
-  }));
+async function fetchSaavn(endpoint: string): Promise<any> {
+  const res = await fetch(`${SAAVN_API}/${endpoint}`, {
+    headers: { "Accept": "application/json" },
+  });
+  if (!res.ok) {
+    console.error(`Saavn API error: ${res.status} for ${endpoint}`);
+    throw new Error(`API error: ${res.status}`);
+  }
+  return res.json();
 }
 
 async function searchSongs(query: string, limit: string): Promise<any> {
-  const params = new URLSearchParams({
-    p: "1", q: query, _format: "json", _marker: "0",
-    api_version: "4", ctx: "web6dot0", n: limit, __call: "search.getResults",
-  });
-  const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
-  const data = await res.json();
-  const mapped = (data.results || []).map(mapSong);
-  const resolved = await resolveUrls(mapped);
-  return { data: { results: resolved } };
+  const data = await fetchSaavn(`search/songs?query=${encodeURIComponent(query)}&limit=${limit}`);
+  const results = data.data?.results || [];
+  return { data: { results: results.map(mapSong) } };
 }
 
 async function getSongById(id: string): Promise<any> {
-  const params = new URLSearchParams({
-    pids: id, _format: "json", __call: "song.getDetails", ctx: "web6dot0", api_version: "4",
-  });
-  const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
-  const data = await res.json();
-  const songs = data.songs || (data[id] ? [data[id]] : Object.values(data).filter((v: any) => v?.id));
-  return { data: songs.map(mapSong) };
+  const data = await fetchSaavn(`songs/${id}`);
+  const songs = data.data || [];
+  return { data: (Array.isArray(songs) ? songs : [songs]).map(mapSong) };
 }
 
 async function getSuggestions(id: string, limit: string): Promise<any> {
-  const params = new URLSearchParams({
-    pid: id, _format: "json", __call: "reco.getreco", ctx: "web6dot0", api_version: "4", n: limit,
-  });
-  const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
-  const data = await res.json();
-  const songs = Array.isArray(data) ? data : Object.values(data).filter((v: any) => v?.id);
-  return { data: songs.map(mapSong) };
+  try {
+    const data = await fetchSaavn(`songs/${id}/suggestions?limit=${limit}`);
+    const songs = data.data || [];
+    return { data: (Array.isArray(songs) ? songs : [songs]).map(mapSong) };
+  } catch {
+    // Fallback: search for related songs
+    const songData = await fetchSaavn(`songs/${id}`);
+    const song = songData.data?.[0] || songData.data;
+    if (song?.artists?.primary?.[0]?.name) {
+      return searchSongs(song.artists.primary[0].name, limit);
+    }
+    return { data: [] };
+  }
 }
 
 serve(async (req) => {
