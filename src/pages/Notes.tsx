@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import RichTextEditor from "@/components/RichTextEditor";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import QuickNavButton from "@/components/QuickNavButton";
 
 const htmlToMarkdown = (html: string): string => {
   let md = html;
