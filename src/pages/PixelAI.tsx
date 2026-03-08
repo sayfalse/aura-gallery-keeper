@@ -376,7 +376,7 @@ const PixelAI = () => {
           return (
             <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} group`}>
               <div className={`max-w-[85%] ${msg.role === "user"
-                ? "bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2.5"
+                ? "bg-muted text-foreground rounded-2xl rounded-br-md px-4 py-2.5"
                 : "bg-card border border-border rounded-2xl rounded-bl-md px-4 py-2.5"
               }`}>
                 {msg.role === "assistant" && (
