@@ -83,8 +83,10 @@ export default {
           to: { opacity: "1", transform: "translateY(0)" },
         },
         "splash-pulse": {
-          "0%, 100%": { transform: "scale(1)" },
-          "50%": { transform: "scale(1.06)" },
+          "0%, 100%": { transform: "scale(1) rotate(0deg)" },
+          "25%": { transform: "scale(1.04) rotate(2deg)" },
+          "50%": { transform: "scale(1.06) rotate(0deg)" },
+          "75%": { transform: "scale(1.04) rotate(-2deg)" },
         },
         "splash-glow": {
           "0%, 100%": { opacity: "0.4", transform: "scale(1)" },
