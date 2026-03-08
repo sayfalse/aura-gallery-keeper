@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Share2, UserPlus, Search, Check, X, Users, Loader2, AtSign } from "lucide-react";
+import { UserPlus, Search, Check, X, Users, Loader2, AtSign, Bell } from "lucide-react";
 import { toast } from "sonner";
 import type { User } from "@supabase/supabase-js";
 import {
@@ -168,43 +168,8 @@ const SharingSection = ({ user }: SharingSectionProps) => {
           </button>
         </div>
 
-        {/* Pending Invites */}
-        {pendingInvites.length > 0 && (
-          <div className="mb-4">
-            <p className="text-xs text-muted-foreground font-medium mb-2">Pending Invites</p>
-            <div className="space-y-2">
-              {pendingInvites.map((c) => (
-                <div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {c.connectedDisplayName || "Unknown User"}
-                    </p>
-                    {c.connectedUsername && (
-                      <p className="text-xs text-muted-foreground">@{c.connectedUsername}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleAccept(c.id)}
-                      className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                    >
-                      <Check className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleRemove(c.id)}
-                      className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {showAddUser && (
-          <div className="rounded-xl bg-secondary p-3 mb-3 space-y-2 animate-fade-in">
+        {showAddUser ? (
+          <div className="rounded-xl bg-secondary p-3 space-y-2 animate-fade-in">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -239,37 +204,77 @@ const SharingSection = ({ user }: SharingSectionProps) => {
               <p className="text-xs text-muted-foreground text-center py-2">No users found</p>
             )}
           </div>
-        )}
-
-        {/* Sent pending */}
-        {sentPending.length > 0 && (
-          <div>
-            <p className="text-xs text-muted-foreground font-medium mb-2">Sent Invites</p>
-            <div className="space-y-2">
-              {sentPending.map((c) => (
-                <div key={c.id} className="flex items-center justify-between p-2.5 rounded-xl bg-secondary">
-                  <div>
-                    <p className="text-sm text-foreground">{c.connectedDisplayName || "User"}</p>
-                    <p className="text-xs text-muted-foreground">Pending...</p>
-                  </div>
-                  <button
-                    onClick={() => handleRemove(c.id)}
-                    className="text-xs text-destructive hover:underline"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {pendingInvites.length === 0 && sentPending.length === 0 && !showAddUser && (
+        ) : (
           <p className="text-xs text-muted-foreground text-center py-3">
             Search for users by username to add friends
           </p>
         )}
       </section>
+
+      {/* Pending Invites Section */}
+      {(pendingInvites.length > 0 || sentPending.length > 0) && (
+        <section className="rounded-2xl bg-card border border-border p-5">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Bell className="w-4 h-4" /> Pending Invites ({pendingInvites.length + sentPending.length})
+          </h2>
+
+          {pendingInvites.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs text-muted-foreground font-medium mb-2">Received</p>
+              <div className="space-y-2">
+                {pendingInvites.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/20">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {c.connectedDisplayName || "Unknown User"}
+                      </p>
+                      {c.connectedUsername && (
+                        <p className="text-xs text-muted-foreground">@{c.connectedUsername}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleAccept(c.id)}
+                        className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                      >
+                        <Check className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleRemove(c.id)}
+                        className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {sentPending.length > 0 && (
+            <div>
+              <p className="text-xs text-muted-foreground font-medium mb-2">Sent</p>
+              <div className="space-y-2">
+                {sentPending.map((c) => (
+                  <div key={c.id} className="flex items-center justify-between p-2.5 rounded-xl bg-secondary">
+                    <div>
+                      <p className="text-sm text-foreground">{c.connectedDisplayName || "User"}</p>
+                      <p className="text-xs text-muted-foreground">Pending...</p>
+                    </div>
+                    <button
+                      onClick={() => handleRemove(c.id)}
+                      className="text-xs text-destructive hover:underline"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Shared With Me Section */}
       <section className="rounded-2xl bg-card border border-border p-5">
