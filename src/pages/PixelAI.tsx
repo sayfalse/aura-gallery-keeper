@@ -186,7 +186,7 @@ const PixelAI = () => {
         setLastVoiceResponse(assistantSoFar);
       }
     } catch (e: any) {
-      toast.error(e.message || "Failed to get response");
+      toast.error(e.message || t("pixelAI.failedResponse"));
       setMessages(prev => prev.filter(m => m.id !== assistantId));
     }
   };
