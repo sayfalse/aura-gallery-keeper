@@ -34,8 +34,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "Aura — Gallery Keeper",
-        short_name: "Aura",
+        name: "PixelVault — Your Cloud Vault",
+        short_name: "PixelVault",
         description: "Your personal photo gallery — organize, browse, and keep your memories safe.",
         theme_color: "#2563eb",
         background_color: "#fafafa",
