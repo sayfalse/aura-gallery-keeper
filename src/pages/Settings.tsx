@@ -143,6 +143,7 @@ const SettingsPage = () => {
     supabase.from("notes").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setNoteCount(count || 0));
     supabase.from("contacts").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setContactCount(count || 0));
     supabase.from("drive_files").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setDriveFileCount(count || 0));
+    getStorageAnalytics(user.id).then(setStorageAnalytics).catch(() => {});
   }, [user]);
 
   const handleSaveProfile = useCallback(async () => {
