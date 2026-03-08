@@ -316,9 +316,9 @@ const SettingsPage = () => {
               { label: "Contacts", count: contactCount },
               { label: "Drive Files", count: driveFileCount },
             ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between py-2">
-                <span className="text-sm text-foreground">{item.label}</span>
-                <span className="text-sm text-muted-foreground font-medium">{item.count} items</span>
+              <div key={item.label} className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+                <span className="text-sm font-medium text-foreground">{item.label}</span>
+                <span className="text-sm text-primary font-semibold">{item.count} items</span>
               </div>
             ))}
 
