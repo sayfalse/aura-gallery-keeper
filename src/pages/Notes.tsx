@@ -60,7 +60,7 @@ const NotesPage = () => {
   const handleCreate = async () => {
     if (!user) return;
     try {
-      const note = await createNote(user.id, "Untitled Note", "");
+      const note = await createNote(user.id, t("notes.untitled") + " Note", "");
       setNotes((prev) => [note, ...prev]);
       setActiveNote(note);
       setTitle(note.title);
