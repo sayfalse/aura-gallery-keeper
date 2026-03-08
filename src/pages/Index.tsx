@@ -277,6 +277,8 @@ const Index = () => {
               onOpen={setLightboxPhoto}
               onToggleFavorite={handleToggleFavorite}
               selectionMode={selectionMode}
+              isAlbumView={!!activeAlbum}
+              onReorder={handleReorderPhotos}
             />
           )}
         </div>
