@@ -46,13 +46,33 @@ const Browser = () => {
     setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
   }, []);
 
-  const buildProxyUrl = useCallback((url: string) => {
-    return `${SUPABASE_URL}/functions/v1/web-proxy?url=${encodeURIComponent(url)}`;
-  }, []);
-
-  const loadUrl = useCallback((url: string) => {
-    setProxyUrl(buildProxyUrl(url));
-  }, [buildProxyUrl]);
+  const loadUrl = useCallback(async (url: string) => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/web-proxy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) throw new Error("Proxy error");
+      const html = await res.text();
+      const blob = new Blob([html], { type: "text/html" });
+      // Revoke previous blob URL to prevent memory leak
+      if (proxyUrl && proxyUrl.startsWith("blob:")) URL.revokeObjectURL(proxyUrl);
+      setProxyUrl(URL.createObjectURL(blob));
+    } catch {
+      const errorHtml = `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+        <body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:-apple-system,system-ui,sans-serif;color:#888;background:#f8f9fa;margin:0;">
+        <div style="text-align:center;padding:2rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">🌐</div>
+          <p style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;">Can't load this page</p>
+          <p style="font-size:0.75rem;color:#aaa;margin-bottom:1.5rem;">Try opening it externally</p>
+          <a href="${url}" target="_blank" rel="noopener" style="padding:0.6rem 1.2rem;border-radius:12px;background:#3b82f6;color:#fff;text-decoration:none;font-size:0.8rem;font-weight:600;">Open externally ↗</a>
+        </div></body></html>`;
+      const blob = new Blob([errorHtml], { type: "text/html" });
+      if (proxyUrl && proxyUrl.startsWith("blob:")) URL.revokeObjectURL(proxyUrl);
+      setProxyUrl(URL.createObjectURL(blob));
+    }
+  }, [proxyUrl]);
 
   const navigate = useCallback(
     (url: string) => {
