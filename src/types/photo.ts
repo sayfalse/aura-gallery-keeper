@@ -12,8 +12,10 @@ export interface Photo {
 export interface Album {
   id: string;
   name: string;
-  coverPhoto?: string;
+  description?: string;
+  coverPhotoUrl?: string;
   photoCount: number;
+  createdAt: Date;
 }
 
 export type ViewMode = "grid" | "list";
