@@ -34,8 +34,8 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       manifest: {
-        name: "PixelVault",
-        short_name: "PixelVault",
+        name: "Aura — Gallery Keeper",
+        short_name: "Aura",
         description: "Your personal photo gallery — organize, browse, and keep your memories safe.",
         theme_color: "#2563eb",
         background_color: "#fafafa",
@@ -43,11 +43,48 @@ export default defineConfig(({ mode }) => ({
         orientation: "portrait",
         scope: "/",
         start_url: "/",
+        categories: ["photo", "productivity", "utilities"],
         icons: [
           { src: "/pwa-192x192.png", sizes: "192x192", type: "image/png" },
           { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png" },
           { src: "/pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
+        shortcuts: [
+          {
+            name: "Gallery",
+            short_name: "Gallery",
+            url: "/gallery",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "Mail",
+            short_name: "Mail",
+            url: "/mail",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "Notes",
+            short_name: "Notes",
+            url: "/notes",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+        ],
+        share_target: {
+          action: "/gallery",
+          method: "POST",
+          enctype: "multipart/form-data",
+          params: {
+            title: "title",
+            text: "text",
+            url: "url",
+            files: [
+              {
+                name: "media",
+                accept: ["image/*", "video/*"],
+              },
+            ],
+          },
+        },
       },
     }),
   ].filter(Boolean),
