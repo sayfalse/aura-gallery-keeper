@@ -214,7 +214,7 @@ const DrivePage = () => {
           <HardDrive className="w-5 h-5 text-primary" />
           <h1 className="font-display text-lg font-bold text-foreground">{t("drive.title")}</h1>
           <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-            {formatFileSize(totalSize)} used
+            {formatFileSize(totalSize)} {t("drive.used")}
           </span>
         </div>
         <QuickNavButton />
