@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import MoveToFolderModal from "@/components/MoveToFolderModal";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import QuickNavButton from "@/components/QuickNavButton";
 
 const getFileIcon = (mimeType: string) => {
   if (mimeType.startsWith("image/")) return Image;
