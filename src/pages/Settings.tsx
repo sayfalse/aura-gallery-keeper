@@ -545,6 +545,9 @@ const SettingsPage = () => {
           <LogOut className="w-4 h-4" />
           Sign Out
         </button>
+
+        {/* Delete Account */}
+        <DeleteAccountSection />
       </div>
       <ModuleSwitcher />
     </div>
