@@ -8,7 +8,7 @@ import { toast } from "sonner";
 const DeleteAccountSection = () => {
   const { signOut } = useAuth();
   const navigate = useNavigate();
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [step, setStep] = useState<"idle" | "ask" | "confirm">("idle");
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
 
@@ -35,6 +35,8 @@ const DeleteAccountSection = () => {
     }
   };
 
+  const reset = () => { setStep("idle"); setConfirmText(""); };
+
   return (
     <section className="rounded-2xl bg-card border border-destructive/20 p-5">
       <h2 className="text-sm font-semibold text-destructive uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -44,21 +46,40 @@ const DeleteAccountSection = () => {
         Permanently delete your account and all associated data including photos, notes, contacts, drive files, and settings. This action cannot be undone.
       </p>
 
-      {!showConfirm ? (
+      {step === "idle" && (
         <button
-          onClick={() => setShowConfirm(true)}
+          onClick={() => setStep("ask")}
           className="w-full py-2.5 rounded-xl border border-destructive/30 text-destructive text-sm font-medium hover:bg-destructive/5 transition-colors"
         >
           Delete My Account
         </button>
-      ) : (
+      )}
+
+      {step === "ask" && (
+        <div className="rounded-xl bg-destructive/5 border border-destructive/20 p-4 space-y-3 animate-fade-in">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
+            <p className="text-sm font-medium text-foreground">Do you really want to delete your account?</p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={reset} className="flex-1 py-2 rounded-xl bg-secondary text-sm font-medium text-foreground hover:bg-accent transition-colors">
+              No, keep it
+            </button>
+            <button onClick={() => setStep("confirm")} className="flex-1 py-2 rounded-xl bg-destructive text-destructive-foreground text-sm font-medium hover:bg-destructive/90 transition-colors">
+              Yes, delete it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === "confirm" && (
         <div className="rounded-xl bg-destructive/5 border border-destructive/20 p-4 space-y-3 animate-fade-in">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-medium text-foreground">Are you absolutely sure?</p>
               <p className="text-xs text-muted-foreground mt-1">
-                This will permanently delete all your data. Type <span className="font-mono font-bold text-destructive">DELETE</span> to confirm.
+                Type <span className="font-mono font-bold text-destructive">DELETE</span> to confirm.
               </p>
             </div>
           </div>
@@ -70,10 +91,7 @@ const DeleteAccountSection = () => {
             className="w-full px-3 py-2.5 rounded-xl bg-card text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-destructive/20 font-mono"
           />
           <div className="flex gap-2">
-            <button
-              onClick={() => { setShowConfirm(false); setConfirmText(""); }}
-              className="flex-1 py-2 rounded-xl bg-secondary text-sm font-medium text-foreground hover:bg-accent transition-colors"
-            >
+            <button onClick={reset} className="flex-1 py-2 rounded-xl bg-secondary text-sm font-medium text-foreground hover:bg-accent transition-colors">
               Cancel
             </button>
             <button
