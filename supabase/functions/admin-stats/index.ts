@@ -191,6 +191,7 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
         totalContacts: contactsRes.count || 0,
         totalAnnouncements: announcementsRes.count || 0,
         recentMessages: messagesRes.count || 0,
+        totalStorageBytes,
       },
       dailySignups: Object.entries(dailySignups).map(([date, count]) => ({ date, count })),
       recentActivity: [
