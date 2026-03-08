@@ -187,8 +187,8 @@ const NotesPage = () => {
                   <div className="flex items-start gap-2">
                     {note.pinned && <Pin className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />}
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm text-foreground truncate">{note.title || "Untitled"}</p>
-                      <p className="text-xs text-muted-foreground truncate mt-0.5">{stripHtml(note.content).slice(0, 60) || "No content"}</p>
+                      <p className="font-medium text-sm text-foreground truncate">{note.title || t("notes.untitled")}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{stripHtml(note.content).slice(0, 60) || t("notes.noContent")}</p>
                       <p className="text-[10px] text-muted-foreground/60 mt-1">{format(note.updatedAt, "MMM d, h:mm a")}</p>
                     </div>
                   </div>
