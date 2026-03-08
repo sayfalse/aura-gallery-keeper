@@ -7,7 +7,7 @@ import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, Globe, MessageCircle,
-  ArrowUpRight, Layers
+  ArrowUpRight, Layers, AtSign
 } from "lucide-react";
 
 const apps = [
@@ -16,6 +16,7 @@ const apps = [
   { id: "drive", name: "Drive", icon: HardDrive, gradient: "from-indigo-500 to-purple-400", path: "/drive", desc: "Cloud storage" },
   { id: "contacts", name: "People", icon: Users, gradient: "from-emerald-500 to-teal-400", path: "/contacts", desc: "Contacts" },
   { id: "mail", name: "Mail", icon: Mail, gradient: "from-sky-500 to-blue-400", path: "/mail", desc: "Email" },
+  { id: "temp-mail", name: "Temp Mail", icon: AtSign, gradient: "from-orange-500 to-red-400", path: "/temp-mail", desc: "Disposable email" },
   { id: "chat", name: "Chat", icon: MessageCircle, gradient: "from-green-500 to-emerald-400", path: "/chat", desc: "Messages" },
   { id: "pixel-ai", name: "Pixel AI", icon: Sparkles, gradient: "from-violet-500 to-fuchsia-400", path: "/pixel-ai", desc: "AI Assistant" },
   { id: "browser", name: "Browser", icon: Globe, gradient: "from-rose-500 to-orange-400", path: "/browser", desc: "Web" },
