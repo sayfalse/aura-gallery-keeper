@@ -109,6 +109,7 @@ const SettingsPage = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { t, i18n } = useTranslation();
   const [displayName, setDisplayName] = useState("");
   const [saving, setSaving] = useState(false);
   const [photoCount, setPhotoCount] = useState(0);
