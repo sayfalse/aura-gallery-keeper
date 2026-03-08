@@ -16,7 +16,6 @@ Deno.serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify the caller is an admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -39,8 +38,6 @@ Deno.serve(async (req) => {
     }
 
     const userId = claimsData.claims.sub;
-
-    // Use service role to check admin status
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const { data: roleData } = await adminClient
@@ -57,168 +54,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch stats using service role
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    // Check if this is a user-detail request
+    const url = new URL(req.url);
+    const targetUserId = url.searchParams.get("userId");
 
-    // Total users
-    const { count: totalUsers } = await adminClient.auth.admin.listUsers({ perPage: 1 });
-
-    // Get all users for recent signups
-    const { data: allUsers } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
-    const users = allUsers?.users || [];
-    
-    const recentSignups = users.filter(
-      (u) => new Date(u.created_at) >= sevenDaysAgo
-    ).length;
-
-    // Daily signups for chart (last 30 days)
-    const dailySignups: Record<string, number> = {};
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      dailySignups[d.toISOString().split("T")[0]] = 0;
+    if (targetUserId) {
+      return await handleUserDetail(adminClient, targetUserId, corsHeaders);
     }
-    users.forEach((u) => {
-      const day = u.created_at.split("T")[0];
-      if (dailySignups[day] !== undefined) dailySignups[day]++;
-    });
 
-    // Photos count
-    const { count: totalPhotos } = await adminClient
-      .from("photos")
-      .select("*", { count: "exact", head: true });
-
-    // Notes count
-    const { count: totalNotes } = await adminClient
-      .from("notes")
-      .select("*", { count: "exact", head: true });
-
-    // Drive files count
-    const { count: totalFiles } = await adminClient
-      .from("drive_files")
-      .select("*", { count: "exact", head: true });
-
-    // Contacts count
-    const { count: totalContacts } = await adminClient
-      .from("contacts")
-      .select("*", { count: "exact", head: true });
-
-    // Messages count (last 7 days)
-    const { count: recentMessages } = await adminClient
-      .from("messages")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", sevenDaysAgo.toISOString());
-
-    // Recent activity (last 10 photos uploaded)
-    const { data: recentPhotos } = await adminClient
-      .from("photos")
-      .select("id, name, created_at, user_id")
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    // Recent notes
-    const { data: recentNotes } = await adminClient
-      .from("notes")
-      .select("id, title, created_at, user_id")
-      .order("created_at", { ascending: false })
-      .limit(5);
-
-    // User list with profiles
-    const { data: profiles } = await adminClient
-      .from("profiles")
-      .select("user_id, display_name, avatar_url, username, created_at")
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    // Fetch roles for all users
-    const { data: allRoles } = await adminClient
-      .from("user_roles")
-      .select("user_id, role");
-
-    const roleMap: Record<string, string> = {};
-    (allRoles || []).forEach((r: any) => { roleMap[r.user_id] = r.role; });
-
-    // Get ban status from auth users
-    const banMap: Record<string, string | null> = {};
-    users.forEach((u: any) => {
-      banMap[u.id] = u.banned_until || null;
-    });
-
-    // Announcements count
-    const { count: totalAnnouncements } = await adminClient
-      .from("announcements")
-      .select("*", { count: "exact", head: true });
-
-    const enrichedProfiles = (profiles || []).map((p: any) => ({
-      ...p,
-      role: roleMap[p.user_id] || "user",
-      email: users.find((u: any) => u.id === p.user_id)?.email || null,
-      banned_until: banMap[p.user_id] || null,
-    }));
-
-    // Audit log (last 50)
-    const { data: auditLogs } = await adminClient
-      .from("admin_audit_log")
-      .select("id, admin_user_id, action, target_user_id, details, created_at")
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    // Map admin/target user IDs to display names for audit
-    const allUserIds = new Set<string>();
-    (auditLogs || []).forEach((l: any) => {
-      allUserIds.add(l.admin_user_id);
-      allUserIds.add(l.target_user_id);
-    });
-    const profileMap: Record<string, string> = {};
-    (profiles || []).forEach((p: any) => {
-      profileMap[p.user_id] = p.display_name || p.username || "Unknown";
-    });
-
-    const enrichedAuditLogs = (auditLogs || []).map((l: any) => ({
-      ...l,
-      admin_name: profileMap[l.admin_user_id] || "Admin",
-      target_name: profileMap[l.target_user_id] || "User",
-    }));
-
-    return new Response(
-      JSON.stringify({
-        overview: {
-          totalUsers: totalUsers || users.length,
-          recentSignups,
-          totalPhotos: totalPhotos || 0,
-          totalNotes: totalNotes || 0,
-          totalFiles: totalFiles || 0,
-          totalContacts: totalContacts || 0,
-          totalAnnouncements: totalAnnouncements || 0,
-          recentMessages: recentMessages || 0,
-        },
-        dailySignups: Object.entries(dailySignups).map(([date, count]) => ({
-          date,
-          count,
-        })),
-        recentActivity: [
-          ...(recentPhotos || []).map((p: any) => ({
-            type: "photo",
-            id: p.id,
-            title: p.name,
-            user_id: p.user_id,
-            created_at: p.created_at,
-          })),
-          ...(recentNotes || []).map((n: any) => ({
-            type: "note",
-            id: n.id,
-            title: n.title,
-            user_id: n.user_id,
-            created_at: n.created_at,
-          })),
-        ].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10),
-        users: enrichedProfiles,
-        auditLog: enrichedAuditLogs,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return await handleOverview(adminClient, corsHeaders);
   } catch (err) {
     console.error("Admin stats error:", err);
     return new Response(JSON.stringify({ error: String(err) }), {
@@ -227,3 +71,115 @@ Deno.serve(async (req) => {
     });
   }
 });
+
+async function handleUserDetail(adminClient: any, targetUserId: string, corsHeaders: Record<string, string>) {
+  const [photosRes, notesRes, filesRes, contactsRes, profileRes] = await Promise.all([
+    adminClient.from("photos").select("id, name, storage_path, size, favorite, deleted, created_at").eq("user_id", targetUserId).order("created_at", { ascending: false }).limit(100),
+    adminClient.from("notes").select("id, title, content, folder, pinned, created_at, updated_at").eq("user_id", targetUserId).order("updated_at", { ascending: false }).limit(100),
+    adminClient.from("drive_files").select("id, name, folder, mime_type, size_bytes, created_at").eq("user_id", targetUserId).order("created_at", { ascending: false }).limit(100),
+    adminClient.from("contacts").select("id, first_name, last_name, email, phone, company, created_at").eq("user_id", targetUserId).order("created_at", { ascending: false }).limit(100),
+    adminClient.from("profiles").select("display_name, username, avatar_url, created_at").eq("user_id", targetUserId).maybeSingle(),
+  ]);
+
+  return new Response(
+    JSON.stringify({
+      profile: profileRes.data,
+      photos: photosRes.data || [],
+      notes: notesRes.data || [],
+      driveFiles: filesRes.data || [],
+      contacts: contactsRes.data || [],
+      counts: {
+        photos: photosRes.data?.length || 0,
+        notes: notesRes.data?.length || 0,
+        driveFiles: filesRes.data?.length || 0,
+        contacts: contactsRes.data?.length || 0,
+      },
+    }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
+
+async function handleOverview(adminClient: any, corsHeaders: Record<string, string>) {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const { count: totalUsers } = await adminClient.auth.admin.listUsers({ perPage: 1 });
+  const { data: allUsers } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+  const users = allUsers?.users || [];
+
+  const recentSignups = users.filter((u: any) => new Date(u.created_at) >= sevenDaysAgo).length;
+
+  const dailySignups: Record<string, number> = {};
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    dailySignups[d.toISOString().split("T")[0]] = 0;
+  }
+  users.forEach((u: any) => {
+    const day = u.created_at.split("T")[0];
+    if (dailySignups[day] !== undefined) dailySignups[day]++;
+  });
+
+  const [photosRes, notesRes, filesRes, contactsRes, messagesRes, announcementsRes, profilesRes, allRolesRes, auditRes, recentPhotosRes, recentNotesRes] = await Promise.all([
+    adminClient.from("photos").select("*", { count: "exact", head: true }),
+    adminClient.from("notes").select("*", { count: "exact", head: true }),
+    adminClient.from("drive_files").select("*", { count: "exact", head: true }),
+    adminClient.from("contacts").select("*", { count: "exact", head: true }),
+    adminClient.from("messages").select("*", { count: "exact", head: true }).gte("created_at", sevenDaysAgo.toISOString()),
+    adminClient.from("announcements").select("*", { count: "exact", head: true }),
+    adminClient.from("profiles").select("user_id, display_name, avatar_url, username, created_at").order("created_at", { ascending: false }).limit(50),
+    adminClient.from("user_roles").select("user_id, role"),
+    adminClient.from("admin_audit_log").select("id, admin_user_id, action, target_user_id, details, created_at").order("created_at", { ascending: false }).limit(50),
+    adminClient.from("photos").select("id, name, created_at, user_id").order("created_at", { ascending: false }).limit(5),
+    adminClient.from("notes").select("id, title, created_at, user_id").order("created_at", { ascending: false }).limit(5),
+  ]);
+
+  const profiles = profilesRes.data || [];
+  const allRoles = allRolesRes.data || [];
+  const auditLogs = auditRes.data || [];
+
+  const roleMap: Record<string, string> = {};
+  allRoles.forEach((r: any) => { roleMap[r.user_id] = r.role; });
+
+  const banMap: Record<string, string | null> = {};
+  users.forEach((u: any) => { banMap[u.id] = u.banned_until || null; });
+
+  const profileMap: Record<string, string> = {};
+  profiles.forEach((p: any) => { profileMap[p.user_id] = p.display_name || p.username || "Unknown"; });
+
+  const enrichedProfiles = profiles.map((p: any) => ({
+    ...p,
+    role: roleMap[p.user_id] || "user",
+    email: users.find((u: any) => u.id === p.user_id)?.email || null,
+    banned_until: banMap[p.user_id] || null,
+  }));
+
+  const enrichedAuditLogs = auditLogs.map((l: any) => ({
+    ...l,
+    admin_name: profileMap[l.admin_user_id] || "Admin",
+    target_name: profileMap[l.target_user_id] || "User",
+  }));
+
+  return new Response(
+    JSON.stringify({
+      overview: {
+        totalUsers: totalUsers || users.length,
+        recentSignups,
+        totalPhotos: photosRes.count || 0,
+        totalNotes: notesRes.count || 0,
+        totalFiles: filesRes.count || 0,
+        totalContacts: contactsRes.count || 0,
+        totalAnnouncements: announcementsRes.count || 0,
+        recentMessages: messagesRes.count || 0,
+      },
+      dailySignups: Object.entries(dailySignups).map(([date, count]) => ({ date, count })),
+      recentActivity: [
+        ...(recentPhotosRes.data || []).map((p: any) => ({ type: "photo", id: p.id, title: p.name, user_id: p.user_id, created_at: p.created_at })),
+        ...(recentNotesRes.data || []).map((n: any) => ({ type: "note", id: n.id, title: n.title, user_id: n.user_id, created_at: n.created_at })),
+      ].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10),
+      users: enrichedProfiles,
+      auditLog: enrichedAuditLogs,
+    }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
