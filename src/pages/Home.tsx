@@ -119,7 +119,29 @@ const Home = () => {
         <ProfileMenu />
       </motion.header>
 
-      <main className="relative px-5 pt-2 pb-28 max-w-3xl mx-auto space-y-7">
+      {/* Pull-to-refresh indicator */}
+      <motion.div
+        style={{ opacity: pullOpacity, y: pullY }}
+        className="flex justify-center py-2 -mt-2"
+      >
+        <motion.div
+          style={{ rotate: refreshing ? undefined : pullRotate }}
+          animate={refreshing ? { rotate: 360 } : {}}
+          transition={refreshing ? { duration: 0.8, repeat: Infinity, ease: "linear" } : {}}
+          className="w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center shadow-md"
+        >
+          <RefreshCw className={`w-4 h-4 text-primary ${refreshing ? "" : ""}`} />
+        </motion.div>
+      </motion.div>
+
+      <motion.main
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.5, bottom: 0 }}
+        style={{ y: pullY }}
+        onDragEnd={handlePullRelease}
+        className="relative px-5 pt-2 pb-28 max-w-3xl mx-auto space-y-7 cursor-grab active:cursor-grabbing"
+      >
         {/* Stats */}
         {stats.length > 0 && (
           <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-4 gap-2.5">
