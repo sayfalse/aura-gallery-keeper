@@ -1,0 +1,87 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "loading": "Cargando...",
+    "retry": "Reintentar",
+    "signOut": "Cerrar sesión",
+    "back": "Atrás",
+    "upload": "Subir",
+    "items": "elementos",
+    "openInBrowser": "Abrir en navegador",
+    "openExternally": "Abrir externamente",
+    "newSearch": "Nueva búsqueda"
+  },
+  "home": {
+    "greeting": {
+      "night": "Buenas noches 🌙",
+      "morning": "Buenos días ☀️",
+      "afternoon": "Buenas tardes 🌤️",
+      "evening": "Buenas noches 🌆"
+    },
+    "apps": "Aplicaciones",
+    "askPixelAI": "Preguntar a Pixel AI",
+    "aiDesc": "Chatear, generar, traducir",
+    "stats": { "photos": "Fotos", "notes": "Notas", "people": "Personas", "files": "Archivos" }
+  },
+  "apps": {
+    "gallery": "Galería", "galleryDesc": "Fotos y Álbumes",
+    "notes": "Notas", "notesDesc": "Pensamientos rápidos",
+    "drive": "Drive", "driveDesc": "Almacenamiento",
+    "people": "Personas", "peopleDesc": "Contactos",
+    "mail": "Correo", "mailDesc": "Email",
+    "tempMail": "Correo Temp", "tempMailDesc": "Email desechable",
+    "chat": "Chat", "chatDesc": "Mensajes",
+    "pixelAI": "Pixel AI", "pixelAIDesc": "Asistente IA",
+    "browser": "Navegador", "browserDesc": "Web",
+    "music": "Música", "musicDesc": "Escuchar música",
+    "vpn": "VPN y DNS", "vpnDesc": "Herramientas de privacidad",
+    "settings": "Ajustes", "settingsDesc": "Preferencias"
+  },
+  "nav": {
+    "home": "Inicio", "gallery": "Galería", "mail": "Correo", "chat": "Chat", "settings": "Ajustes",
+    "photos": "Fotos", "favorites": "Favoritos", "shared": "Compartido", "recent": "Reciente", "upload": "Subir"
+  },
+  "settings": {
+    "title": "Ajustes", "appearance": "Apariencia", "light": "Claro", "dark": "Oscuro", "system": "Sistema",
+    "language": "Idioma", "currentLang": "Actual", "searchLanguages": "Buscar idiomas...",
+    "showAll": "Mostrar todos los {{count}} idiomas", "noLanguagesFound": "No se encontraron idiomas",
+    "storage": "Almacenamiento y Datos", "cloudStorage": "Almacenamiento en la nube", "used": "usado",
+    "storageByType": "Almacenamiento por tipo", "largestFiles": "Archivos más grandes",
+    "security": "Seguridad y Cifrado", "dataProtected": "Tus datos están protegidos",
+    "dataProtectedDesc": "Todos tus datos están cifrados de extremo a extremo.",
+    "atRestEncryption": "Cifrado en reposo", "inTransitEncryption": "Cifrado en tránsito",
+    "dataIsolation": "Aislamiento de datos", "authProvider": "Proveedor de autenticación",
+    "appLock": "Bloqueo de app", "enableAppLock": "Activar bloqueo", "requirePin": "Requerir PIN para abrir",
+    "lockAfter": "Bloquear después de", "immediately": "Inmediatamente", "oneMinute": "1 minuto",
+    "fiveMinutes": "5 minutos", "twentyMinutes": "20 minutos", "changePin": "Cambiar PIN",
+    "setPin": "Establecer PIN de 4 dígitos", "confirmPin": "Confirmar PIN",
+    "pinSet": "¡PIN establecido!", "pinMismatch": "Los PINs no coinciden",
+    "lockEnabled": "Bloqueo activado", "lockDisabled": "Bloqueo desactivado",
+    "developer": "Desarrollador", "developedBy": "Desarrollado por", "contact": "Contacto",
+    "version": "Versión", "privacyPolicy": "Política de privacidad", "termsOfService": "Términos de servicio",
+    "profileUpdated": "¡Perfil actualizado!", "profileFailed": "Error al guardar perfil"
+  },
+  "deleteAccount": {
+    "title": "Eliminar cuenta",
+    "description": "Eliminar permanentemente tu cuenta y todos los datos asociados. Esta acción no se puede deshacer.",
+    "deleteBtn": "Eliminar mi cuenta", "askTitle": "¿Realmente quieres eliminar tu cuenta?",
+    "keepIt": "No, conservarla", "yesDelete": "Sí, eliminarla",
+    "absolutelySure": "¿Estás absolutamente seguro?", "typeDelete": "Escribe DELETE para confirmar.",
+    "placeholder": "Escribe \"DELETE\" para confirmar", "deleting": "Eliminando...",
+    "deleteForever": "Eliminar para siempre", "deleted": "Cuenta eliminada permanentemente"
+  },
+  "browser": {
+    "searchTheWeb": "Buscar en la Web", "searchPrompt": "Escribe una URL o término de búsqueda.",
+    "startBrowsing": "Comenzar a navegar", "cantLoad": "No se puede cargar la página",
+    "cantLoadDesc": "Este sitio bloquea la carga embebida.", "searchOrEnter": "Buscar o escribir sitio web",
+    "searchOrEnterUrl": "Buscar o escribir URL"
+  },
+  "tempMail": {
+    "title": "Correo Temporal", "cantLoad": "No se pudo cargar el correo temporal",
+    "cantLoadDesc": "El servicio puede no estar disponible. Puedes abrirlo en tu navegador."
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "common": {
+    "save": "सहेजें", "cancel": "रद्द करें", "delete": "हटाएं", "confirm": "पुष्टि करें",
+    "search": "खोजें", "loading": "लोड हो रहा है...", "retry": "पुनः प्रयास",
+    "signOut": "साइन आउट", "back": "वापस", "upload": "अपलोड", "items": "आइटम",
+    "openInBrowser": "ब्राउज़र में खोलें", "openExternally": "बाहर खोलें", "newSearch": "नई खोज"
+  },
+  "home": {
+    "greeting": { "night": "शुभ रात्रि 🌙", "morning": "सुप्रभात ☀️", "afternoon": "शुभ दोपहर 🌤️", "evening": "शुभ संध्या 🌆" },
+    "apps": "ऐप्स", "askPixelAI": "Pixel AI से पूछें", "aiDesc": "चैट करें, बनाएं, अनुवाद करें",
+    "stats": { "photos": "फ़ोटो", "notes": "नोट्स", "people": "लोग", "files": "फ़ाइलें" }
+  },
+  "apps": {
+    "gallery": "गैलरी", "galleryDesc": "फ़ोटो और एल्बम", "notes": "नोट्स", "notesDesc": "त्वरित विचार",
+    "drive": "ड्राइव", "driveDesc": "क्लाउड स्टोरेज", "people": "लोग", "peopleDesc": "संपर्क",
+    "mail": "मेल", "mailDesc": "ईमेल", "tempMail": "अस्थायी मेल", "tempMailDesc": "डिस्पोज़ेबल ईमेल",
+    "chat": "चैट", "chatDesc": "संदेश", "pixelAI": "Pixel AI", "pixelAIDesc": "AI सहायक",
+    "browser": "ब्राउज़र", "browserDesc": "वेब", "music": "संगीत", "musicDesc": "संगीत सुनें",
+    "vpn": "VPN और DNS", "vpnDesc": "गोपनीयता उपकरण", "settings": "सेटिंग्स", "settingsDesc": "प्राथमिकताएं"
+  },
+  "nav": {
+    "home": "होम", "gallery": "गैलरी", "mail": "मेल", "chat": "चैट", "settings": "सेटिंग्स",
+    "photos": "फ़ोटो", "favorites": "पसंदीदा", "shared": "साझा", "recent": "हाल का", "upload": "अपलोड"
+  },
+  "settings": {
+    "title": "सेटिंग्स", "appearance": "दिखावट", "light": "लाइट", "dark": "डार्क", "system": "सिस्टम",
+    "language": "भाषा", "currentLang": "वर्तमान", "searchLanguages": "भाषाएं खोजें...",
+    "showAll": "सभी {{count}} भाषाएं दिखाएं", "noLanguagesFound": "कोई भाषा नहीं मिली",
+    "storage": "स्टोरेज और डेटा", "cloudStorage": "क्लाउड स्टोरेज", "used": "उपयोग",
+    "storageByType": "प्रकार के अनुसार", "largestFiles": "सबसे बड़ी फ़ाइलें",
+    "security": "सुरक्षा और एन्क्रिप्शन", "dataProtected": "आपका डेटा सुरक्षित है",
+    "dataProtectedDesc": "आपका सभी डेटा एंड-टू-एंड एन्क्रिप्टेड है।",
+    "atRestEncryption": "रेस्ट एन्क्रिप्शन", "inTransitEncryption": "ट्रांज़िट एन्क्रिप्शन",
+    "dataIsolation": "डेटा आइसोलेशन", "authProvider": "ऑथ प्रोवाइडर",
+    "appLock": "ऐप लॉक", "enableAppLock": "ऐप लॉक सक्षम करें", "requirePin": "PIN आवश्यक",
+    "lockAfter": "बाद में लॉक", "immediately": "तुरंत", "oneMinute": "1 मिनट",
+    "fiveMinutes": "5 मिनट", "twentyMinutes": "20 मिनट", "changePin": "PIN बदलें",
+    "setPin": "4-अंकीय PIN सेट करें", "confirmPin": "PIN की पुष्टि करें",
+    "pinSet": "PIN सेट हो गया!", "pinMismatch": "PIN मेल नहीं खाते",
+    "lockEnabled": "ऐप लॉक सक्षम", "lockDisabled": "ऐप लॉक अक्षम",
+    "developer": "डेवलपर", "developedBy": "द्वारा विकसित", "contact": "संपर्क",
+    "version": "संस्करण", "privacyPolicy": "गोपनीयता नीति", "termsOfService": "सेवा की शर्तें",
+    "profileUpdated": "प्रोफ़ाइल अपडेट!", "profileFailed": "प्रोफ़ाइल सहेजने में विफल"
+  },
+  "deleteAccount": {
+    "title": "खाता हटाएं", "description": "अपना खाता और सभी संबंधित डेटा स्थायी रूप से हटाएं।",
+    "deleteBtn": "मेरा खाता हटाएं", "askTitle": "क्या आप वाकई अपना खाता हटाना चाहते हैं?",
+    "keepIt": "नहीं, रखें", "yesDelete": "हां, हटाएं",
+    "absolutelySure": "क्या आप बिल्कुल निश्चित हैं?", "typeDelete": "पुष्टि के लिए DELETE टाइप करें।",
+    "placeholder": "पुष्टि के लिए \"DELETE\" टाइप करें", "deleting": "हटा रहे हैं...",
+    "deleteForever": "हमेशा के लिए हटाएं", "deleted": "खाता स्थायी रूप से हटाया गया"
+  },
+  "browser": {
+    "searchTheWeb": "वेब पर खोजें", "searchPrompt": "URL या खोज शब्द टाइप करें।",
+    "startBrowsing": "ब्राउज़िंग शुरू करें", "cantLoad": "पेज लोड नहीं हो सकता",
+    "cantLoadDesc": "यह साइट एम्बेडिंग ब्लॉक करती है।", "searchOrEnter": "खोजें या वेबसाइट लिखें",
+    "searchOrEnterUrl": "खोजें या URL लिखें"
+  },
+  "tempMail": {
+    "title": "अस्थायी मेल", "cantLoad": "अस्थायी मेल लोड नहीं हो सका",
+    "cantLoadDesc": "सेवा अनुपलब्ध हो सकती है।"
+  }
+}

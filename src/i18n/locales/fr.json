@@ -1,0 +1,64 @@
+{
+  "common": {
+    "save": "Enregistrer", "cancel": "Annuler", "delete": "Supprimer", "confirm": "Confirmer",
+    "search": "Rechercher", "loading": "Chargement...", "retry": "Réessayer",
+    "signOut": "Se déconnecter", "back": "Retour", "upload": "Télécharger", "items": "éléments",
+    "openInBrowser": "Ouvrir dans le navigateur", "openExternally": "Ouvrir externement", "newSearch": "Nouvelle recherche"
+  },
+  "home": {
+    "greeting": { "night": "Bonne nuit 🌙", "morning": "Bonjour ☀️", "afternoon": "Bon après-midi 🌤️", "evening": "Bonsoir 🌆" },
+    "apps": "Applications", "askPixelAI": "Demander à Pixel AI", "aiDesc": "Discuter, générer, traduire",
+    "stats": { "photos": "Photos", "notes": "Notes", "people": "Contacts", "files": "Fichiers" }
+  },
+  "apps": {
+    "gallery": "Galerie", "galleryDesc": "Photos & Albums", "notes": "Notes", "notesDesc": "Pensées rapides",
+    "drive": "Drive", "driveDesc": "Stockage cloud", "people": "Contacts", "peopleDesc": "Contacts",
+    "mail": "Courrier", "mailDesc": "Email", "tempMail": "Email Temp", "tempMailDesc": "Email jetable",
+    "chat": "Chat", "chatDesc": "Messages", "pixelAI": "Pixel AI", "pixelAIDesc": "Assistant IA",
+    "browser": "Navigateur", "browserDesc": "Web", "music": "Musique", "musicDesc": "Écouter de la musique",
+    "vpn": "VPN & DNS", "vpnDesc": "Outils de confidentialité", "settings": "Paramètres", "settingsDesc": "Préférences"
+  },
+  "nav": {
+    "home": "Accueil", "gallery": "Galerie", "mail": "Courrier", "chat": "Chat", "settings": "Paramètres",
+    "photos": "Photos", "favorites": "Favoris", "shared": "Partagé", "recent": "Récent", "upload": "Télécharger"
+  },
+  "settings": {
+    "title": "Paramètres", "appearance": "Apparence", "light": "Clair", "dark": "Sombre", "system": "Système",
+    "language": "Langue", "currentLang": "Actuelle", "searchLanguages": "Rechercher des langues...",
+    "showAll": "Afficher les {{count}} langues", "noLanguagesFound": "Aucune langue trouvée",
+    "storage": "Stockage et Données", "cloudStorage": "Stockage cloud", "used": "utilisé",
+    "storageByType": "Stockage par type", "largestFiles": "Plus gros fichiers",
+    "security": "Sécurité et Chiffrement", "dataProtected": "Vos données sont protégées",
+    "dataProtectedDesc": "Toutes vos données sont chiffrées de bout en bout.",
+    "atRestEncryption": "Chiffrement au repos", "inTransitEncryption": "Chiffrement en transit",
+    "dataIsolation": "Isolation des données", "authProvider": "Fournisseur d'authentification",
+    "appLock": "Verrouillage", "enableAppLock": "Activer le verrouillage", "requirePin": "Exiger un PIN",
+    "lockAfter": "Verrouiller après", "immediately": "Immédiatement", "oneMinute": "1 minute",
+    "fiveMinutes": "5 minutes", "twentyMinutes": "20 minutes", "changePin": "Changer le PIN",
+    "setPin": "Définir un PIN à 4 chiffres", "confirmPin": "Confirmer le PIN",
+    "pinSet": "PIN défini !", "pinMismatch": "Les PIN ne correspondent pas",
+    "lockEnabled": "Verrouillage activé", "lockDisabled": "Verrouillage désactivé",
+    "developer": "Développeur", "developedBy": "Développé par", "contact": "Contact",
+    "version": "Version", "privacyPolicy": "Politique de confidentialité", "termsOfService": "Conditions d'utilisation",
+    "profileUpdated": "Profil mis à jour !", "profileFailed": "Échec de la sauvegarde"
+  },
+  "deleteAccount": {
+    "title": "Supprimer le compte",
+    "description": "Supprimer définitivement votre compte et toutes les données associées. Cette action est irréversible.",
+    "deleteBtn": "Supprimer mon compte", "askTitle": "Voulez-vous vraiment supprimer votre compte ?",
+    "keepIt": "Non, le garder", "yesDelete": "Oui, le supprimer",
+    "absolutelySure": "Êtes-vous absolument sûr ?", "typeDelete": "Tapez DELETE pour confirmer.",
+    "placeholder": "Tapez \"DELETE\" pour confirmer", "deleting": "Suppression...",
+    "deleteForever": "Supprimer définitivement", "deleted": "Compte supprimé définitivement"
+  },
+  "browser": {
+    "searchTheWeb": "Rechercher sur le Web", "searchPrompt": "Tapez une URL ou un terme de recherche.",
+    "startBrowsing": "Commencer à naviguer", "cantLoad": "Impossible de charger la page",
+    "cantLoadDesc": "Ce site bloque l'intégration.", "searchOrEnter": "Rechercher ou saisir un site",
+    "searchOrEnterUrl": "Rechercher ou saisir une URL"
+  },
+  "tempMail": {
+    "title": "Email Temporaire", "cantLoad": "Impossible de charger l'email temporaire",
+    "cantLoadDesc": "Le service peut ne pas être disponible. Vous pouvez l'ouvrir dans votre navigateur."
+  }
+}
