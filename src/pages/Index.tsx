@@ -78,7 +78,13 @@ const Index = () => {
         favoriteCount={photos.filter((p) => p.favorite).length}
       />
 
-      <main className="ml-[260px]">
+      <BottomNav
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        onUpload={() => setShowUpload(true)}
+      />
+
+      <main className="md:ml-[260px]">
         <Toolbar
           section={activeSection}
           viewMode={viewMode}
