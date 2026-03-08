@@ -9,7 +9,7 @@ import PullToRefresh from "@/components/PullToRefresh";
 import { motion } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, MessageCircle,
-  ArrowUpRight, Layers, Shield
+  ArrowUpRight, Layers, Shield, Globe
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
