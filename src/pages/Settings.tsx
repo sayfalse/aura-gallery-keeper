@@ -321,19 +321,50 @@ const SettingsPage = () => {
           </div>
         </section>
 
-        {/* Security */}
+        {/* Security & Encryption */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Shield className="w-4 h-4" /> Security
+            <Shield className="w-4 h-4" /> Security & Encryption
           </h2>
+          <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Your data is protected</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  All your data is encrypted end-to-end. Files, photos, notes, and contacts are secured with industry-standard encryption both in transit and at rest.
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">Encryption</span>
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">At-rest AES-256</span>
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Database className="w-3.5 h-3.5 text-muted-foreground" />
+                At-rest Encryption
+              </span>
+              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">AES-256</span>
             </div>
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">Auth Provider</span>
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Google OAuth</span>
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Wifi className="w-3.5 h-3.5 text-muted-foreground" />
+                In-transit Encryption
+              </span>
+              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">TLS 1.3</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Shield className="w-3.5 h-3.5 text-muted-foreground" />
+                Data Isolation
+              </span>
+              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">Row-Level Security</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                Auth Provider
+              </span>
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Google OAuth 2.0</span>
             </div>
           </div>
         </section>
