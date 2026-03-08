@@ -300,15 +300,30 @@ const SettingsPage = () => {
                 return (
                   <div key={ann.id} className="rounded-xl bg-primary/5 border border-primary/10 p-4">
                     <div className="flex items-start gap-3">
-                      <div className={`p-1.5 rounded-lg ${cfg.color} shrink-0`}>
+                      <a
+                        href={ann.telegram_message_id ? `https://t.me/copyrightpost/${ann.telegram_message_id}` : "https://t.me/copyrightpost"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`p-1.5 rounded-lg ${cfg.color} shrink-0 hover:scale-110 transition-transform cursor-pointer`}
+                        title="Read on Telegram"
+                      >
                         <Icon className="w-3.5 h-3.5" />
-                      </div>
+                      </a>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${cfg.color}`}>
                             {cfg.label}
                           </span>
                           <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
+                          <a
+                            href={ann.telegram_message_id ? `https://t.me/copyrightpost/${ann.telegram_message_id}` : "https://t.me/copyrightpost"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-auto text-muted-foreground hover:text-primary transition-colors"
+                            title="Open in Telegram"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
                         </div>
                         {ann.title && <p className="text-sm font-medium text-foreground mb-1">{ann.title}</p>}
                         <p className="text-xs text-muted-foreground leading-relaxed">{ann.content}</p>
