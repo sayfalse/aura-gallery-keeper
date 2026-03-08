@@ -368,7 +368,7 @@ const PixelAI = () => {
               className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-sm font-semibold shadow-lg shadow-violet-500/20 hover:opacity-90 transition-opacity"
             >
               <Mic className="w-4 h-4" />
-              Start Voice Chat 🎙️
+              {t("pixelAI.startVoice")}
             </button>
           </div>
         )}
