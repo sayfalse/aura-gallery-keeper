@@ -201,14 +201,14 @@ const AdminDashboard = () => {
     fetchUserDetail(profile.user_id);
   };
 
-  const manageUser = useCallback(async (action: string, targetUserId: string, role?: string) => {
+  const manageUser = useCallback(async (action: string, targetUserId: string, role?: string, quotaBytes?: number) => {
     setActionLoading(targetUserId);
     try {
       const token = await getToken();
       if (!token) throw new Error("Not authenticated");
       const { data, error: fnError } = await supabase.functions.invoke("admin-manage-user", {
         headers: { Authorization: `Bearer ${token}` },
-        body: { action, targetUserId, role },
+        body: { action, targetUserId, role, quotaBytes },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
