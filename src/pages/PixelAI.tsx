@@ -98,12 +98,12 @@ const PixelAI = () => {
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { toast.error("File too large. Max 10MB 📁"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error(t("pixelAI.fileTooLarge")); return; }
     try {
       const content = await readFileAsText(file);
       setAttachedFile({ name: file.name, content: content.slice(0, 50000) });
-      toast.success(`📎 ${file.name} attached!`);
-    } catch { toast.error("Couldn't read this file 😔"); }
+      toast.success(t("pixelAI.fileAttached", { name: file.name }));
+    } catch { toast.error(t("pixelAI.cantReadFile")); }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
