@@ -274,7 +274,8 @@ const DrivePage = () => {
                     return (
                       <div
                         key={file.id}
-                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/50 transition-colors group"
+                        onClick={() => setPreviewFile(file)}
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-accent/50 transition-colors group cursor-pointer"
                       >
                         <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
                           <FileIcon className="w-5 h-5 text-muted-foreground" />
