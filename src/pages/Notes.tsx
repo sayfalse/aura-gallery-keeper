@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchNotes, createNote, updateNote, deleteNote, type Note } from "@/lib/noteService";
 import { ArrowLeft, Plus, Pin, Trash2, Search, StickyNote, FileDown } from "lucide-react";
 import { toast } from "sonner";
