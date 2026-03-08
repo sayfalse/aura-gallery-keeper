@@ -14,6 +14,7 @@ import DrivePage from "./pages/Drive";
 import ContactsPage from "./pages/Contacts";
 import MailPage from "./pages/Mail";
 import GmailCallback from "./pages/GmailCallback";
+import PixelAIPage from "./pages/PixelAI";
 import SettingsPage from "./pages/Settings";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
