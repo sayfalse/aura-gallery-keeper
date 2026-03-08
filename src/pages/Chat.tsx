@@ -136,7 +136,7 @@ const ChatPage = () => {
       await sendMessage(activeConv.id, user.id, content);
       loadConversations();
     } catch {
-      toast.error("Failed to send message");
+      toast.error(t("chat.failedSend"));
       setNewMsg(content);
     } finally {
       setSending(false);
