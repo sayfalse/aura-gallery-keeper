@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -6,8 +7,9 @@ import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, MessageCircle,
-  ArrowUpRight, Layers
+  ArrowUpRight, Layers, Shield
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const appKeys = [
   { id: "gallery", nameKey: "apps.gallery", icon: Image, gradient: "from-blue-500 to-cyan-400", path: "/gallery", descKey: "apps.galleryDesc" },
@@ -32,7 +34,21 @@ const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [isAdmin, setIsAdmin] = useState(false);
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setIsAdmin(true);
+      });
+  }, [user]);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -80,6 +96,26 @@ const Home = () => {
             <ArrowUpRight className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
           </div>
         </motion.button>
+
+        {/* Admin link */}
+        {isAdmin && (
+          <motion.button
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.4 }}
+            onClick={() => navigate("/admin")}
+            className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-destructive/20 hover:border-destructive/40 hover:shadow-lg transition-all duration-200 text-left"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-sm">
+              <Shield className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground leading-tight">Admin Dashboard</p>
+              <p className="text-[10px] text-muted-foreground">System stats & user management</p>
+            </div>
+            <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
+          </motion.button>
+        )}
 
         {/* App grid */}
         <div>
