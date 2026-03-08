@@ -29,13 +29,13 @@ const AppSidebar = ({ activeSection, onSectionChange, onUpload, photoCount, favo
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-sidebar border-r border-sidebar-border flex-col z-30 hidden md:flex">
-      {/* Logo */}
-      <div className="px-5 py-6 flex items-center gap-2.5">
+      {/* Logo - clickable to home */}
+      <button onClick={() => navigate("/")} className="px-5 py-6 flex items-center gap-2.5 hover:opacity-80 transition-opacity">
         <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-          <Cloud className="w-5 h-5 text-primary-foreground" />
+          <Home className="w-5 h-5 text-primary-foreground" />
         </div>
         <span className="font-display text-lg font-bold tracking-tight text-foreground">PixelVault</span>
-      </div>
+      </button>
 
       {/* Upload */}
       <div className="px-4 mb-4">
