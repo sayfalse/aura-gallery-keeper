@@ -83,6 +83,11 @@ export const moveDriveFile = async (id: string, newFolder: string) => {
   if (error) throw error;
 };
 
+export const renameDriveFile = async (id: string, newName: string) => {
+  const { error } = await supabase.from("drive_files").update({ name: newName }).eq("id", id);
+  if (error) throw error;
+};
+
 export const getDriveFolders = async (userId: string): Promise<string[]> => {
   const { data, error } = await supabase
     .from("drive_files")
@@ -93,6 +98,42 @@ export const getDriveFolders = async (userId: string): Promise<string[]> => {
   const folders = new Set((data || []).map((r: any) => r.folder || "/"));
   folders.add("/");
   return Array.from(folders).sort();
+};
+
+export const getStorageAnalytics = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("drive_files")
+    .select("name, mime_type, size_bytes, folder")
+    .eq("user_id", userId);
+
+  if (error) throw error;
+  const files = data || [];
+
+  const totalSize = files.reduce((acc, f: any) => acc + (f.size_bytes || 0), 0);
+
+  const byType: Record<string, number> = {};
+  for (const f of files) {
+    const mime = (f as any).mime_type || "";
+    let category = "Other";
+    if (mime.startsWith("image/")) category = "Images";
+    else if (mime.startsWith("video/")) category = "Videos";
+    else if (mime.startsWith("audio/")) category = "Audio";
+    else if (mime.includes("pdf") || mime.includes("document") || mime.includes("text")) category = "Documents";
+    byType[category] = (byType[category] || 0) + ((f as any).size_bytes || 0);
+  }
+
+  const byFolder: Record<string, number> = {};
+  for (const f of files) {
+    const folder = (f as any).folder || "/";
+    byFolder[folder] = (byFolder[folder] || 0) + ((f as any).size_bytes || 0);
+  }
+
+  const largest = [...files]
+    .sort((a: any, b: any) => (b.size_bytes || 0) - (a.size_bytes || 0))
+    .slice(0, 5)
+    .map((f: any) => ({ name: f.name, size: f.size_bytes || 0 }));
+
+  return { totalSize, byType, byFolder, largest, fileCount: files.length };
 };
 
 export const formatFileSize = (bytes: number): string => {
