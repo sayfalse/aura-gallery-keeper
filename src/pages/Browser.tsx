@@ -271,8 +271,7 @@ const Browser = () => {
             )}
             <iframe
               ref={iframeRef}
-              src={activeTab.url}
-              onLoad={handleIframeLoad}
+              srcDoc={proxyHtml || "<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#999;'>Loading...</body></html>"}
               className="w-full h-full border-0"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
