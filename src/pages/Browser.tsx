@@ -136,11 +136,11 @@ const Browser = () => {
   }, [activeTab, navHistory, updateTab, fetchViaProxy]);
 
   const reload = useCallback(() => {
-    if (iframeRef.current && activeTab.url) {
+    if (activeTab.url) {
       updateTab(activeTab.id, { isLoading: true });
-      iframeRef.current.src = activeTab.url;
+      fetchViaProxy(activeTab.url).finally(() => updateTab(activeTab.id, { isLoading: false }));
     }
-  }, [activeTab, updateTab]);
+  }, [activeTab, updateTab, fetchViaProxy]);
 
   const addTab = useCallback(() => {
     const newTab: BrowserTab = {
