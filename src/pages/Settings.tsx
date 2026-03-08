@@ -145,6 +145,7 @@ const SettingsPage = () => {
   // Announcements state
   const [announcements, setAnnouncements] = useState<Array<{
     id: string;
+    telegram_message_id: number | null;
     title: string | null;
     content: string;
     author: string;
