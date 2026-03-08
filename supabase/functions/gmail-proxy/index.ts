@@ -348,6 +348,26 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Get attachment data
+    if (action === "attachment" && req.method === "GET") {
+      const messageId = url.searchParams.get("messageId");
+      const attachmentId = url.searchParams.get("attachmentId");
+      if (!messageId || !attachmentId) {
+        return new Response(JSON.stringify({ error: "messageId and attachmentId required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const res = await fetch(`${GMAIL_API}/messages/${messageId}/attachments/${attachmentId}`, {
+        headers: gmailHeaders,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(`Gmail attachment error [${res.status}]: ${JSON.stringify(data)}`);
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 404,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

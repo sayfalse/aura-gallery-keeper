@@ -106,6 +106,13 @@ export function getLabels(email: string) {
   });
 }
 
+export function getAttachment(email: string, messageId: string, attachmentId: string) {
+  return callGmail("attachment", {
+    method: "GET",
+    params: { email, messageId, attachmentId },
+  });
+}
+
 // Helpers to parse Gmail message
 export function getHeader(message: GmailMessage, name: string): string {
   const header = message.payload?.headers?.find(
@@ -147,6 +154,35 @@ export function getMessageBody(message: GmailMessage): string {
   return "<p>Unable to display message body</p>";
 }
 
+export interface AttachmentInfo {
+  filename: string;
+  mimeType: string;
+  size: number;
+  attachmentId: string;
+  partId: string;
+}
+
+export function getAttachments(message: GmailMessage): AttachmentInfo[] {
+  const attachments: AttachmentInfo[] = [];
+  const collectParts = (parts?: GmailPart[]) => {
+    if (!parts) return;
+    for (const part of parts) {
+      if (part.filename && part.filename.length > 0 && part.body?.attachmentId) {
+        attachments.push({
+          filename: part.filename,
+          mimeType: part.mimeType,
+          size: part.body.size || 0,
+          attachmentId: part.body.attachmentId,
+          partId: part.partId || "",
+        });
+      }
+      if (part.parts) collectParts(part.parts);
+    }
+  };
+  collectParts(message.payload?.parts);
+  return attachments;
+}
+
 function decodeBase64Url(data: string): string {
   const base64 = data.replace(/-/g, "+").replace(/_/g, "/");
   return decodeURIComponent(
@@ -157,9 +193,21 @@ function decodeBase64Url(data: string): string {
   );
 }
 
+export function base64UrlToBlob(data: string, mimeType: string): Blob {
+  const base64 = data.replace(/-/g, "+").replace(/_/g, "/");
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: mimeType });
+}
+
 export interface GmailPart {
   mimeType: string;
-  body?: { data?: string; size?: number };
+  filename?: string;
+  partId?: string;
+  body?: { data?: string; size?: number; attachmentId?: string };
   parts?: GmailPart[];
   headers?: { name: string; value: string }[];
 }
