@@ -25,7 +25,7 @@ const AppSidebar = ({ activeSection, onSectionChange, onUpload, photoCount, favo
   };
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-sidebar border-r border-sidebar-border flex flex-col z-30">
+    <aside className="fixed left-0 top-0 bottom-0 w-[260px] bg-sidebar border-r border-sidebar-border flex-col z-30 hidden md:flex">
       {/* Logo */}
       <div className="px-5 py-6 flex items-center gap-2.5">
         <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">

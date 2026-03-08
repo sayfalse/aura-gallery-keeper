@@ -98,7 +98,7 @@ const Index = () => {
           onClearSelection={() => { setSelectedPhotos(new Set()); setSelectionMode(false); }}
         />
 
-        <div className="p-6">
+        <div className="p-3 md:p-6 pb-24 md:pb-6">
           <PhotoGrid
             photos={filteredPhotos}
             selectedPhotos={selectedPhotos}

@@ -59,7 +59,7 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
 
       {/* Info panel */}
       {showInfo && (
-        <div className="absolute right-0 top-0 bottom-0 w-72 bg-card/95 backdrop-blur-xl p-6 pt-20 animate-fade-in" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute right-0 bottom-0 left-0 md:left-auto md:top-0 w-full md:w-72 bg-card/95 backdrop-blur-xl p-6 pt-6 md:pt-20 rounded-t-2xl md:rounded-none animate-fade-in" onClick={(e) => e.stopPropagation()}>
           <h3 className="font-display font-semibold text-foreground text-lg">{photo.name}</h3>
           <div className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span className="text-foreground">{format(photo.date, "MMM d, yyyy")}</span></div>
