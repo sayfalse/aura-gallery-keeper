@@ -371,7 +371,7 @@ const SettingsPage = () => {
                             <span className="text-xs text-foreground font-medium">{type}</span>
                             <span className="text-[10px] text-muted-foreground">{formatFileSize(size)} ({pct.toFixed(1)}%)</span>
                           </div>
-                          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                          <div className="h-1.5 rounded-full bg-primary/10 overflow-hidden">
                             <div className={`h-full rounded-full ${colors[type] || "bg-primary"} transition-all duration-500`} style={{ width: `${Math.max(2, pct)}%` }} />
                           </div>
                         </div>
@@ -594,40 +594,40 @@ const SettingsPage = () => {
             <Code className="w-4 h-4" /> {t("settings.developer")}
           </h2>
           <div className="space-y-3">
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">{t("settings.developedBy")}</span>
-              <span className="text-sm text-muted-foreground font-medium">sayfalse</span>
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="text-sm font-medium text-foreground">{t("settings.developedBy")}</span>
+              <span className="text-sm text-primary font-semibold">sayfalse</span>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Mail className="w-3.5 h-3.5 text-primary" />
                 Contact
               </span>
-              <a href="mailto:scor@tuta.io" className="text-sm text-primary font-medium hover:underline">
+              <a href="mailto:scor@tuta.io" className="text-sm text-primary font-semibold hover:underline">
                 scor@tuta.io
               </a>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Github className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Github className="w-3.5 h-3.5 text-primary" />
                 GitHub
               </span>
-              <a href="https://github.com/sayfalse" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-medium hover:underline">
+              <a href="https://github.com/sayfalse" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-semibold hover:underline">
                 @sayfalse
               </a>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="flex items-center gap-2 text-sm text-foreground">
-                <Send className="w-3.5 h-3.5 text-muted-foreground" />
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Send className="w-3.5 h-3.5 text-primary" />
                 Telegram
               </span>
-              <a href="https://t.me/copyrightpost" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-medium hover:underline">
+              <a href="https://t.me/copyrightpost" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-semibold hover:underline">
                 @copyrightpost
               </a>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">{t("settings.version")}</span>
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">1.0.0</span>
+            <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
+              <span className="text-sm font-medium text-foreground">{t("settings.version")}</span>
+              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">1.0.0</span>
             </div>
             <div className="pt-2 border-t border-border space-y-2">
               <a

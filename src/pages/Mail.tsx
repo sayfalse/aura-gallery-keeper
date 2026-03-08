@@ -326,8 +326,8 @@ const MailPage = () => {
       {/* Search bar */}
       {view === "inbox" && showSearch && (
         <div className="px-4 py-2 border-b border-border bg-card">
-          <div className="flex items-center gap-2 rounded-xl bg-secondary px-3 py-2">
-            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary shrink-0" />
             <input
               type="text"
               placeholder="Search emails..."
@@ -335,7 +335,7 @@ const MailPage = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && loadMessages()}
               autoFocus
-              className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground transition-all"
             />
           </div>
         </div>
@@ -579,7 +579,7 @@ const MailPage = () => {
                 placeholder="To"
                 value={composeTo}
                 onChange={(e) => setComposeTo(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
+                className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground transition-all"
               />
 
               <input
@@ -587,7 +587,7 @@ const MailPage = () => {
                 placeholder="Subject"
                 value={composeSubject}
                 onChange={(e) => setComposeSubject(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
+                className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground transition-all"
               />
 
               <textarea
@@ -595,7 +595,7 @@ const MailPage = () => {
                 value={composeBody}
                 onChange={(e) => setComposeBody(e.target.value)}
                 rows={12}
-                className="w-full px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none"
+                className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground resize-none transition-all"
               />
 
               {/* Attachments */}

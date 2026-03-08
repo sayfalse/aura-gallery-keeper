@@ -284,7 +284,7 @@ const ChatPage = () => {
                   placeholder={t("chat.groupName")}
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
                 {selectedMembers.length > 0 && (
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
@@ -303,14 +303,14 @@ const ChatPage = () => {
 
             <div className="px-4 py-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
                 <input
                   type="text"
                   placeholder={t("chat.searchUsers")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
             </div>
@@ -490,7 +490,7 @@ const ChatPage = () => {
                 <div className={`px-3 py-2 rounded-2xl text-sm leading-relaxed ${
                   isMe
                     ? "bg-primary text-primary-foreground rounded-br-md"
-                    : "bg-secondary text-foreground rounded-bl-md"
+                    : "bg-primary/10 border border-primary/20 text-foreground rounded-bl-md"
                 }`}>
                   {msg.content}
                 </div>
@@ -507,7 +507,7 @@ const ChatPage = () => {
       {/* Message input */}
       <div className="shrink-0 border-t border-border bg-background px-3 py-2 pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-2 bg-secondary rounded-2xl px-3 py-2">
+          <div className="flex-1 flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-2xl px-3 py-2">
             <input
               ref={inputRef}
               type="text"
