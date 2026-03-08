@@ -113,6 +113,7 @@ const AppContent = () => {
           <Route path="/pixel-ai" element={<ProtectedRoute module="Pixel AI"><PixelAIPage /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute module="Chat"><ChatPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute module="Settings"><SettingsPage /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute module="Admin"><AdminDashboard /></ProtectedRoute>} />
 
           {/* Public routes */}
           <Route path="/privacy-policy" element={<Suspense fallback={<LoadingScreen />}><PrivacyPolicy /></Suspense>} />
