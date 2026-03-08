@@ -22,6 +22,7 @@ const getFileIcon = (mimeType: string) => {
 const DrivePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<DriveFile[]>([]);
   const [folders, setFolders] = useState<string[]>([]);
