@@ -1,5 +1,12 @@
 import { supabase } from "@/integrations/supabase/client";
 
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+export const getProxyUrl = (url: string): string => {
+  return `${SUPABASE_URL}/functions/v1/web-proxy`;
+};
+
+
 export interface BrowserTab {
   id: string;
   url: string;

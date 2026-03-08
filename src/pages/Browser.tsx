@@ -9,12 +9,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  BrowserTab, normalizeUrl, getDisplayUrl, defaultQuickLinks,
+  BrowserTab, normalizeUrl, getDisplayUrl, defaultQuickLinks, getProxyUrl,
   addHistoryEntry, fetchHistory, clearHistory, deleteHistoryEntry,
   fetchBookmarks, addBookmark, deleteBookmark,
   fetchDownloads, deleteDownloadEntry,
   HistoryEntry, Bookmark as BookmarkType, DownloadEntry
 } from "@/lib/browserService";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 type Panel = "none" | "tabs" | "history" | "bookmarks" | "downloads";
