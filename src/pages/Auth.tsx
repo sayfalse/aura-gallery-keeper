@@ -47,7 +47,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
       <div className="w-full max-w-sm animate-fade-in">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
@@ -144,6 +144,10 @@ const Auth = () => {
           </button>
         </p>
       </div>
+
+      <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">
+        © {new Date().getFullYear()} PixelVault. All rights reserved.
+      </p>
     </div>
   );
 };
