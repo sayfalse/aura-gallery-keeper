@@ -1,4 +1,4 @@
-import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info, Calendar, HardDrive, ImageIcon, Clock, Share2, Check, MapPin, Maximize2, FileText, Camera, FolderOpen } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Heart, Download, Trash2, Info, Calendar, HardDrive, ImageIcon, Clock, Share2, Check, MapPin, Maximize2, FileText, Camera, FolderOpen, Pencil } from "lucide-react";
 import type { Photo } from "@/types/photo";
 import { format } from "date-fns";
 import { useState, useEffect, useRef } from "react";
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { createShareLink } from "@/lib/sharedPhotoService";
 import { toast } from "sonner";
+import PhotoEditor from "@/components/PhotoEditor";
 
 interface LightboxProps {
   photo: Photo;
