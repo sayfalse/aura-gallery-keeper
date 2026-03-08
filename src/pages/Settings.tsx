@@ -636,11 +636,12 @@ const SettingsPage = () => {
                             if (next.length <= 4) setConfirmPin(next);
                             if (next.length === 4) {
                               if (next === newPin) {
-                                setAppLockPin(next);
-                                setAppLockEnabled(true);
-                                setLockEnabled(true);
-                                setShowPinSetup(false);
-                                toast.success("App lock PIN set!");
+                                setAppLockPin(next).then(() => {
+                                  setAppLockEnabled(true);
+                                  setLockEnabled(true);
+                                  setShowPinSetup(false);
+                                  toast.success("App lock PIN set!");
+                                });
                               } else {
                                 toast.error("PINs don't match, try again");
                                 setConfirmPin("");
