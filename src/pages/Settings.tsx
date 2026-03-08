@@ -300,7 +300,7 @@ const SettingsPage = () => {
             </button>
           )}
           {filteredLangs.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">No languages found</p>
+            <p className="text-sm text-muted-foreground text-center py-4">{t("settings.noLanguagesFound")}</p>
           )}
         </section>
 
