@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   ArrowLeft, Mail, Inbox, Send, Star, Trash2, Plus, Search, RefreshCw,
   ChevronLeft, Archive, MailOpen, Reply, Loader2, LogOut, AlertCircle,
-  FileText, Tag, Clock
+  FileText, Tag, Clock, Paperclip, X
 } from "lucide-react";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
