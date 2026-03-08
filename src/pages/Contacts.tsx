@@ -31,7 +31,7 @@ const ContactsPage = () => {
       const data = await fetchContacts(user.id);
       setContacts(data);
     } catch {
-      toast.error("Failed to load contacts");
+      toast.error(t("contacts.failedLoad"));
     } finally {
       setLoading(false);
     }
