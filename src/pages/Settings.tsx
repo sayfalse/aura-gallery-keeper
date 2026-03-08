@@ -548,8 +548,8 @@ const SettingsPage = () => {
                 <Send className="w-3.5 h-3.5 text-muted-foreground" />
                 Telegram
               </span>
-              <a href="https://t.me/minutesbd" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-medium hover:underline">
-                @minutesbd
+              <a href="https://t.me/copyrightpost" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-medium hover:underline">
+                @copyrightpost
               </a>
             </div>
             <div className="flex items-center justify-between py-2">
