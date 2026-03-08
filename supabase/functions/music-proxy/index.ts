@@ -5,111 +5,131 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-// Use the public saavn.dev API which provides direct download URLs
-// Multiple API endpoints for reliability
-const SAAVN_APIS = [
-  "https://saavn.dev/api",
-  "https://jiosaavn-api-privatecvc2.vercel.app/api",
-];
+const JIOSAAVN_BASE = "https://www.jiosaavn.com/api.php";
+const HEADERS = {
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+  "Accept": "application/json, text/javascript, */*; q=0.01",
+  "Referer": "https://www.jiosaavn.com/",
+  "Cookie": "L=english",
+};
 
-let currentApiIndex = 0;
-
-function getSaavnApi(): string {
-  return SAAVN_APIS[currentApiIndex % SAAVN_APIS.length];
+function getStreamUrl(s: any): string {
+  // Try media_preview_url and upgrade to high quality
+  const previewUrl = s.media_preview_url || s.more_info?.media_preview_url || s.preview_url || s.more_info?.preview_url;
+  if (previewUrl) {
+    return previewUrl
+      .replace("preview.saavncdn.com", "aac.saavncdn.com")
+      .replace("_96_p.mp4", "_320.mp4")
+      .replace("_96.mp4", "_320.mp4")
+      .replace("_96_p.mp3", "_320.mp3")
+      .replace("/96/", "/320/");
+  }
+  
+  // Try vlink / perma_url based construction
+  if (s.perma_url) {
+    const match = s.perma_url.match(/\/song\/[^/]+\/([^/]+)$/);
+    if (match) {
+      // Can't construct URL from permalink alone
+    }
+  }
+  
+  return "";
 }
 
 function mapSong(s: any): any {
-  // Get best quality image
-  let image = "";
-  if (Array.isArray(s.image)) {
-    const best = s.image.find((i: any) => i.quality === "500x500") || s.image[s.image.length - 1];
-    image = best?.url || "";
-  } else if (typeof s.image === "string") {
-    image = s.image;
+  let image = s.image || "";
+  if (typeof image === "string") {
+    image = image
+      .replace(/150x150|50x50|500x500/, "500x500")
+      .replace("c.saavncdn.com/", "c.saavncdn.com/");
   }
 
-  // Get best quality download URL
-  let url = "";
-  if (Array.isArray(s.downloadUrl)) {
-    const best = s.downloadUrl.find((d: any) => d.quality === "320kbps") 
-      || s.downloadUrl.find((d: any) => d.quality === "160kbps")
-      || s.downloadUrl[s.downloadUrl.length - 1];
-    url = best?.url || "";
-  } else if (typeof s.downloadUrl === "string") {
-    url = s.downloadUrl;
-  }
-
-  // Get artist names
-  let artist = "";
-  if (s.artists?.primary?.length) {
-    artist = s.artists.primary.map((a: any) => a.name).join(", ");
-  } else if (s.artists?.all?.length) {
-    artist = s.artists.all.slice(0, 3).map((a: any) => a.name).join(", ");
-  } else if (typeof s.artist === "string") {
-    artist = s.artist;
-  }
+  const artist = s.more_info?.artistMap?.primary_artists?.map((a: any) => a.name).join(", ")
+    || s.primary_artists || s.more_info?.primary_artists || s.singers
+    || (s.subtitle ? s.subtitle.split(" - ")[0] : "") || "";
 
   return {
     id: s.id || "",
-    name: s.name || s.title || "",
+    name: s.title || s.song || s.name || "",
     artist,
-    album: s.album?.name || s.album || "",
+    album: s.more_info?.album || s.album || "",
     image,
-    duration: s.duration ? parseInt(s.duration) : 0,
-    url,
-    year: s.year || s.releaseDate?.split("-")[0] || "",
-    language: s.language || "",
+    duration: s.more_info?.duration ? parseInt(s.more_info.duration) : (s.duration ? parseInt(s.duration) : 0),
+    url: getStreamUrl(s),
+    year: s.year || "",
+    language: s.language || s.more_info?.language || "",
   };
 }
 
-async function fetchSaavn(endpoint: string): Promise<any> {
-  const apis = [...SAAVN_APIS];
-  for (let i = 0; i < apis.length; i++) {
-    const apiBase = apis[(currentApiIndex + i) % apis.length];
-    try {
-      const res = await fetch(`${apiBase}/${endpoint}`, {
-        headers: { "Accept": "application/json" },
-      });
-      if (!res.ok) {
-        console.error(`Saavn API error: ${res.status} from ${apiBase}`);
-        continue;
-      }
-      currentApiIndex = (currentApiIndex + i) % apis.length;
-      return res.json();
-    } catch (e) {
-      console.error(`Saavn API fetch failed from ${apiBase}:`, e);
-      continue;
-    }
-  }
-  throw new Error("All API endpoints failed");
+async function fetchJioSaavn(params: Record<string, string>): Promise<any> {
+  const qs = new URLSearchParams(params).toString();
+  const res = await fetch(`${JIOSAAVN_BASE}?${qs}`, { headers: HEADERS });
+  if (!res.ok) throw new Error(`JioSaavn API error: ${res.status}`);
+  return res.json();
 }
 
 async function searchSongs(query: string, limit: string): Promise<any> {
-  const data = await fetchSaavn(`search/songs?query=${encodeURIComponent(query)}&limit=${limit}`);
-  const results = data.data?.results || [];
-  return { data: { results: results.map(mapSong) } };
+  const data = await fetchJioSaavn({
+    p: "1", q: query, _format: "json", _marker: "0",
+    api_version: "4", ctx: "web6dot0", n: limit, __call: "search.getResults",
+  });
+  
+  const results = (data.results || []).map(mapSong);
+  
+  // For songs without URLs, try to resolve them individually
+  const resolved = await Promise.all(results.slice(0, 15).map(async (song: any) => {
+    if (song.url) return song;
+    if (!song.id) return song;
+    try {
+      const url = await resolveSongUrl(song.id);
+      return { ...song, url };
+    } catch {
+      return song;
+    }
+  }));
+  
+  return { data: { results: resolved } };
+}
+
+async function resolveSongUrl(songId: string): Promise<string> {
+  try {
+    const data = await fetchJioSaavn({
+      pids: songId, _format: "json", __call: "song.getDetails", ctx: "web6dot0", api_version: "4",
+    });
+    const song = data.songs?.[0] || data[songId];
+    if (!song) return "";
+    return getStreamUrl(song);
+  } catch { return ""; }
 }
 
 async function getSongById(id: string): Promise<any> {
-  const data = await fetchSaavn(`songs/${id}`);
-  const songs = data.data || [];
-  return { data: (Array.isArray(songs) ? songs : [songs]).map(mapSong) };
+  const data = await fetchJioSaavn({
+    pids: id, _format: "json", __call: "song.getDetails", ctx: "web6dot0", api_version: "4",
+  });
+  const songs = data.songs || (data[id] ? [data[id]] : Object.values(data).filter((v: any) => v?.id));
+  return { data: songs.map(mapSong) };
 }
 
 async function getSuggestions(id: string, limit: string): Promise<any> {
-  try {
-    const data = await fetchSaavn(`songs/${id}/suggestions?limit=${limit}`);
-    const songs = data.data || [];
-    return { data: (Array.isArray(songs) ? songs : [songs]).map(mapSong) };
-  } catch {
-    // Fallback: search for related songs
-    const songData = await fetchSaavn(`songs/${id}`);
-    const song = songData.data?.[0] || songData.data;
-    if (song?.artists?.primary?.[0]?.name) {
-      return searchSongs(song.artists.primary[0].name, limit);
+  const data = await fetchJioSaavn({
+    pid: id, _format: "json", __call: "reco.getreco", ctx: "web6dot0", api_version: "4", n: limit,
+  });
+  const songs = Array.isArray(data) ? data : Object.values(data).filter((v: any) => v?.id);
+  const mapped = songs.map(mapSong);
+  
+  // Resolve URLs for suggestions
+  const resolved = await Promise.all(mapped.slice(0, 10).map(async (song: any) => {
+    if (song.url) return song;
+    if (!song.id) return song;
+    try {
+      const url = await resolveSongUrl(song.id);
+      return { ...song, url };
+    } catch {
+      return song;
     }
-    return { data: [] };
-  }
+  }));
+  
+  return { data: resolved };
 }
 
 serve(async (req) => {
@@ -122,6 +142,8 @@ serve(async (req) => {
     const limit = url.searchParams.get("limit") || "20";
     const id = url.searchParams.get("id") || "";
 
+    console.log(`Music proxy request: path=${path}, query=${query}, id=${id}`);
+
     let result: any;
     switch (path) {
       case "search": result = await searchSongs(query, limit); break;
@@ -132,6 +154,9 @@ serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
     }
+
+    const songCount = result.data?.results?.length || result.data?.length || 0;
+    console.log(`Returning ${songCount} songs`);
 
     return new Response(JSON.stringify(result), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
