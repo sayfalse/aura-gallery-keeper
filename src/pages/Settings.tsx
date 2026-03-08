@@ -11,6 +11,7 @@ import SharingSection from "@/components/settings/SharingSection";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { getStorageAnalytics, formatFileSize } from "@/lib/driveService";
+import QuickNavButton from "@/components/QuickNavButton";
 import {
   getAppLockSettings,
   setAppLockEnabled,
