@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { Cloud, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Cloud, Mail, Lock, User, Eye, EyeOff, Check } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,6 +12,7 @@ const Auth = () => {
   const [name, setName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,9 +139,31 @@ const Auth = () => {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
+
+          {/* Terms agreement */}
+          <label className="flex items-start gap-2.5 cursor-pointer group">
+            <button
+              type="button"
+              onClick={() => setAgreedToTerms(!agreedToTerms)}
+              className={`mt-0.5 shrink-0 w-4.5 h-4.5 rounded border flex items-center justify-center transition-all ${
+                agreedToTerms
+                  ? "bg-primary border-primary"
+                  : "border-muted-foreground/40 group-hover:border-primary/60"
+              }`}
+            >
+              {agreedToTerms && <Check className="w-3 h-3 text-primary-foreground" />}
+            </button>
+            <span className="text-xs text-muted-foreground leading-relaxed">
+              By {isLogin ? "signing in" : "signing up"}, you agree to our{" "}
+              <Link to="/terms-of-service" className="text-primary hover:underline">Terms of Service</Link>{" "}
+              and{" "}
+              <Link to="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>.
+            </span>
+          </label>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !agreedToTerms}
             className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-medium text-sm transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
           >
             {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
