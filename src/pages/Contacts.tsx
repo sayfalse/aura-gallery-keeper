@@ -199,9 +199,9 @@ const ContactsPage = () => {
                   </div>
                 )}
                 {activeContact.email && (
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <Mail className="w-4 h-4 text-muted-foreground" />
-                    <div><p className="text-xs text-muted-foreground">{t("common.email")}</p><p className="text-sm text-foreground">{activeContact.email}</p></div>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20">
+                    <Mail className="w-4 h-4 text-primary" />
+                    <div><p className="text-xs text-muted-foreground">{t("common.email")}</p><p className="text-sm font-medium text-foreground">{activeContact.email}</p></div>
                   </div>
                 )}
                 {activeContact.address && (
