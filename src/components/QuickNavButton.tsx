@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { LayoutGrid, Image, StickyNote, HardDrive, Users, Mail, Settings, Home, Globe, Sparkles } from "lucide-react";
+import { LayoutGrid, Image, StickyNote, HardDrive, Users, Mail, Settings, Home, Globe, Sparkles, MessageCircle } from "lucide-react";
 
 const modules = [
   { path: "/", icon: Home, label: "Home" },
@@ -9,6 +9,7 @@ const modules = [
   { path: "/drive", icon: HardDrive, label: "Drive" },
   { path: "/contacts", icon: Users, label: "Contacts" },
   { path: "/mail", icon: Mail, label: "Mail" },
+  { path: "/chat", icon: MessageCircle, label: "Chat" },
   { path: "/pixel-ai", icon: Sparkles, label: "Pixel AI" },
   { path: "/browser", icon: Globe, label: "Browser" },
   { path: "/settings", icon: Settings, label: "Settings" },

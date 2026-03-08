@@ -16,6 +16,7 @@ import MailPage from "./pages/Mail";
 import GmailCallback from "./pages/GmailCallback";
 import PixelAIPage from "./pages/PixelAI";
 import BrowserPage from "./pages/Browser";
+import ChatPage from "./pages/Chat";
 import SettingsPage from "./pages/Settings";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -90,6 +91,7 @@ const AppContent = () => {
           <Route path="/gmail-callback" element={<ProtectedRoute><GmailCallback /></ProtectedRoute>} />
           <Route path="/pixel-ai" element={<ProtectedRoute><PixelAIPage /></ProtectedRoute>} />
           <Route path="/browser" element={<ProtectedRoute><BrowserPage /></ProtectedRoute>} />
+          <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
