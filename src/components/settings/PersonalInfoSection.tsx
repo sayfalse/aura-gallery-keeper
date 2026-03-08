@@ -193,30 +193,31 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
         {/* Display Name */}
         <div>
           <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Display Name</label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-          />
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
+            <User className="w-4 h-4 text-primary shrink-0" />
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="w-full bg-transparent text-sm font-medium text-foreground outline-none"
+            />
+          </div>
         </div>
 
         {/* Email (read-only display) */}
         <div>
           <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Email Address</label>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary">
-              <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-sm text-foreground truncate">{email}</span>
-            </div>
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
+            <Mail className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-sm font-medium text-foreground truncate">{email}</span>
           </div>
         </div>
 
         {/* Auth provider badge */}
         <div>
           <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Sign-in Method</label>
-          <div className="px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground capitalize flex items-center gap-2">
-            <KeyRound className="w-4 h-4 text-muted-foreground" />
+          <div className="px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground capitalize flex items-center gap-2">
+            <KeyRound className="w-4 h-4 text-primary" />
             {provider === "google" ? "Google Account" : "Email & Password"}
           </div>
         </div>
@@ -224,8 +225,8 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
         {/* Account Creation Date */}
         <div>
           <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Account Created</label>
-          <div className="px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-muted-foreground" />
+          <div className="px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-primary" />
             {user.created_at ? format(new Date(user.created_at), "MMMM d, yyyy 'at' h:mm a") : "Unknown"}
           </div>
         </div>
