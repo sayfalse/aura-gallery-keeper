@@ -92,12 +92,13 @@ const Index = () => {
     if (activeSection === "favorites") result = result.filter((p) => p.favorite);
     if (activeSection === "recent") result = result.slice().sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 10);
     if (activeSection === "trash") return deletedPhotos;
+    if (activeSection === "shared") return sharedPhotos as unknown as Photo[];
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter((p) => p.name.toLowerCase().includes(q) || p.album?.toLowerCase().includes(q));
     }
     return result;
-  }, [photos, activeSection, searchQuery, deletedPhotos, activeAlbum, albumPhotoIds]);
+  }, [photos, activeSection, searchQuery, deletedPhotos, activeAlbum, albumPhotoIds, sharedPhotos]);
 
   const handleToggleFavorite = useCallback(async (id: string) => {
     const photo = photos.find((p) => p.id === id);
