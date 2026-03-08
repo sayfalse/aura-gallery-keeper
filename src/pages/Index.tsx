@@ -276,6 +276,7 @@ const Index = () => {
         onUpload={() => setShowUpload(true)}
         photoCount={photos.length}
         favoriteCount={photos.filter((p) => p.favorite).length}
+        sharedCount={sharedPhotos.length}
         onSignOut={signOut}
       />
 
