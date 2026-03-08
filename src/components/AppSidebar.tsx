@@ -15,6 +15,7 @@ const navItems: { id: SidebarSection; label: string; icon: React.ElementType }[]
   { id: "photos", label: "All Photos", icon: Images },
   { id: "favorites", label: "Favorites", icon: Heart },
   { id: "albums", label: "Albums", icon: FolderOpen },
+  { id: "shared", label: "Shared With Me", icon: Share2 },
   { id: "recent", label: "Recent", icon: Clock },
   { id: "trash", label: "Trash", icon: Trash2 },
 ];
