@@ -165,6 +165,35 @@ function mapSong(s: any): any {
   };
 }
 
+// Fetch song details to get encrypted_media_url for streaming
+async function resolveSongUrl(songId: string): Promise<string> {
+  try {
+    const params = new URLSearchParams({
+      pids: songId, _format: "json", __call: "song.getDetails", ctx: "web6dot0", api_version: "4",
+    });
+    const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
+    const data = await res.json();
+    const song = data.songs?.[0] || data[songId];
+    if (!song) return "";
+    const encUrl = song.encrypted_media_url || song.more_info?.encrypted_media_url;
+    if (encUrl) return decryptUrl(encUrl);
+    if (song.media_preview_url) {
+      return song.media_preview_url.replace("preview.saavncdn.com", "aac.saavncdn.com").replace("_96_p.mp4", "_320.mp4");
+    }
+    return "";
+  } catch { return ""; }
+}
+
+async function resolveUrls(songs: any[]): Promise<any[]> {
+  const batch = songs.slice(0, 15);
+  return Promise.all(batch.map(async (song) => {
+    if (song.url) return song;
+    if (!song.id) return song;
+    const url = await resolveSongUrl(song.id);
+    return { ...song, url };
+  }));
+}
+
 async function searchSongs(query: string, limit: string): Promise<any> {
   const params = new URLSearchParams({
     p: "1", q: query, _format: "json", _marker: "0",
@@ -173,7 +202,8 @@ async function searchSongs(query: string, limit: string): Promise<any> {
   const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
   const data = await res.json();
   const mapped = (data.results || []).map(mapSong);
-  return { data: { results: mapped } };
+  const resolved = await resolveUrls(mapped);
+  return { data: { results: resolved } };
 }
 
 async function getSongById(id: string): Promise<any> {
