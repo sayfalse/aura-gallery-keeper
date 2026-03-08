@@ -23,17 +23,24 @@ const VPNPage = () => {
   const checkConnection = useCallback(async () => {
     setLoading(true);
     try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const start = performance.now();
-      const res = await fetch("https://1.1.1.1/cdn-cgi/trace");
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/vpn-proxy?action=trace`,
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
+      );
       const latency = Math.round(performance.now() - start);
-      const text = await res.text();
-      const lines = Object.fromEntries(text.trim().split("\n").map(l => l.split("=")));
+      const data = await res.json();
       setDnsResult({
-        ip: lines.ip || "Unknown",
-        isp: lines.org || "Unknown",
-        location: `${lines.loc || ""} ${lines.colo || ""}`.trim() || "Unknown",
-        usingCf: lines.fl !== undefined,
-        latency,
+        ip: data.ip || "Unknown",
+        isp: data.isp || "Unknown",
+        location: data.location || "Unknown",
+        usingCf: data.cfConnected || false,
+        latency: data.cfLatency || latency,
       });
     } catch {
       setDnsResult({ ip: "Error", isp: "Could not connect", location: "", usingCf: false, latency: 0 });
@@ -45,9 +52,15 @@ const VPNPage = () => {
 
   const dohQuery = async (domain: string) => {
     try {
-      const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${domain}&type=A`, {
-        headers: { Accept: "application/dns-json" },
-      });
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/vpn-proxy?action=dns&domain=${encodeURIComponent(domain)}&type=A`,
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        }
+      );
       const data = await res.json();
       return data.Answer?.map((a: any) => a.data).join(", ") || "No records found";
     } catch {
