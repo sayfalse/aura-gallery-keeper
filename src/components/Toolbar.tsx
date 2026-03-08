@@ -1,4 +1,4 @@
-import { Search, LayoutGrid, List, CheckSquare, Trash2, X, FolderPlus, ArrowLeft } from "lucide-react";
+import { Search, LayoutGrid, List, CheckSquare, Trash2, X, FolderPlus, ArrowLeft, RotateCcw, AlertTriangle } from "lucide-react";
 import type { ViewMode, SidebarSection, Album } from "@/types/photo";
 import ProfileMenu from "@/components/ProfileMenu";
 
@@ -16,6 +16,8 @@ interface ToolbarProps {
   onAddToAlbum?: () => void;
   activeAlbum?: Album | null;
   onBackFromAlbum?: () => void;
+  onRestoreSelected?: () => void;
+  onPermanentDeleteSelected?: () => void;
 }
 
 const sectionTitles: Record<SidebarSection, string> = {
@@ -29,9 +31,10 @@ const sectionTitles: Record<SidebarSection, string> = {
 const Toolbar = ({
   section, viewMode, onViewModeChange, searchQuery, onSearchChange,
   selectionMode, onToggleSelectionMode, selectedCount, onDeleteSelected, onClearSelection,
-  onAddToAlbum, activeAlbum, onBackFromAlbum,
+  onAddToAlbum, activeAlbum, onBackFromAlbum, onRestoreSelected, onPermanentDeleteSelected,
 }: ToolbarProps) => {
   const title = activeAlbum ? activeAlbum.name : sectionTitles[section];
+  const isTrash = section === "trash";
 
   return (
     <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-3 md:px-6 py-3 md:py-4">
@@ -45,6 +48,11 @@ const Toolbar = ({
           <h1 className="font-display text-lg md:text-2xl font-bold tracking-tight text-foreground">
             {title}
           </h1>
+          {isTrash && (
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full hidden sm:inline">
+              Cloud backed up
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5 md:gap-2">
@@ -94,14 +102,31 @@ const Toolbar = ({
         <div className="flex items-center gap-3 mt-3 px-3 py-2 bg-primary/5 rounded-xl animate-slide-up">
           <span className="text-sm font-medium text-primary">{selectedCount} selected</span>
           <div className="flex-1" />
-          {onAddToAlbum && (
-            <button onClick={onAddToAlbum} className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors">
-              <FolderPlus className="w-3.5 h-3.5" /> Add to Album
-            </button>
+          {isTrash ? (
+            <>
+              {onRestoreSelected && (
+                <button onClick={onRestoreSelected} className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors">
+                  <RotateCcw className="w-3.5 h-3.5" /> Restore
+                </button>
+              )}
+              {onPermanentDeleteSelected && (
+                <button onClick={onPermanentDeleteSelected} className="flex items-center gap-1.5 text-sm text-destructive hover:text-destructive/80 transition-colors">
+                  <AlertTriangle className="w-3.5 h-3.5" /> Delete Forever
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              {onAddToAlbum && (
+                <button onClick={onAddToAlbum} className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors">
+                  <FolderPlus className="w-3.5 h-3.5" /> Add to Album
+                </button>
+              )}
+              <button onClick={onDeleteSelected} className="flex items-center gap-1.5 text-sm text-destructive hover:text-destructive/80 transition-colors">
+                <Trash2 className="w-3.5 h-3.5" /> Delete
+              </button>
+            </>
           )}
-          <button onClick={onDeleteSelected} className="flex items-center gap-1.5 text-sm text-destructive hover:text-destructive/80 transition-colors">
-            <Trash2 className="w-3.5 h-3.5" /> Delete
-          </button>
           <button onClick={onClearSelection} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <X className="w-3.5 h-3.5" /> Clear
           </button>
