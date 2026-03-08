@@ -70,6 +70,9 @@ const Toolbar = ({
           >
             <CheckSquare className="w-4 h-4" />
           </button>
+
+          {/* Profile */}
+          <ProfileMenu />
         </div>
       </div>
 
