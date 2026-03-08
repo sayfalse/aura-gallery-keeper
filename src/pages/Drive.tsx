@@ -49,7 +49,7 @@ const DrivePage = () => {
       setFiles(data);
       setFolders(allFolders);
     } catch {
-      toast.error("Failed to load files");
+      toast.error(t("drive.failedLoad"));
     } finally {
       setLoading(false);
     }
