@@ -579,7 +579,7 @@ const SettingsPage = () => {
         {/* Developer */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Code className="w-4 h-4" /> Developer
+            <Code className="w-4 h-4" /> {t("settings.developer")}
           </h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between py-2">
