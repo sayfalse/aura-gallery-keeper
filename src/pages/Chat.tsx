@@ -82,7 +82,7 @@ const ChatPage = () => {
           }
         }
       } catch {
-        toast.error("Failed to load messages");
+        toast.error(t("chat.failedLoad"));
       }
     };
     load();
