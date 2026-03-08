@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
           });
         }
 
-        const webhookUrl = `${SUPABASE_URL}/functions/v1/telegram-webhook`;
+        const webhookUrl = `${SUPABASE_URL}/functions/v1/telegram-webhook?secret=${encodeURIComponent(BOT_TOKEN)}`;
         const telegramRes = await fetch(
           `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`,
           {

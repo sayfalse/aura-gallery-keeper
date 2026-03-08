@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Cloud, Lock, Fingerprint } from "lucide-react";
 
-const PIN_STORAGE_KEY = "app_lock_pin";
+const PIN_HASH_STORAGE_KEY = "app_lock_pin_hash";
 const LOCK_TIMEOUT_KEY = "app_lock_timeout";
 const LAST_ACTIVE_KEY = "app_lock_last_active";
 const LOCK_ENABLED_KEY = "app_lock_enabled";
