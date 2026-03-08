@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi } from "lucide-react";
+import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi, Code, Mail } from "lucide-react";
 import PersonalInfoSection from "@/components/settings/PersonalInfoSection";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
@@ -504,6 +504,32 @@ const SettingsPage = () => {
                 Change PIN
               </button>
             )}
+          </div>
+        </section>
+
+        {/* Developer */}
+        <section className="rounded-2xl bg-card border border-border p-5">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Code className="w-4 h-4" /> Developer
+          </h2>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-foreground">Developed by</span>
+              <span className="text-sm text-muted-foreground font-medium">Scor</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Mail className="w-3.5 h-3.5 text-muted-foreground" />
+                Contact
+              </span>
+              <a href="mailto:scor@tuta.io" className="text-sm text-primary font-medium hover:underline">
+                scor@tuta.io
+              </a>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-sm text-foreground">Version</span>
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">1.0.0</span>
+            </div>
           </div>
         </section>
 
