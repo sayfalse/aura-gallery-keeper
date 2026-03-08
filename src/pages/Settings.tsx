@@ -536,10 +536,10 @@ const SettingsPage = () => {
                 <p className="text-xs text-muted-foreground mb-2">{t("settings.lockAfter")}</p>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { label: "Immediately", value: 0 },
-                    { label: "1 minute", value: 60 },
-                    { label: "5 minutes", value: 300 },
-                    { label: "20 minutes", value: 1200 },
+                    { label: t("settings.immediately"), value: 0 },
+                    { label: t("settings.oneMinute"), value: 60 },
+                    { label: t("settings.fiveMinutes"), value: 300 },
+                    { label: t("settings.twentyMinutes"), value: 1200 },
                   ].map((opt) => (
                     <button
                       key={opt.value}
