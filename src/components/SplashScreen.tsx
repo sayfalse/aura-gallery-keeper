@@ -97,13 +97,6 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
       >
         Aura
       </h1>
-      <p
-        className={`mt-1.5 text-sm text-muted-foreground tracking-wide transition-all duration-700 delay-400 ${
-          phase === "pulse" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
-        }`}
-      >
-        Gallery Keeper
-      </p>
     </div>
   );
 };
