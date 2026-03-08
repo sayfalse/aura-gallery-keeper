@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 
 interface Message {
