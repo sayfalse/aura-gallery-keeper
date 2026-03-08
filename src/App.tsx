@@ -43,14 +43,39 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppContent = () => {
   const [showSplash, setShowSplash] = useState(true);
+  const [locked, setLocked] = useState(() => shouldShowLockScreen());
   const handleSplashFinish = useCallback(() => setShowSplash(false), []);
+
+  // Track user activity for app lock timeout
+  useEffect(() => {
+    if (locked) return;
+    const handler = () => updateLastActive();
+    const events = ["click", "keydown", "touchstart", "scroll"];
+    events.forEach((e) => window.addEventListener(e, handler, { passive: true }));
+    updateLastActive();
+    return () => events.forEach((e) => window.removeEventListener(e, handler));
+  }, [locked]);
+
+  // Check lock on visibility change (app resume)
+  useEffect(() => {
+    const handler = () => {
+      if (document.visibilityState === "visible" && shouldShowLockScreen()) {
+        setLocked(true);
+      }
+    };
+    document.addEventListener("visibilitychange", handler);
+    return () => document.removeEventListener("visibilitychange", handler);
+  }, []);
 
   return (
     <>
       {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
+      {locked && <AppLockScreen onUnlock={() => setLocked(false)} />}
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<AuthRoute><Auth /></AuthRoute>} />
+          <Route path="/forgot-password" element={<AuthRoute><ForgotPassword /></AuthRoute>} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
           <Route path="/gallery" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/notes" element={<ProtectedRoute><NotesPage /></ProtectedRoute>} />
