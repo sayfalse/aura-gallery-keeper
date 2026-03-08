@@ -181,7 +181,7 @@ const PixelAI = () => {
       }
 
       if (!assistantSoFar) {
-        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: "Couldn't generate a response. Please try again. 😅", isLoading: false } : m));
+        setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: t("pixelAI.noResponse"), isLoading: false } : m));
       } else {
         setLastVoiceResponse(assistantSoFar);
       }
