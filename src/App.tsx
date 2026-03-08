@@ -21,6 +21,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import SharedView from "./pages/SharedView";
 import NotFound from "./pages/NotFound";
 import AppLockScreen, { shouldShowLockScreen, updateLastActive } from "./components/AppLockScreen";
 
