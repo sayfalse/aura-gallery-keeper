@@ -27,6 +27,7 @@ const Browser = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [proxyHtml, setProxyHtml] = useState<string | null>(null);
 
   // Tabs
   const [tabs, setTabs] = useState<BrowserTab[]>([
