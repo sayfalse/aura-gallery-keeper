@@ -294,7 +294,7 @@ const Home = () => {
             <p className="text-[11px] text-muted-foreground leading-relaxed">Military-grade encryption protects your data.</p>
           </div>
         </motion.div>
-      </main>
+      </motion.main>
       <ModuleSwitcher />
     </div>
   );
