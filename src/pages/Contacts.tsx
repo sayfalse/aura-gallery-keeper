@@ -211,9 +211,9 @@ const ContactsPage = () => {
                   </div>
                 )}
                 {activeContact.notes && (
-                  <div className="p-3 rounded-xl bg-muted/50">
+                  <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
                      <p className="text-xs text-muted-foreground mb-1">{t("common.notes")}</p>
-                    <p className="text-sm text-foreground">{activeContact.notes}</p>
+                    <p className="text-sm font-medium text-foreground">{activeContact.notes}</p>
                   </div>
                 )}
               </div>
