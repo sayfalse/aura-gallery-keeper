@@ -163,6 +163,7 @@ const DrivePage = () => {
             {formatFileSize(totalSize)} used
           </span>
         </div>
+        <QuickNavButton />
         <button
           onClick={() => setShowNewFolder(true)}
           className="p-2 rounded-xl hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
