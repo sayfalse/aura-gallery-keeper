@@ -614,7 +614,7 @@ const SettingsPage = () => {
               </a>
             </div>
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">Version</span>
+              <span className="text-sm text-foreground">{t("settings.version")}</span>
               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">1.0.0</span>
             </div>
             <div className="pt-2 border-t border-border space-y-2">
