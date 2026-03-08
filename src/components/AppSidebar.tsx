@@ -21,11 +21,12 @@ const navItems: { id: SidebarSection; label: string; icon: React.ElementType }[]
   { id: "trash", label: "Trash", icon: Trash2 },
 ];
 
-const AppSidebar = ({ activeSection, onSectionChange, onUpload, photoCount, favoriteCount, onSignOut }: AppSidebarProps) => {
+const AppSidebar = ({ activeSection, onSectionChange, onUpload, photoCount, favoriteCount, sharedCount = 0, onSignOut }: AppSidebarProps) => {
   const navigate = useNavigate();
   const getCount = (id: SidebarSection) => {
     if (id === "photos") return photoCount;
     if (id === "favorites") return favoriteCount;
+    if (id === "shared") return sharedCount > 0 ? sharedCount : undefined;
     return undefined;
   };
 
