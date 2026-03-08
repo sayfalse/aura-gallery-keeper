@@ -28,6 +28,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const SharedView = lazy(() => import("./pages/SharedView"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -112,6 +113,7 @@ const AppContent = () => {
           <Route path="/pixel-ai" element={<ProtectedRoute module="Pixel AI"><PixelAIPage /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute module="Chat"><ChatPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute module="Settings"><SettingsPage /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute module="Admin"><AdminDashboard /></ProtectedRoute>} />
 
           {/* Public routes */}
           <Route path="/privacy-policy" element={<Suspense fallback={<LoadingScreen />}><PrivacyPolicy /></Suspense>} />
