@@ -212,7 +212,7 @@ const PixelAI = () => {
       const text = data.choices?.[0]?.message?.content || "Here's your image! ✨";
       setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: text, images, isLoading: false } : m));
     } catch (e: any) {
-      toast.error(e.message || "Image generation failed");
+      toast.error(e.message || t("pixelAI.imageFailed"));
       setMessages(prev => prev.filter(m => m.id !== assistantId));
     }
   };
