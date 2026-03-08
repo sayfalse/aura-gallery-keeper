@@ -20,6 +20,7 @@ const navItems: { id: SidebarSection; label: string; icon: React.ElementType }[]
 ];
 
 const AppSidebar = ({ activeSection, onSectionChange, onUpload, photoCount, favoriteCount, onSignOut }: AppSidebarProps) => {
+  const navigate = useNavigate();
   const getCount = (id: SidebarSection) => {
     if (id === "photos") return photoCount;
     if (id === "favorites") return favoriteCount;
