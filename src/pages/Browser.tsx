@@ -20,13 +20,12 @@ import { format } from "date-fns";
 type Panel = "none" | "tabs" | "history" | "bookmarks" | "downloads" | "menu";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const Browser = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [proxyHtml, setProxyHtml] = useState<string | null>(null);
+  const [proxyUrl, setProxyUrl] = useState<string | null>(null);
 
   const [tabs, setTabs] = useState<BrowserTab[]>([
     { id: crypto.randomUUID(), url: "", title: "New Tab", isActive: true, isLoading: false },
@@ -47,26 +46,33 @@ const Browser = () => {
     setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
   }, []);
 
-  const fetchViaProxy = useCallback(async (url: string) => {
+  const loadUrl = useCallback(async (url: string) => {
     try {
       const res = await fetch(`${SUPABASE_URL}/functions/v1/web-proxy`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY },
+        headers: { "Content-Type": "application/json", apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
         body: JSON.stringify({ url }),
       });
       if (!res.ok) throw new Error("Proxy error");
-      setProxyHtml(await res.text());
+      const html = await res.text();
+      const blob = new Blob([html], { type: "text/html" });
+      // Revoke previous blob URL to prevent memory leak
+      if (proxyUrl && proxyUrl.startsWith("blob:")) URL.revokeObjectURL(proxyUrl);
+      setProxyUrl(URL.createObjectURL(blob));
     } catch {
-      setProxyHtml(
-        `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>` +
-        `<body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:-apple-system,system-ui,sans-serif;color:#888;background:var(--bg,#f8f9fa);margin:0;">` +
-        `<div style="text-align:center;padding:2rem;"><div style="font-size:2.5rem;margin-bottom:1rem;">🌐</div>` +
-        `<p style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;">Can't load this page</p>` +
-        `<p style="font-size:0.75rem;color:#aaa;margin-bottom:1.5rem;">This website blocked embedded loading</p>` +
-        `<a href="${url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;border-radius:12px;background:#3b82f6;color:#fff;text-decoration:none;font-size:0.8rem;font-weight:600;">Open externally ↗</a></div></body></html>`
-      );
+      const errorHtml = `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+        <body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:-apple-system,system-ui,sans-serif;color:#888;background:#f8f9fa;margin:0;">
+        <div style="text-align:center;padding:2rem;">
+          <div style="font-size:2.5rem;margin-bottom:1rem;">🌐</div>
+          <p style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;">Can't load this page</p>
+          <p style="font-size:0.75rem;color:#aaa;margin-bottom:1.5rem;">Try opening it externally</p>
+          <a href="${url}" target="_blank" rel="noopener" style="padding:0.6rem 1.2rem;border-radius:12px;background:#3b82f6;color:#fff;text-decoration:none;font-size:0.8rem;font-weight:600;">Open externally ↗</a>
+        </div></body></html>`;
+      const blob = new Blob([errorHtml], { type: "text/html" });
+      if (proxyUrl && proxyUrl.startsWith("blob:")) URL.revokeObjectURL(proxyUrl);
+      setProxyUrl(URL.createObjectURL(blob));
     }
-  }, []);
+  }, [proxyUrl]);
 
   const navigate = useCallback(
     (url: string) => {
@@ -81,11 +87,12 @@ const Browser = () => {
       }
       updateTab(tabId, { url: normalized, title: getDisplayUrl(normalized), isLoading: true });
       setUrlInput(normalized);
-      setProxyHtml(null);
-      fetchViaProxy(normalized).finally(() => updateTab(tabId, { isLoading: false }));
+      loadUrl(normalized);
+      // Mark as loaded after a brief delay (iframe handles its own loading)
+      setTimeout(() => updateTab(tabId, { isLoading: false }), 2000);
       if (user) addHistoryEntry(user.id, normalized, getDisplayUrl(normalized)).catch(() => {});
     },
-    [activeTab, updateTab, user, fetchViaProxy]
+    [activeTab, updateTab, user, loadUrl]
   );
 
   const goBack = useCallback(() => {
@@ -99,9 +106,9 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
-    setProxyHtml(null);
-    fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
-  }, [activeTab, navHistory, updateTab, fetchViaProxy]);
+    loadUrl(url);
+    setTimeout(() => updateTab(activeTab.id, { isLoading: false }), 2000);
+  }, [activeTab, navHistory, updateTab, loadUrl]);
 
   const goForward = useCallback(() => {
     const hist = navHistory[activeTab.id];
@@ -114,17 +121,17 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
-    setProxyHtml(null);
-    fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
-  }, [activeTab, navHistory, updateTab, fetchViaProxy]);
+    loadUrl(url);
+    setTimeout(() => updateTab(activeTab.id, { isLoading: false }), 2000);
+  }, [activeTab, navHistory, updateTab, loadUrl]);
 
   const reload = useCallback(() => {
     if (activeTab.url) {
       updateTab(activeTab.id, { isLoading: true });
-      setProxyHtml(null);
-      fetchViaProxy(activeTab.url).finally(() => updateTab(activeTab.id, { isLoading: false }));
+      loadUrl(activeTab.url);
+      setTimeout(() => updateTab(activeTab.id, { isLoading: false }), 2000);
     }
-  }, [activeTab, updateTab, fetchViaProxy]);
+  }, [activeTab, updateTab, loadUrl]);
 
   const addTab = useCallback(() => {
     setTabs((prev) => [
@@ -132,7 +139,7 @@ const Browser = () => {
       { id: crypto.randomUUID(), url: "", title: "New Tab", isActive: true, isLoading: false },
     ]);
     setUrlInput("");
-    setProxyHtml(null);
+    setProxyUrl(null);
     setPanel("none");
     setTimeout(() => inputRef.current?.focus(), 100);
   }, []);
@@ -142,7 +149,7 @@ const Browser = () => {
       if (tabs.length === 1) {
         updateTab(id, { url: "", title: "New Tab", isLoading: false });
         setUrlInput("");
-        setProxyHtml(null);
+        setProxyUrl(null);
         return;
       }
       const idx = tabs.findIndex((t) => t.id === id);
@@ -164,12 +171,12 @@ const Browser = () => {
       const tab = tabs.find((t) => t.id === id);
       if (tab) {
         setUrlInput(tab.url);
-        if (tab.url) fetchViaProxy(tab.url);
-        else setProxyHtml(null);
+        if (tab.url) loadUrl(tab.url);
+        else setProxyUrl(null);
       }
       setPanel("none");
     },
-    [tabs, fetchViaProxy]
+    [tabs, loadUrl]
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -242,9 +249,10 @@ const Browser = () => {
         ) : (
           <iframe
             ref={iframeRef}
-            srcDoc={proxyHtml || loadingPage}
+            src={proxyUrl || undefined}
             className="w-full h-full border-0 bg-background"
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+            onLoad={() => updateTab(activeTab.id, { isLoading: false })}
           />
         )}
 
@@ -367,14 +375,8 @@ const Browser = () => {
   );
 };
 
-// Loading placeholder
-const loadingPage = `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>
-  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
-  body{display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f8f9fa;}
-  .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;animation:pulse 1.2s infinite;margin:0 4px;}
-  .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
-  @media(prefers-color-scheme:dark){body{background:#0a0a0a;}.dot{background:#475569;}}
-</style></head><body><div style="display:flex"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></body></html>`;
+// Loading placeholder (no longer needed with src approach but kept for reference)
+const loadingPage = "";
 
 // === New Tab Page ===
 const NewTabPage = ({
