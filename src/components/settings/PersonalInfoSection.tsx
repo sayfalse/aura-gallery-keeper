@@ -207,11 +207,9 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
         {/* Email (read-only display) */}
         <div>
           <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Email Address</label>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-xl bg-secondary">
-              <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-sm text-foreground truncate">{email}</span>
-            </div>
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
+            <Mail className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-sm font-medium text-foreground truncate">{email}</span>
           </div>
         </div>
 
