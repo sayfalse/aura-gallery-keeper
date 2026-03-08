@@ -260,6 +260,63 @@ const SettingsPage = () => {
         {/* Sharing & Username */}
         {user && <SharingSection user={user} />}
 
+        {/* Announcements & Updates */}
+        <section className="rounded-2xl bg-card border border-border p-5">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Megaphone className="w-4 h-4" /> Announcements & Updates
+          </h2>
+          {announcements.length === 0 ? (
+            <div className="text-center py-6">
+              <Bell className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No announcements yet</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Updates from our Telegram channel will appear here in real-time</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {(showAllAnnouncements ? announcements : announcements.slice(0, 3)).map((ann) => {
+                const typeConfig: Record<string, { icon: typeof Sparkles; color: string; label: string }> = {
+                  feature: { icon: Sparkles, color: "text-purple-500 bg-purple-500/15", label: "Feature" },
+                  announcement: { icon: Megaphone, color: "text-primary bg-primary/15", label: "Announcement" },
+                  maintenance: { icon: Wrench, color: "text-amber-500 bg-amber-500/15", label: "Maintenance" },
+                  update: { icon: Bell, color: "text-emerald-500 bg-emerald-500/15", label: "Update" },
+                };
+                const cfg = typeConfig[ann.type] || typeConfig.update;
+                const Icon = cfg.icon;
+                const timeAgo = getTimeAgo(ann.created_at);
+
+                return (
+                  <div key={ann.id} className="rounded-xl bg-primary/5 border border-primary/10 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className={`p-1.5 rounded-lg ${cfg.color} shrink-0`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${cfg.color}`}>
+                            {cfg.label}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
+                        </div>
+                        {ann.title && <p className="text-sm font-medium text-foreground mb-1">{ann.title}</p>}
+                        <p className="text-xs text-muted-foreground leading-relaxed">{ann.content}</p>
+                        <p className="text-[10px] text-muted-foreground/60 mt-2">— {ann.author}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {announcements.length > 3 && (
+                <button
+                  onClick={() => setShowAllAnnouncements(!showAllAnnouncements)}
+                  className="w-full py-2 text-sm text-primary font-medium hover:underline"
+                >
+                  {showAllAnnouncements ? "Show less" : `View all ${announcements.length} announcements`}
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+
         {/* Appearance */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
