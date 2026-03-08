@@ -252,7 +252,7 @@ const ChatPage = () => {
           <button
             onClick={() => setShowNewGroup(true)}
             className="p-2 rounded-xl hover:bg-accent transition-colors text-muted-foreground"
-            title="New group"
+            title={t("chat.newGroup")}
           >
             <Users className="w-5 h-5" />
           </button>
