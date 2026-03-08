@@ -39,6 +39,11 @@ const Home = () => {
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
   const [stats, setStats] = useState<QuickStat[]>([]);
   const [recentNotes, setRecentNotes] = useState<{ id: string; title: string; updatedAt: string }[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const pullY = useMotionValue(0);
+  const pullProgress = useTransform(pullY, [0, 80], [0, 1]);
+  const pullRotate = useTransform(pullY, [0, 80], [0, 360]);
+  const pullOpacity = useTransform(pullY, [0, 30, 80], [0, 0.6, 1]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll({ container: scrollRef });
   const headerY = useTransform(scrollY, [0, 120], [0, -30]);
@@ -49,24 +54,34 @@ const Home = () => {
   const blobX2 = useTransform(scrollY, [0, 300], [0, -30]);
   const blobY2 = useTransform(scrollY, [0, 300], [0, 40]);
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (!user) return;
-    Promise.all([
+    const [photos, notes, contacts, files] = await Promise.all([
       supabase.from("photos").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("deleted", false),
       supabase.from("notes").select("id", { count: "exact", head: true }).eq("user_id", user.id),
       supabase.from("contacts").select("id", { count: "exact", head: true }).eq("user_id", user.id),
       supabase.from("drive_files").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-    ]).then(([photos, notes, contacts, files]) => {
-      setStats([
-        { label: "Photos", count: photos.count || 0, icon: Image },
-        { label: "Notes", count: notes.count || 0, icon: StickyNote },
-        { label: "Contacts", count: contacts.count || 0, icon: Users },
-        { label: "Files", count: files.count || 0, icon: HardDrive },
-      ]);
-    });
-    supabase.from("notes").select("id, title, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(3)
-      .then(({ data }) => { setRecentNotes((data || []).map((n: any) => ({ id: n.id, title: n.title, updatedAt: n.updated_at }))); });
+    ]);
+    setStats([
+      { label: "Photos", count: photos.count || 0, icon: Image },
+      { label: "Notes", count: notes.count || 0, icon: StickyNote },
+      { label: "Contacts", count: contacts.count || 0, icon: Users },
+      { label: "Files", count: files.count || 0, icon: HardDrive },
+    ]);
+    const { data } = await supabase.from("notes").select("id, title, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(3);
+    setRecentNotes((data || []).map((n: any) => ({ id: n.id, title: n.title, updatedAt: n.updated_at })));
   }, [user]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handlePullRelease = useCallback(async () => {
+    if (pullY.get() > 60) {
+      setRefreshing(true);
+      await loadData();
+      setRefreshing(false);
+    }
+    pullY.set(0);
+  }, [loadData, pullY]);
 
   const greeting = () => {
     const h = new Date().getHours();
