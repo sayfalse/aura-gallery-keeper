@@ -150,15 +150,16 @@ const MailPage = () => {
     }
     setSending(true);
     try {
-      await sendMessage(activeEmail, composeTo, composeSubject, composeBody || "<p></p>", replyTo ? {
-        inReplyTo: replyTo.messageId,
-        threadId: replyTo.threadId,
-      } : undefined);
+      await sendMessage(activeEmail, composeTo, composeSubject, composeBody || "<p></p>", {
+        ...(replyTo ? { inReplyTo: replyTo.messageId, threadId: replyTo.threadId } : {}),
+        ...(attachments.length > 0 ? { attachments: attachments.map(a => ({ filename: a.filename, mimeType: a.mimeType, data: a.data })) } : {}),
+      });
       toast.success("Email sent!");
       setComposeTo("");
       setComposeSubject("");
       setComposeBody("");
       setReplyTo(null);
+      setAttachments([]);
       setView("inbox");
       loadMessages();
     } catch (err) {
