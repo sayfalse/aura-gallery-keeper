@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileMenu from "@/components/ProfileMenu";
+import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { Image, StickyNote, HardDrive, Users, Mail, Cloud, Settings, Clock, Star, FileText } from "lucide-react";
 
 const apps = [

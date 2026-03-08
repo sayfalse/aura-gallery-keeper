@@ -6,6 +6,7 @@ import { ArrowLeft, Upload, Trash2, Download, HardDrive, File, Image, FileText, 
 import { toast } from "sonner";
 import { format } from "date-fns";
 import MoveToFolderModal from "@/components/MoveToFolderModal";
+import ModuleSwitcher from "@/components/ModuleSwitcher";
 
 const getFileIcon = (mimeType: string) => {
   if (mimeType.startsWith("image/")) return Image;

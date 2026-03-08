@@ -6,6 +6,7 @@ import { ArrowLeft, Plus, Pin, Trash2, Search, StickyNote, FileDown } from "luci
 import { toast } from "sonner";
 import { format } from "date-fns";
 import RichTextEditor from "@/components/RichTextEditor";
+import ModuleSwitcher from "@/components/ModuleSwitcher";
 
 const htmlToMarkdown = (html: string): string => {
   let md = html;
