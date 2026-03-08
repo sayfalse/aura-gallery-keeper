@@ -7,7 +7,7 @@ import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, Globe, MessageCircle,
-  ArrowUpRight, Layers, AtSign
+  ArrowUpRight, Layers, AtSign, Music2, Shield
 } from "lucide-react";
 
 const apps = [
