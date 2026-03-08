@@ -284,7 +284,7 @@ const DrivePage = () => {
               </div>
             ) : filtered.length > 0 && (
               <div>
-                {subfolders.length > 0 && <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Files</p>}
+                {subfolders.length > 0 && <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{t("drive.files")}</p>}
                 <div className="space-y-1">
                   {filtered.map((file) => {
                     const FileIcon = getFileIcon(file.mimeType);
