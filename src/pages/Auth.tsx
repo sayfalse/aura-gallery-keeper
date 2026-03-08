@@ -4,7 +4,6 @@ import { lovable } from "@/integrations/lovable/index";
 import { Cloud, Mail, Lock, User, Eye, EyeOff, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
