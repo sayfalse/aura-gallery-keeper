@@ -281,7 +281,7 @@ const ChatPage = () => {
               <div className="px-4 py-3 border-b border-border">
                 <input
                   type="text"
-                  placeholder="Group name..."
+                  placeholder={t("chat.groupName")}
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
