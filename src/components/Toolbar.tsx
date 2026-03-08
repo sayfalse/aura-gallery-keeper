@@ -1,5 +1,6 @@
 import { Search, LayoutGrid, List, CheckSquare, Trash2, X } from "lucide-react";
 import type { ViewMode, SidebarSection } from "@/types/photo";
+import ProfileMenu from "@/components/ProfileMenu";
 
 interface ToolbarProps {
   section: SidebarSection;
@@ -69,6 +70,9 @@ const Toolbar = ({
           >
             <CheckSquare className="w-4 h-4" />
           </button>
+
+          {/* Profile */}
+          <ProfileMenu />
         </div>
       </div>
 
