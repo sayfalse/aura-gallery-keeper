@@ -1,0 +1,211 @@
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { fetchNotes, createNote, updateNote, deleteNote, type Note } from "@/lib/noteService";
+import { ArrowLeft, Plus, Pin, Trash2, Search, StickyNote } from "lucide-react";
+import { toast } from "sonner";
+import { format } from "date-fns";
+
+const NotesPage = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [activeNote, setActiveNote] = useState<Note | null>(null);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const loadNotes = useCallback(async () => {
+    if (!user) return;
+    try {
+      const data = await fetchNotes(user.id);
+      setNotes(data);
+    } catch {
+      toast.error("Failed to load notes");
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => { loadNotes(); }, [loadNotes]);
+
+  const handleCreate = async () => {
+    if (!user) return;
+    try {
+      const note = await createNote(user.id, "Untitled Note", "");
+      setNotes((prev) => [note, ...prev]);
+      setActiveNote(note);
+      setTitle(note.title);
+      setContent(note.content);
+    } catch {
+      toast.error("Failed to create note");
+    }
+  };
+
+  const handleSave = useCallback(async () => {
+    if (!activeNote) return;
+    try {
+      await updateNote(activeNote.id, { title, content });
+      setNotes((prev) =>
+        prev.map((n) => (n.id === activeNote.id ? { ...n, title, content, updatedAt: new Date() } : n))
+      );
+    } catch {
+      toast.error("Failed to save note");
+    }
+  }, [activeNote, title, content]);
+
+  // Auto-save on blur
+  const handleBlur = () => { handleSave(); };
+
+  const handleDelete = async (id: string) => {
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+    if (activeNote?.id === id) { setActiveNote(null); setTitle(""); setContent(""); }
+    try {
+      await deleteNote(id);
+      toast.success("Note deleted");
+    } catch {
+      toast.error("Failed to delete note");
+      loadNotes();
+    }
+  };
+
+  const handleTogglePin = async (note: Note) => {
+    const newPinned = !note.pinned;
+    setNotes((prev) =>
+      prev.map((n) => (n.id === note.id ? { ...n, pinned: newPinned } : n))
+        .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.updatedAt.getTime() - a.updatedAt.getTime())
+    );
+    try {
+      await updateNote(note.id, { pinned: newPinned });
+    } catch {
+      toast.error("Failed to update note");
+    }
+  };
+
+  const filtered = notes.filter((n) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q);
+  });
+
+  const selectNote = (note: Note) => {
+    if (activeNote) handleSave();
+    setActiveNote(note);
+    setTitle(note.title);
+    setContent(note.content);
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-20">
+        <button onClick={() => navigate("/")} className="p-2 rounded-xl hover:bg-accent transition-colors">
+          <ArrowLeft className="w-5 h-5 text-foreground" />
+        </button>
+        <div className="flex-1 flex items-center gap-2">
+          <StickyNote className="w-5 h-5 text-amber-500" />
+          <h1 className="font-display text-lg font-bold text-foreground">Notes</h1>
+        </div>
+        <button onClick={handleCreate} className="p-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+          <Plus className="w-5 h-5" />
+        </button>
+      </header>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar list */}
+        <aside className={`w-full md:w-80 border-r border-border flex flex-col shrink-0 ${activeNote ? "hidden md:flex" : "flex"}`}>
+          <div className="p-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search notes..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-20 text-muted-foreground">
+                <StickyNote className="w-10 h-10 mx-auto mb-3 opacity-40" />
+                <p className="text-sm">No notes yet</p>
+              </div>
+            ) : (
+              filtered.map((note) => (
+                <button
+                  key={note.id}
+                  onClick={() => selectNote(note)}
+                  className={`w-full text-left px-4 py-3 border-b border-border hover:bg-accent/50 transition-colors ${
+                    activeNote?.id === note.id ? "bg-primary/5 border-l-2 border-l-primary" : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-2">
+                    {note.pinned && <Pin className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />}
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm text-foreground truncate">{note.title || "Untitled"}</p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">{note.content.slice(0, 60) || "No content"}</p>
+                      <p className="text-[10px] text-muted-foreground/60 mt-1">{format(note.updatedAt, "MMM d, h:mm a")}</p>
+                    </div>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </aside>
+
+        {/* Editor */}
+        <main className={`flex-1 flex flex-col ${!activeNote ? "hidden md:flex" : "flex"}`}>
+          {activeNote ? (
+            <>
+              <div className="flex items-center gap-2 px-4 py-2 border-b border-border">
+                <button onClick={() => { handleSave(); setActiveNote(null); }} className="md:hidden p-2 rounded-lg hover:bg-accent">
+                  <ArrowLeft className="w-4 h-4 text-foreground" />
+                </button>
+                <div className="flex-1" />
+                <button onClick={() => handleTogglePin(activeNote)} className={`p-2 rounded-lg transition-colors ${activeNote.pinned ? "text-amber-500" : "text-muted-foreground hover:text-foreground"}`}>
+                  <Pin className="w-4 h-4" />
+                </button>
+                <button onClick={() => handleDelete(activeNote.id)} className="p-2 rounded-lg text-muted-foreground hover:text-destructive transition-colors">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 p-4 md:p-8 overflow-y-auto">
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  onBlur={handleBlur}
+                  placeholder="Title"
+                  className="w-full text-2xl font-display font-bold text-foreground bg-transparent outline-none mb-4 placeholder:text-muted-foreground/40"
+                />
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  onBlur={handleBlur}
+                  placeholder="Start writing..."
+                  className="w-full flex-1 min-h-[60vh] text-foreground bg-transparent outline-none resize-none text-sm leading-relaxed placeholder:text-muted-foreground/40"
+                />
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-muted-foreground">
+              <div className="text-center">
+                <StickyNote className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Select a note or create a new one</p>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default NotesPage;
