@@ -5,20 +5,19 @@ import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, ArrowRight, RotateCw, X, Plus, Search, Globe, Star, Clock,
-  Download, Bookmark, Trash2, ExternalLink, ChevronDown, Shield, Share2
+  Download, Bookmark, Trash2, Shield, Share2, Menu, Home as HomeIcon, Compass
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  BrowserTab, normalizeUrl, getDisplayUrl, defaultQuickLinks, getProxyUrl,
+  BrowserTab, normalizeUrl, getDisplayUrl, defaultQuickLinks,
   addHistoryEntry, fetchHistory, clearHistory, deleteHistoryEntry,
   fetchBookmarks, addBookmark, deleteBookmark,
   fetchDownloads, deleteDownloadEntry,
   HistoryEntry, Bookmark as BookmarkType, DownloadEntry
 } from "@/lib/browserService";
-import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
-type Panel = "none" | "tabs" | "history" | "bookmarks" | "downloads";
+type Panel = "none" | "tabs" | "history" | "bookmarks" | "downloads" | "menu";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -29,26 +28,19 @@ const Browser = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [proxyHtml, setProxyHtml] = useState<string | null>(null);
 
-  // Tabs
   const [tabs, setTabs] = useState<BrowserTab[]>([
     { id: crypto.randomUUID(), url: "", title: "New Tab", isActive: true, isLoading: false },
   ]);
   const activeTab = tabs.find((t) => t.isActive) || tabs[0];
 
-  // URL bar
   const [urlInput, setUrlInput] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Panels
   const [panel, setPanel] = useState<Panel>("none");
 
-  // Panel data
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [bookmarks, setBookmarks] = useState<BookmarkType[]>([]);
   const [downloads, setDownloads] = useState<DownloadEntry[]>([]);
-
-  // Navigation history per tab
   const [navHistory, setNavHistory] = useState<Record<string, { back: string[]; forward: string[] }>>({});
 
   const updateTab = useCallback((id: string, updates: Partial<BrowserTab>) => {
@@ -59,18 +51,20 @@ const Browser = () => {
     try {
       const res = await fetch(`${SUPABASE_URL}/functions/v1/web-proxy`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-        },
+        headers: { "Content-Type": "application/json", apikey: SUPABASE_KEY },
         body: JSON.stringify({ url }),
       });
       if (!res.ok) throw new Error("Proxy error");
-      const html = await res.text();
-      setProxyHtml(html);
-    } catch (err) {
-      // Fallback: open in new tab
-      setProxyHtml(`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#666;background:#fafafa;"><div style="text-align:center;"><p>This site can't be loaded in the browser.</p><a href="${url}" target="_blank" style="color:#3b82f6;">Open in new tab →</a></div></body></html>`);
+      setProxyHtml(await res.text());
+    } catch {
+      setProxyHtml(
+        `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>` +
+        `<body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:-apple-system,system-ui,sans-serif;color:#888;background:var(--bg,#f8f9fa);margin:0;">` +
+        `<div style="text-align:center;padding:2rem;"><div style="font-size:2.5rem;margin-bottom:1rem;">🌐</div>` +
+        `<p style="font-size:0.9rem;font-weight:600;margin-bottom:0.5rem;">Can't load this page</p>` +
+        `<p style="font-size:0.75rem;color:#aaa;margin-bottom:1.5rem;">This website blocked embedded loading</p>` +
+        `<a href="${url}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;border-radius:12px;background:#3b82f6;color:#fff;text-decoration:none;font-size:0.8rem;font-weight:600;">Open externally ↗</a></div></body></html>`
+      );
     }
   }, []);
 
@@ -79,30 +73,17 @@ const Browser = () => {
       if (!url) return;
       const normalized = normalizeUrl(url);
       const tabId = activeTab.id;
-
       if (activeTab.url) {
         setNavHistory((prev) => ({
           ...prev,
-          [tabId]: {
-            back: [...(prev[tabId]?.back || []), activeTab.url],
-            forward: [],
-          },
+          [tabId]: { back: [...(prev[tabId]?.back || []), activeTab.url], forward: [] },
         }));
       }
-
-      updateTab(tabId, {
-        url: normalized,
-        title: getDisplayUrl(normalized),
-        isLoading: true,
-      });
+      updateTab(tabId, { url: normalized, title: getDisplayUrl(normalized), isLoading: true });
       setUrlInput(normalized);
-      fetchViaProxy(normalized).finally(() => {
-        updateTab(tabId, { isLoading: false });
-      });
-
-      if (user) {
-        addHistoryEntry(user.id, normalized, getDisplayUrl(normalized)).catch(() => {});
-      }
+      setProxyHtml(null);
+      fetchViaProxy(normalized).finally(() => updateTab(tabId, { isLoading: false }));
+      if (user) addHistoryEntry(user.id, normalized, getDisplayUrl(normalized)).catch(() => {});
     },
     [activeTab, updateTab, user, fetchViaProxy]
   );
@@ -118,6 +99,7 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
+    setProxyHtml(null);
     fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
   }, [activeTab, navHistory, updateTab, fetchViaProxy]);
 
@@ -132,26 +114,25 @@ const Browser = () => {
     }));
     updateTab(activeTab.id, { url, title: getDisplayUrl(url), isLoading: true });
     setUrlInput(url);
+    setProxyHtml(null);
     fetchViaProxy(url).finally(() => updateTab(activeTab.id, { isLoading: false }));
   }, [activeTab, navHistory, updateTab, fetchViaProxy]);
 
   const reload = useCallback(() => {
     if (activeTab.url) {
       updateTab(activeTab.id, { isLoading: true });
+      setProxyHtml(null);
       fetchViaProxy(activeTab.url).finally(() => updateTab(activeTab.id, { isLoading: false }));
     }
   }, [activeTab, updateTab, fetchViaProxy]);
 
   const addTab = useCallback(() => {
-    const newTab: BrowserTab = {
-      id: crypto.randomUUID(),
-      url: "",
-      title: "New Tab",
-      isActive: true,
-      isLoading: false,
-    };
-    setTabs((prev) => [...prev.map((t) => ({ ...t, isActive: false })), newTab]);
+    setTabs((prev) => [
+      ...prev.map((t) => ({ ...t, isActive: false })),
+      { id: crypto.randomUUID(), url: "", title: "New Tab", isActive: true, isLoading: false },
+    ]);
     setUrlInput("");
+    setProxyHtml(null);
     setPanel("none");
     setTimeout(() => inputRef.current?.focus(), 100);
   }, []);
@@ -161,6 +142,7 @@ const Browser = () => {
       if (tabs.length === 1) {
         updateTab(id, { url: "", title: "New Tab", isLoading: false });
         setUrlInput("");
+        setProxyHtml(null);
         return;
       }
       const idx = tabs.findIndex((t) => t.id === id);
@@ -180,10 +162,14 @@ const Browser = () => {
     (id: string) => {
       setTabs((prev) => prev.map((t) => ({ ...t, isActive: t.id === id })));
       const tab = tabs.find((t) => t.id === id);
-      if (tab) setUrlInput(tab.url);
+      if (tab) {
+        setUrlInput(tab.url);
+        if (tab.url) fetchViaProxy(tab.url);
+        else setProxyHtml(null);
+      }
       setPanel("none");
     },
-    [tabs]
+    [tabs, fetchViaProxy]
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -195,16 +181,8 @@ const Browser = () => {
     }
   };
 
-  const handleIframeLoad = () => {
-    updateTab(activeTab.id, { isLoading: false });
-  };
-
-  // Load panel data
   const openPanel = async (p: Panel) => {
-    if (panel === p) {
-      setPanel("none");
-      return;
-    }
+    if (panel === p) { setPanel("none"); return; }
     setPanel(p);
     if (!user) return;
     try {
@@ -219,33 +197,36 @@ const Browser = () => {
     try {
       await addBookmark(user.id, activeTab.url, activeTab.title);
       toast.success("Bookmark added!");
-    } catch {
-      toast.error("Failed to add bookmark");
-    }
+    } catch { toast.error("Failed to add bookmark"); }
   };
 
   const handleShare = async () => {
     if (!activeTab.url) return;
-    if (navigator.share) {
-      await navigator.share({ title: activeTab.title, url: activeTab.url });
-    } else {
-      await navigator.clipboard.writeText(activeTab.url);
-      toast.success("URL copied!");
-    }
+    if (navigator.share) await navigator.share({ title: activeTab.title, url: activeTab.url });
+    else { await navigator.clipboard.writeText(activeTab.url); toast.success("URL copied!"); }
   };
 
-  // Sync urlInput when switching tabs
-  useEffect(() => {
-    setUrlInput(activeTab.url);
-  }, [activeTab.id]);
+  useEffect(() => { setUrlInput(activeTab.url); }, [activeTab.id]);
 
   const canGoBack = (navHistory[activeTab.id]?.back.length || 0) > 0;
   const canGoForward = (navHistory[activeTab.id]?.forward.length || 0) > 0;
   const isNewTab = !activeTab.url;
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      {/* WebView / New Tab */}
+    <div className="flex flex-col h-[100dvh] bg-background">
+      {/* Loading bar */}
+      {activeTab.isLoading && (
+        <div className="absolute top-0 left-0 right-0 z-50 h-[2px]">
+          <motion.div
+            className="h-full bg-primary rounded-r-full"
+            initial={{ width: "0%" }}
+            animate={{ width: "85%" }}
+            transition={{ duration: 3, ease: "easeOut" }}
+          />
+        </div>
+      )}
+
+      {/* Content area */}
       <div className="flex-1 relative overflow-hidden">
         {isNewTab ? (
           <NewTabPage
@@ -256,27 +237,15 @@ const Browser = () => {
             handleSubmit={handleSubmit}
             isFocused={isFocused}
             setIsFocused={setIsFocused}
+            onOpenPanel={openPanel}
           />
         ) : (
-          <>
-            {activeTab.isLoading && (
-              <div className="absolute top-0 left-0 right-0 z-10 h-0.5 bg-primary/20">
-                <motion.div
-                  className="h-full bg-primary"
-                  initial={{ width: "0%" }}
-                  animate={{ width: "90%" }}
-                  transition={{ duration: 2, ease: "easeOut" }}
-                />
-              </div>
-            )}
-            <iframe
-              ref={iframeRef}
-              srcDoc={proxyHtml || "<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#999;'>Loading...</body></html>"}
-              className="w-full h-full border-0"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
-            />
-          </>
+          <iframe
+            ref={iframeRef}
+            srcDoc={proxyHtml || loadingPage}
+            className="w-full h-full border-0 bg-background"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+          />
         )}
 
         {/* Slide-up panels */}
@@ -286,52 +255,47 @@ const Browser = () => {
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 400 }}
-              className="absolute inset-0 z-20 bg-background flex flex-col"
+              transition={{ type: "spring", damping: 32, stiffness: 380 }}
+              className="absolute inset-0 z-30 bg-background/95 backdrop-blur-xl flex flex-col"
             >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <h2 className="text-sm font-bold capitalize">{panel}</h2>
-                <button onClick={() => setPanel("none")} className="p-1.5 rounded-lg hover:bg-muted">
-                  <X className="w-4 h-4" />
+              <div className="flex items-center justify-between px-5 pt-4 pb-3">
+                <h2 className="text-base font-bold text-foreground capitalize">{panel === "menu" ? "More" : panel}</h2>
+                <button onClick={() => setPanel("none")} className="p-2 -mr-2 rounded-full hover:bg-muted transition-colors">
+                  <X className="w-5 h-5 text-muted-foreground" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto">
-                {panel === "tabs" && (
-                  <TabsPanel tabs={tabs} onSwitch={switchTab} onClose={closeTab} onAdd={addTab} />
-                )}
+              <div className="flex-1 overflow-y-auto overscroll-contain">
+                {panel === "tabs" && <TabsPanel tabs={tabs} onSwitch={switchTab} onClose={closeTab} onAdd={addTab} />}
                 {panel === "history" && (
                   <HistoryPanel
                     history={history}
                     onNavigate={(url) => { navigate(url); setPanel("none"); }}
-                    onDelete={async (id) => {
-                      await deleteHistoryEntry(id);
-                      setHistory((h) => h.filter((e) => e.id !== id));
-                    }}
-                    onClear={async () => {
-                      if (!user) return;
-                      await clearHistory(user.id);
-                      setHistory([]);
-                      toast.success("History cleared");
-                    }}
+                    onDelete={async (id) => { await deleteHistoryEntry(id); setHistory((h) => h.filter((e) => e.id !== id)); }}
+                    onClear={async () => { if (!user) return; await clearHistory(user.id); setHistory([]); toast.success("History cleared"); }}
                   />
                 )}
                 {panel === "bookmarks" && (
                   <BookmarksPanel
                     bookmarks={bookmarks}
                     onNavigate={(url) => { navigate(url); setPanel("none"); }}
-                    onDelete={async (id) => {
-                      await deleteBookmark(id);
-                      setBookmarks((b) => b.filter((e) => e.id !== id));
-                    }}
+                    onDelete={async (id) => { await deleteBookmark(id); setBookmarks((b) => b.filter((e) => e.id !== id)); }}
                   />
                 )}
                 {panel === "downloads" && (
                   <DownloadsPanel
                     downloads={downloads}
-                    onDelete={async (id) => {
-                      await deleteDownloadEntry(id);
-                      setDownloads((d) => d.filter((e) => e.id !== id));
-                    }}
+                    onDelete={async (id) => { await deleteDownloadEntry(id); setDownloads((d) => d.filter((e) => e.id !== id)); }}
+                  />
+                )}
+                {panel === "menu" && (
+                  <MenuPanel
+                    onBookmark={handleBookmarkCurrent}
+                    onShare={handleShare}
+                    onHistory={() => openPanel("history")}
+                    onBookmarks={() => openPanel("bookmarks")}
+                    onDownloads={() => openPanel("downloads")}
+                    onReload={reload}
+                    hasUrl={!!activeTab.url}
                   />
                 )}
               </div>
@@ -340,16 +304,22 @@ const Browser = () => {
         </AnimatePresence>
       </div>
 
-      {/* Bottom toolbar - Safari/Chrome style */}
+      {/* Bottom Safari-style toolbar */}
       {!isNewTab && (
-        <div className="border-t border-border bg-card/95 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]">
+        <div className="shrink-0 border-t border-border/60 bg-card/80 backdrop-blur-2xl">
           {/* URL bar */}
-          <form onSubmit={handleSubmit} className="px-3 pt-2 pb-1">
-            <div className="flex items-center gap-2 bg-muted/80 rounded-xl px-3 py-2">
+          <form onSubmit={handleSubmit} className="px-3 pt-2.5 pb-1.5">
+            <motion.div
+              className={`flex items-center gap-2.5 rounded-2xl px-3.5 py-2.5 transition-all duration-200 ${
+                isFocused
+                  ? "bg-background border border-primary/30 shadow-sm shadow-primary/5"
+                  : "bg-muted/60 border border-transparent"
+              }`}
+            >
               {activeTab.isLoading ? (
-                <RotateCw className="w-3.5 h-3.5 text-muted-foreground animate-spin shrink-0" />
+                <RotateCw className="w-3.5 h-3.5 text-primary animate-spin shrink-0" />
               ) : (
-                <Shield className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <Shield className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
               )}
               <input
                 ref={inputRef}
@@ -359,48 +329,56 @@ const Browser = () => {
                 onFocus={() => { setIsFocused(true); setUrlInput(activeTab.url); }}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 placeholder="Search or enter URL"
-                className="flex-1 bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none text-center"
+                className="flex-1 bg-transparent text-[13px] text-foreground placeholder:text-muted-foreground/50 outline-none text-center font-medium"
               />
               {isFocused && urlInput && (
-                <button type="button" onClick={() => setUrlInput("")} className="shrink-0">
-                  <X className="w-3.5 h-3.5 text-muted-foreground" />
+                <button type="button" onClick={() => setUrlInput("")} className="shrink-0 p-0.5 rounded-full bg-muted-foreground/15">
+                  <X className="w-3 h-3 text-muted-foreground" />
                 </button>
               )}
-            </div>
+            </motion.div>
           </form>
 
-          {/* Navigation buttons */}
-          <div className="flex items-center justify-between px-6 py-1.5">
-            <button onClick={goBack} disabled={!canGoBack} className="p-2 disabled:opacity-30">
-              <ArrowLeft className="w-5 h-5 text-primary" />
+          {/* Navigation row */}
+          <div className="flex items-center justify-between px-4 py-1 pb-[max(0.375rem,env(safe-area-inset-bottom))]">
+            <button onClick={goBack} disabled={!canGoBack} className="p-2.5 rounded-xl active:bg-muted/60 transition-colors disabled:opacity-25">
+              <ArrowLeft className="w-[22px] h-[22px] text-primary" strokeWidth={2} />
             </button>
-            <button onClick={goForward} disabled={!canGoForward} className="p-2 disabled:opacity-30">
-              <ArrowRight className="w-5 h-5 text-primary" />
+            <button onClick={goForward} disabled={!canGoForward} className="p-2.5 rounded-xl active:bg-muted/60 transition-colors disabled:opacity-25">
+              <ArrowRight className="w-[22px] h-[22px] text-primary" strokeWidth={2} />
             </button>
-            <button onClick={handleShare} className="p-2">
-              <Share2 className="w-5 h-5 text-primary" />
+            <button onClick={handleShare} className="p-2.5 rounded-xl active:bg-muted/60 transition-colors">
+              <Share2 className="w-[22px] h-[22px] text-primary" strokeWidth={2} />
             </button>
-            <button onClick={handleBookmarkCurrent} disabled={!activeTab.url} className="p-2 disabled:opacity-30">
-              <Bookmark className="w-5 h-5 text-primary" />
-            </button>
-            <button onClick={() => openPanel("tabs")} className="relative p-2">
-              <div className="w-5 h-5 border-2 border-primary rounded-md flex items-center justify-center">
-                <span className="text-[10px] font-bold text-primary">{tabs.length}</span>
+            <button onClick={() => openPanel("tabs")} className="p-2.5 rounded-xl active:bg-muted/60 transition-colors relative">
+              <div className="w-[22px] h-[22px] border-[2.5px] border-primary rounded-[6px] flex items-center justify-center">
+                <span className="text-[10px] font-bold text-primary leading-none">{tabs.length}</span>
               </div>
+            </button>
+            <button onClick={() => openPanel("menu")} className="p-2.5 rounded-xl active:bg-muted/60 transition-colors">
+              <Menu className="w-[22px] h-[22px] text-primary" strokeWidth={2} />
             </button>
           </div>
         </div>
       )}
 
-      <ModuleSwitcher />
+      {isNewTab && <ModuleSwitcher />}
     </div>
   );
 };
 
-// === Sub-components ===
+// Loading placeholder
+const loadingPage = `<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
+  body{display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:-apple-system,system-ui,sans-serif;background:#f8f9fa;}
+  .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8;animation:pulse 1.2s infinite;margin:0 4px;}
+  .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+  @media(prefers-color-scheme:dark){body{background:#0a0a0a;}.dot{background:#475569;}}
+</style></head><body><div style="display:flex"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></body></html>`;
 
+// === New Tab Page ===
 const NewTabPage = ({
-  onNavigate, urlInput, setUrlInput, inputRef, handleSubmit, isFocused, setIsFocused,
+  onNavigate, urlInput, setUrlInput, inputRef, handleSubmit, isFocused, setIsFocused, onOpenPanel,
 }: {
   onNavigate: (url: string) => void;
   urlInput: string;
@@ -409,16 +387,37 @@ const NewTabPage = ({
   handleSubmit: (e: React.FormEvent) => void;
   isFocused: boolean;
   setIsFocused: (v: boolean) => void;
+  onOpenPanel: (p: Panel) => void;
 }) => (
-  <div className="flex flex-col h-full px-5 pt-[env(safe-area-inset-top)]">
-    <div className="flex-1 flex flex-col items-center justify-center gap-8 -mt-20">
-      <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-xl shadow-primary/20">
-        <Globe className="w-8 h-8 text-primary-foreground" />
-      </div>
+  <div className="flex flex-col h-full pt-[env(safe-area-inset-top)]">
+    <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 -mt-16">
+      {/* Logo */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="relative"
+      >
+        <div className="w-20 h-20 rounded-[28px] bg-gradient-to-br from-primary via-primary/90 to-secondary flex items-center justify-center shadow-2xl shadow-primary/25">
+          <Compass className="w-10 h-10 text-primary-foreground" strokeWidth={1.5} />
+        </div>
+        <div className="absolute -inset-2 rounded-[34px] bg-primary/10 blur-xl -z-10" />
+      </motion.div>
 
-      <form onSubmit={handleSubmit} className="w-full max-w-md">
-        <div className="flex items-center gap-2 bg-muted/80 rounded-2xl px-4 py-3 border border-border focus-within:border-primary/40 transition-colors">
-          <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+      {/* Search bar */}
+      <motion.form
+        initial={{ y: 12, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.1, duration: 0.35 }}
+        onSubmit={handleSubmit}
+        className="w-full max-w-md"
+      >
+        <div className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 transition-all duration-200 ${
+          isFocused
+            ? "bg-background border border-primary/30 shadow-lg shadow-primary/5"
+            : "bg-muted/50 border border-border/60"
+        }`}>
+          <Search className="w-[18px] h-[18px] text-muted-foreground/50 shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -427,47 +426,61 @@ const NewTabPage = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             placeholder="Search or enter URL"
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 outline-none font-medium"
             autoFocus
           />
         </div>
-      </form>
+      </motion.form>
 
-      {/* Quick links */}
-      <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
+      {/* Quick links grid */}
+      <motion.div
+        initial={{ y: 16, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.35 }}
+        className="grid grid-cols-4 gap-3 w-full max-w-sm"
+      >
         {defaultQuickLinks.map((link) => (
-          <button
+          <motion.button
             key={link.url}
+            whileTap={{ scale: 0.92 }}
             onClick={() => onNavigate(link.url)}
-            className="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-muted/60 transition-colors"
+            className="flex flex-col items-center gap-1.5 py-2.5 rounded-2xl hover:bg-muted/50 active:bg-muted transition-colors"
           >
-            <div className="w-12 h-12 rounded-2xl bg-card border border-border flex items-center justify-center text-xl shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-card border border-border/50 flex items-center justify-center text-lg shadow-sm">
               {link.icon}
             </div>
-            <span className="text-[11px] text-muted-foreground font-medium">{link.title}</span>
-          </button>
+            <span className="text-[10px] text-muted-foreground font-medium leading-tight">{link.title}</span>
+          </motion.button>
         ))}
-      </div>
+      </motion.div>
     </div>
 
-    {/* Bottom menu for new tab */}
-    <div className="flex items-center justify-center gap-8 pb-24 pt-4">
-      <button className="flex flex-col items-center gap-1 text-muted-foreground">
-        <Clock className="w-5 h-5" />
-        <span className="text-[10px]">History</span>
-      </button>
-      <button className="flex flex-col items-center gap-1 text-muted-foreground">
-        <Star className="w-5 h-5" />
-        <span className="text-[10px]">Bookmarks</span>
-      </button>
-      <button className="flex flex-col items-center gap-1 text-muted-foreground">
-        <Download className="w-5 h-5" />
-        <span className="text-[10px]">Downloads</span>
-      </button>
-    </div>
+    {/* Bottom shortcuts */}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.3 }}
+      className="flex items-center justify-center gap-10 pb-24 pt-3"
+    >
+      {[
+        { icon: Clock, label: "History", panel: "history" as Panel },
+        { icon: Star, label: "Bookmarks", panel: "bookmarks" as Panel },
+        { icon: Download, label: "Downloads", panel: "downloads" as Panel },
+      ].map(({ icon: Icon, label, panel }) => (
+        <button
+          key={label}
+          onClick={() => onOpenPanel(panel)}
+          className="flex flex-col items-center gap-1 text-muted-foreground/70 hover:text-primary transition-colors"
+        >
+          <Icon className="w-5 h-5" strokeWidth={1.8} />
+          <span className="text-[10px] font-medium">{label}</span>
+        </button>
+      ))}
+    </motion.div>
   </div>
 );
 
+// === Tabs Panel ===
 const TabsPanel = ({
   tabs, onSwitch, onClose, onAdd,
 }: {
@@ -476,38 +489,47 @@ const TabsPanel = ({
   onClose: (id: string) => void;
   onAdd: () => void;
 }) => (
-  <div className="p-3 space-y-2">
+  <div className="px-4 pb-8 space-y-2.5">
     <button
       onClick={onAdd}
-      className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border text-sm text-muted-foreground hover:bg-muted/50 transition-colors"
+      className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-border/60 text-sm text-muted-foreground font-medium hover:bg-muted/30 hover:border-primary/20 transition-all"
     >
       <Plus className="w-4 h-4" /> New Tab
     </button>
-    {tabs.map((tab) => (
+    {tabs.map((tab, i) => (
       <motion.div
         key={tab.id}
-        layout
-        className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${
-          tab.isActive ? "border-primary/30 bg-primary/5" : "border-border hover:bg-muted/50"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: i * 0.04 }}
+        className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all cursor-pointer active:scale-[0.98] ${
+          tab.isActive
+            ? "border-primary/25 bg-primary/5 shadow-sm shadow-primary/5"
+            : "border-border/40 hover:bg-muted/30"
         }`}
         onClick={() => onSwitch(tab.id)}
       >
-        <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
+        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+          tab.isActive ? "bg-primary/10" : "bg-muted/60"
+        }`}>
+          <Globe className={`w-4 h-4 ${tab.isActive ? "text-primary" : "text-muted-foreground"}`} />
+        </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-foreground truncate">{tab.title || "New Tab"}</p>
-          {tab.url && <p className="text-[10px] text-muted-foreground truncate">{getDisplayUrl(tab.url)}</p>}
+          <p className="text-sm font-semibold text-foreground truncate">{tab.title || "New Tab"}</p>
+          {tab.url && <p className="text-[11px] text-muted-foreground truncate mt-0.5">{getDisplayUrl(tab.url)}</p>}
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); onClose(tab.id); }}
-          className="p-1 rounded-lg hover:bg-muted shrink-0"
+          className="p-1.5 rounded-xl hover:bg-destructive/10 transition-colors shrink-0"
         >
-          <X className="w-3.5 h-3.5 text-muted-foreground" />
+          <X className="w-4 h-4 text-muted-foreground" />
         </button>
       </motion.div>
     ))}
   </div>
 );
 
+// === History Panel ===
 const HistoryPanel = ({
   history, onNavigate, onDelete, onClear,
 }: {
@@ -516,42 +538,47 @@ const HistoryPanel = ({
   onDelete: (id: string) => void;
   onClear: () => void;
 }) => (
-  <div className="p-3">
+  <div className="px-4 pb-8">
     {history.length > 0 && (
       <button
         onClick={onClear}
-        className="w-full text-center text-xs text-destructive font-medium py-2 mb-2 rounded-lg hover:bg-destructive/5"
+        className="w-full text-center text-xs text-destructive font-semibold py-2.5 mb-3 rounded-xl hover:bg-destructive/5 transition-colors"
       >
         Clear All History
       </button>
     )}
     {history.length === 0 ? (
-      <p className="text-center text-sm text-muted-foreground py-8">No browsing history</p>
+      <div className="flex flex-col items-center py-16 text-muted-foreground/50">
+        <Clock className="w-10 h-10 mb-3" strokeWidth={1.3} />
+        <p className="text-sm font-medium">No browsing history</p>
+      </div>
     ) : (
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {history.map((entry) => (
           <div
             key={entry.id}
-            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted/50 cursor-pointer group"
+            className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 cursor-pointer group transition-colors active:bg-muted/60"
             onClick={() => onNavigate(entry.url)}
           >
             {entry.favicon_url ? (
-              <img src={entry.favicon_url} className="w-5 h-5 rounded shrink-0" alt="" />
+              <img src={entry.favicon_url} className="w-6 h-6 rounded-lg shrink-0" alt="" />
             ) : (
-              <Globe className="w-5 h-5 text-muted-foreground shrink-0" />
+              <div className="w-6 h-6 rounded-lg bg-muted flex items-center justify-center">
+                <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-foreground truncate">{entry.title || entry.url}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{getDisplayUrl(entry.url)}</p>
+              <p className="text-[13px] font-medium text-foreground truncate">{entry.title || entry.url}</p>
+              <p className="text-[11px] text-muted-foreground/60 truncate">{getDisplayUrl(entry.url)}</p>
             </div>
-            <span className="text-[10px] text-muted-foreground shrink-0">
+            <span className="text-[10px] text-muted-foreground/40 shrink-0 font-medium">
               {format(new Date(entry.visited_at), "HH:mm")}
             </span>
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
-              className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10"
+              className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10 transition-opacity"
             >
-              <X className="w-3 h-3 text-destructive" />
+              <X className="w-3.5 h-3.5 text-destructive" />
             </button>
           </div>
         ))}
@@ -560,6 +587,7 @@ const HistoryPanel = ({
   </div>
 );
 
+// === Bookmarks Panel ===
 const BookmarksPanel = ({
   bookmarks, onNavigate, onDelete,
 }: {
@@ -567,31 +595,36 @@ const BookmarksPanel = ({
   onNavigate: (url: string) => void;
   onDelete: (id: string) => void;
 }) => (
-  <div className="p-3">
+  <div className="px-4 pb-8">
     {bookmarks.length === 0 ? (
-      <p className="text-center text-sm text-muted-foreground py-8">No bookmarks yet</p>
+      <div className="flex flex-col items-center py-16 text-muted-foreground/50">
+        <Star className="w-10 h-10 mb-3" strokeWidth={1.3} />
+        <p className="text-sm font-medium">No bookmarks yet</p>
+      </div>
     ) : (
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {bookmarks.map((bm) => (
           <div
             key={bm.id}
-            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted/50 cursor-pointer group"
+            className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 cursor-pointer group transition-colors active:bg-muted/60"
             onClick={() => onNavigate(bm.url)}
           >
             {bm.favicon_url ? (
-              <img src={bm.favicon_url} className="w-5 h-5 rounded shrink-0" alt="" />
+              <img src={bm.favicon_url} className="w-6 h-6 rounded-lg shrink-0" alt="" />
             ) : (
-              <Star className="w-5 h-5 text-amber-400 shrink-0" />
+              <div className="w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Star className="w-3.5 h-3.5 text-accent" />
+              </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-foreground truncate">{bm.title}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{getDisplayUrl(bm.url)}</p>
+              <p className="text-[13px] font-medium text-foreground truncate">{bm.title}</p>
+              <p className="text-[11px] text-muted-foreground/60 truncate">{getDisplayUrl(bm.url)}</p>
             </div>
             <button
               onClick={(e) => { e.stopPropagation(); onDelete(bm.id); }}
-              className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10"
+              className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10 transition-opacity"
             >
-              <Trash2 className="w-3 h-3 text-destructive" />
+              <Trash2 className="w-3.5 h-3.5 text-destructive" />
             </button>
           </div>
         ))}
@@ -600,36 +633,79 @@ const BookmarksPanel = ({
   </div>
 );
 
+// === Downloads Panel ===
 const DownloadsPanel = ({
   downloads, onDelete,
 }: {
   downloads: DownloadEntry[];
   onDelete: (id: string) => void;
 }) => (
-  <div className="p-3">
+  <div className="px-4 pb-8">
     {downloads.length === 0 ? (
-      <p className="text-center text-sm text-muted-foreground py-8">No downloads</p>
+      <div className="flex flex-col items-center py-16 text-muted-foreground/50">
+        <Download className="w-10 h-10 mb-3" strokeWidth={1.3} />
+        <p className="text-sm font-medium">No downloads</p>
+      </div>
     ) : (
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {downloads.map((dl) => (
-          <div key={dl.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-muted/50 group">
-            <Download className="w-5 h-5 text-primary shrink-0" />
+          <div key={dl.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 group transition-colors">
+            <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Download className="w-4 h-4 text-primary" />
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-foreground truncate">{dl.file_name}</p>
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-[13px] font-medium text-foreground truncate">{dl.file_name}</p>
+              <p className="text-[11px] text-muted-foreground/60">
                 {format(new Date(dl.created_at), "MMM d, HH:mm")}
               </p>
             </div>
             <button
               onClick={() => onDelete(dl.id)}
-              className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10"
+              className="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10 transition-opacity"
             >
-              <Trash2 className="w-3 h-3 text-destructive" />
+              <Trash2 className="w-3.5 h-3.5 text-destructive" />
             </button>
           </div>
         ))}
       </div>
     )}
+  </div>
+);
+
+// === Menu Panel ===
+const MenuPanel = ({
+  onBookmark, onShare, onHistory, onBookmarks, onDownloads, onReload, hasUrl,
+}: {
+  onBookmark: () => void;
+  onShare: () => void;
+  onHistory: () => void;
+  onBookmarks: () => void;
+  onDownloads: () => void;
+  onReload: () => void;
+  hasUrl: boolean;
+}) => (
+  <div className="px-4 pb-8 space-y-1">
+    {[
+      { icon: RotateCw, label: "Reload Page", action: onReload, show: hasUrl },
+      { icon: Bookmark, label: "Add Bookmark", action: onBookmark, show: hasUrl },
+      { icon: Share2, label: "Share", action: onShare, show: hasUrl },
+      { icon: Clock, label: "History", action: onHistory, show: true },
+      { icon: Star, label: "Bookmarks", action: onBookmarks, show: true },
+      { icon: Download, label: "Downloads", action: onDownloads, show: true },
+    ]
+      .filter((item) => item.show)
+      .map(({ icon: Icon, label, action }) => (
+        <button
+          key={label}
+          onClick={action}
+          className="w-full flex items-center gap-4 p-3.5 rounded-2xl hover:bg-muted/40 active:bg-muted/60 transition-colors text-left"
+        >
+          <div className="w-9 h-9 rounded-xl bg-muted/60 flex items-center justify-center shrink-0">
+            <Icon className="w-[18px] h-[18px] text-foreground/70" strokeWidth={1.8} />
+          </div>
+          <span className="text-[14px] font-medium text-foreground">{label}</span>
+        </button>
+      ))}
   </div>
 );
 
