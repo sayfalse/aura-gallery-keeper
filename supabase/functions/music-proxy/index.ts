@@ -18,10 +18,15 @@ import { createDecipheriv } from "node:crypto";
 
 function decryptMediaUrl(encUrl: string): string {
   try {
-    const key = Buffer.from("38346591");
+    const key = new Uint8Array([0x33,0x38,0x33,0x34,0x36,0x35,0x39,0x31]); // "38346591"
     const decipher = createDecipheriv("des-ecb", key, null);
-    let decrypted = decipher.update(encUrl, "base64", "utf8");
-    decrypted += decipher.final("utf8");
+    const encBuf = Uint8Array.from(atob(encUrl), c => c.charCodeAt(0));
+    const part1 = decipher.update(encBuf);
+    const part2 = decipher.final();
+    const combined = new Uint8Array(part1.length + part2.length);
+    combined.set(new Uint8Array(part1.buffer, part1.byteOffset, part1.length));
+    combined.set(new Uint8Array(part2.buffer, part2.byteOffset, part2.length), part1.length);
+    const decrypted = new TextDecoder().decode(combined);
     return decrypted.replace("_96.mp4", "_320.mp4").replace("_96_p.mp4", "_320.mp4");
   } catch (e) {
     console.error("Decrypt error:", e);
