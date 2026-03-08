@@ -395,9 +395,9 @@ const SettingsPage = () => {
             <div className="flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-medium text-foreground">Your data is protected</p>
+                <p className="text-sm font-medium text-foreground">{t("settings.dataProtected")}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  All your data is encrypted end-to-end. Files, photos, notes, and contacts are secured with industry-standard encryption both in transit and at rest.
+                  {t("settings.dataProtectedDesc")}
                 </p>
               </div>
             </div>
