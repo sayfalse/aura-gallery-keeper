@@ -3,7 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search } from "lucide-react";
+import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search, ShieldCheck, Database, Wifi } from "lucide-react";
+import PersonalInfoSection from "@/components/settings/PersonalInfoSection";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
@@ -170,8 +171,6 @@ const SettingsPage = () => {
     toast.success(`Language set to ${lang?.name || code}`);
   };
 
-  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
-  const email = user?.email || "";
 
   const themeOptions = [
     { value: "light", label: "Light", icon: Sun },
@@ -201,43 +200,16 @@ const SettingsPage = () => {
       </header>
 
       <div className="max-w-lg mx-auto p-4 md:p-6 space-y-6">
-        {/* Profile */}
-        <section className="rounded-2xl bg-card border border-border p-5">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <User className="w-4 h-4" /> Profile
-          </h2>
-          <div className="flex items-center gap-4 mb-5">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar" className="w-16 h-16 rounded-full" />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="w-8 h-8 text-primary" />
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
-              <p className="text-xs text-muted-foreground truncate">{email}</p>
-            </div>
-          </div>
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Display Name</label>
-              <input
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <button
-              onClick={handleSaveProfile}
-              disabled={saving}
-              className="w-full py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-        </section>
+        {/* Personal Info */}
+        {user && (
+          <PersonalInfoSection
+            user={user}
+            displayName={displayName}
+            setDisplayName={setDisplayName}
+            onSaveProfile={handleSaveProfile}
+            saving={saving}
+          />
+        )}
 
         {/* Appearance */}
         <section className="rounded-2xl bg-card border border-border p-5">
@@ -347,19 +319,50 @@ const SettingsPage = () => {
           </div>
         </section>
 
-        {/* Security */}
+        {/* Security & Encryption */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Shield className="w-4 h-4" /> Security
+            <Shield className="w-4 h-4" /> Security & Encryption
           </h2>
+          <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Your data is protected</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  All your data is encrypted end-to-end. Files, photos, notes, and contacts are secured with industry-standard encryption both in transit and at rest.
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">Encryption</span>
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">At-rest AES-256</span>
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Database className="w-3.5 h-3.5 text-muted-foreground" />
+                At-rest Encryption
+              </span>
+              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">AES-256</span>
             </div>
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-foreground">Auth Provider</span>
-              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Google OAuth</span>
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Wifi className="w-3.5 h-3.5 text-muted-foreground" />
+                In-transit Encryption
+              </span>
+              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">TLS 1.3</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Shield className="w-3.5 h-3.5 text-muted-foreground" />
+                Data Isolation
+              </span>
+              <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">Row-Level Security</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="flex items-center gap-2 text-sm text-foreground">
+                <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                Auth Provider
+              </span>
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Google OAuth 2.0</span>
             </div>
           </div>
         </section>
