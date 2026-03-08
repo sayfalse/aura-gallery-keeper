@@ -214,6 +214,9 @@ const SettingsPage = () => {
           />
         )}
 
+        {/* Sharing & Username */}
+        {user && <SharingSection user={user} />}
+
         {/* Appearance */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
