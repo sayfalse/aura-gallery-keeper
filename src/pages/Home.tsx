@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
-import { Image, StickyNote, HardDrive, Users, Mail, Cloud, Settings, Clock, Star, FileText } from "lucide-react";
+import { Image, StickyNote, HardDrive, Users, Mail, Cloud, Settings, Clock, Star, FileText, Sparkles } from "lucide-react";
 
 const apps = [
   { id: "gallery", name: "Gallery", icon: Image, color: "from-blue-500 to-cyan-400", path: "/gallery" },
@@ -12,6 +12,7 @@ const apps = [
   { id: "drive", name: "Drive", icon: HardDrive, color: "from-indigo-500 to-purple-500", path: "/drive" },
   { id: "contacts", name: "Contacts", icon: Users, color: "from-emerald-500 to-teal-500", path: "/contacts" },
   { id: "mail", name: "Mail", icon: Mail, color: "from-sky-500 to-blue-600", path: "/mail" },
+  { id: "pixel-ai", name: "Pixel AI", icon: Sparkles, color: "from-violet-500 to-fuchsia-500", path: "/pixel-ai" },
   { id: "settings", name: "Settings", icon: Settings, color: "from-gray-500 to-gray-600", path: "/settings" },
 ];
 
