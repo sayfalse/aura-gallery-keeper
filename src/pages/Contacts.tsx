@@ -105,6 +105,7 @@ const ContactsPage = () => {
           <h1 className="font-display text-lg font-bold text-foreground">Contacts</h1>
           <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{contacts.length}</span>
         </div>
+        <QuickNavButton />
         <button onClick={() => setShowForm(true)} className="p-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
           <Plus className="w-5 h-5" />
         </button>

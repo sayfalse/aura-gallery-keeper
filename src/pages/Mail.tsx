@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, Mail, Inbox, Send, Star, Trash2, Plus, ExternalLink, AtSign, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import QuickNavButton from "@/components/QuickNavButton";
+import ModuleSwitcher from "@/components/ModuleSwitcher";
 
 interface MailAccount {
   id: string;
