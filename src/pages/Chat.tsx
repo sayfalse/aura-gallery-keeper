@@ -193,7 +193,7 @@ const ChatPage = () => {
       }
     } catch (err: any) {
       console.error("Failed to start conversation:", err);
-      toast.error(err?.message || "Failed to start conversation. Please try again.");
+      toast.error(err?.message || t("chat.failedStart"));
     }
   };
 
