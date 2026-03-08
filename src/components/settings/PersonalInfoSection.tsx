@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Mail, Lock, Eye, EyeOff, KeyRound, ShieldCheck, ChevronDown, ChevronUp } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, KeyRound, ShieldCheck, ChevronDown, ChevronUp, Calendar } from "lucide-react";
+import { format } from "date-fns";
 import { toast } from "sonner";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
