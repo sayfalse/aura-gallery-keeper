@@ -490,7 +490,7 @@ const ChatPage = () => {
                 <div className={`px-3 py-2 rounded-2xl text-sm leading-relaxed ${
                   isMe
                     ? "bg-primary text-primary-foreground rounded-br-md"
-                    : "bg-secondary text-foreground rounded-bl-md"
+                    : "bg-primary/10 border border-primary/20 text-foreground rounded-bl-md"
                 }`}>
                   {msg.content}
                 </div>
