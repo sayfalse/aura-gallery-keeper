@@ -31,6 +31,28 @@ export const fetchDriveFiles = async (userId: string, folder: string = "/"): Pro
 };
 
 export const uploadDriveFile = async (userId: string, file: File, folder: string = "/"): Promise<DriveFile> => {
+  // Check storage quota before uploading
+  const { data: quotaData } = await supabase
+    .from("storage_quotas")
+    .select("quota_bytes")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const quotaBytes = quotaData?.quota_bytes ?? 1073741824; // default 1GB
+
+  const { data: usageData } = await supabase
+    .from("drive_files")
+    .select("size_bytes")
+    .eq("user_id", userId);
+
+  const currentUsage = (usageData || []).reduce((acc, f: any) => acc + (f.size_bytes || 0), 0);
+
+  if (currentUsage + file.size > quotaBytes) {
+    const usedMB = (currentUsage / (1024 * 1024)).toFixed(1);
+    const limitMB = (quotaBytes / (1024 * 1024)).toFixed(1);
+    throw new Error(`Storage quota exceeded. Used: ${usedMB} MB / ${limitMB} MB. Free up space or contact an admin.`);
+  }
+
   const fileName = `${crypto.randomUUID()}_${file.name}`;
   const storagePath = `${userId}/${fileName}`;
 
