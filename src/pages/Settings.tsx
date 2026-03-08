@@ -472,7 +472,7 @@ const SettingsPage = () => {
             </div>
 
             {showPinSetup && (
-              <div className="rounded-xl bg-secondary p-4 space-y-3">
+              <div className="rounded-xl bg-primary/10 border border-primary/20 p-4 space-y-3">
                 <p className="text-sm font-medium text-foreground">
                   {pinStep === "enter" ? "Set a 4-digit PIN" : "Confirm your PIN"}
                 </p>
