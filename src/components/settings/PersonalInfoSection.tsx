@@ -216,8 +216,8 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
         {/* Auth provider badge */}
         <div>
           <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Sign-in Method</label>
-          <div className="px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground capitalize flex items-center gap-2">
-            <KeyRound className="w-4 h-4 text-muted-foreground" />
+          <div className="px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-sm font-medium text-foreground capitalize flex items-center gap-2">
+            <KeyRound className="w-4 h-4 text-primary" />
             {provider === "google" ? "Google Account" : "Email & Password"}
           </div>
         </div>
