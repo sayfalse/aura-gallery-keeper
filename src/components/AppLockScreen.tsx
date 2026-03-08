@@ -1,15 +1,24 @@
 import { useState, useEffect, useCallback } from "react";
 import { Cloud, Lock, Fingerprint } from "lucide-react";
 
-const PIN_STORAGE_KEY = "app_lock_pin";
+const PIN_HASH_STORAGE_KEY = "app_lock_pin_hash";
 const LOCK_TIMEOUT_KEY = "app_lock_timeout";
 const LAST_ACTIVE_KEY = "app_lock_last_active";
 const LOCK_ENABLED_KEY = "app_lock_enabled";
 
+/** Hash a PIN string using SHA-256 and return hex digest */
+async function hashPin(pin: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pin);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export const getAppLockSettings = () => ({
   enabled: localStorage.getItem(LOCK_ENABLED_KEY) === "true",
   timeout: parseInt(localStorage.getItem(LOCK_TIMEOUT_KEY) || "0", 10),
-  hasPin: !!localStorage.getItem(PIN_STORAGE_KEY),
+  hasPin: !!localStorage.getItem(PIN_HASH_STORAGE_KEY),
 });
 
 export const setAppLockEnabled = (enabled: boolean) => {
@@ -20,12 +29,13 @@ export const setAppLockTimeout = (seconds: number) => {
   localStorage.setItem(LOCK_TIMEOUT_KEY, String(seconds));
 };
 
-export const setAppLockPin = (pin: string) => {
-  localStorage.setItem(PIN_STORAGE_KEY, pin);
+export const setAppLockPin = async (pin: string) => {
+  const hashed = await hashPin(pin);
+  localStorage.setItem(PIN_HASH_STORAGE_KEY, hashed);
 };
 
 export const removeAppLock = () => {
-  localStorage.removeItem(PIN_STORAGE_KEY);
+  localStorage.removeItem(PIN_HASH_STORAGE_KEY);
   localStorage.removeItem(LOCK_ENABLED_KEY);
   localStorage.removeItem(LOCK_TIMEOUT_KEY);
   localStorage.removeItem(LAST_ACTIVE_KEY);
@@ -60,17 +70,19 @@ const AppLockScreen = ({ onUnlock }: AppLockScreenProps) => {
     setError(false);
 
     if (newPin.length === maxLength) {
-      const stored = localStorage.getItem(PIN_STORAGE_KEY);
-      if (newPin === stored) {
-        updateLastActive();
-        onUnlock();
-      } else {
-        setError(true);
-        setTimeout(() => {
-          setPin("");
-          setError(false);
-        }, 600);
-      }
+      hashPin(newPin).then((hashed) => {
+        const stored = localStorage.getItem(PIN_HASH_STORAGE_KEY);
+        if (hashed === stored) {
+          updateLastActive();
+          onUnlock();
+        } else {
+          setError(true);
+          setTimeout(() => {
+            setPin("");
+            setError(false);
+          }, 600);
+        }
+      });
     }
   }, [pin, onUnlock]);
 
