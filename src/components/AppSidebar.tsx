@@ -64,7 +64,7 @@ const AppSidebar = ({ activeSection, onSectionChange, onUpload, photoCount, favo
               <item.icon className="w-[18px] h-[18px]" />
               <span className="flex-1 text-left">{item.label}</span>
               {count !== undefined && (
-                <span className="text-xs text-muted-foreground font-medium">{count}</span>
+                <span className={`text-xs font-medium ${id === "shared" && count > 0 ? "bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full min-w-[20px] text-center" : "text-muted-foreground"}`}>{count}</span>
               )}
             </button>
           );
