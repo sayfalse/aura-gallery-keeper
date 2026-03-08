@@ -51,6 +51,8 @@
     "chatDesc": "Messages",
     "browser": "Browser",
     "browserDesc": "Secure browsing",
+    "vault": "File Vault",
+    "vaultDesc": "Encrypted storage",
     "pixelAI": "Pixel AI",
     "pixelAIDesc": "AI Assistant",
     "settings": "Settings",
