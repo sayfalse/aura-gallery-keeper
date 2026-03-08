@@ -104,6 +104,104 @@ const VPNPage = () => {
       </header>
 
       <main className="px-5 pb-28 space-y-5">
+        {/* Connect Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl bg-card border border-border p-6 flex flex-col items-center"
+        >
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-5">
+            {connected ? "Secure DNS Active" : "Tap to Enable Secure DNS"}
+          </p>
+
+          {/* Outer ring */}
+          <div className="relative">
+            <motion.div
+              animate={{
+                boxShadow: connected
+                  ? "0 0 0 8px hsl(var(--primary) / 0.1), 0 0 40px hsl(var(--primary) / 0.15)"
+                  : "0 0 0 8px hsl(var(--muted) / 0.5), 0 0 20px transparent",
+              }}
+              transition={{ duration: 0.6 }}
+              className="w-36 h-36 rounded-full flex items-center justify-center"
+            >
+              {/* Inner ring */}
+              <motion.div
+                animate={{
+                  borderColor: connected ? "hsl(var(--primary))" : "hsl(var(--border))",
+                }}
+                transition={{ duration: 0.4 }}
+                className="w-32 h-32 rounded-full border-[3px] flex items-center justify-center"
+              >
+                {/* Button */}
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={async () => {
+                    if (connecting) return;
+                    setConnecting(true);
+                    // Simulate connection handshake
+                    await new Promise(r => setTimeout(r, 1500));
+                    const next = !connected;
+                    setConnected(next);
+                    setConnecting(false);
+                    if (next) {
+                      toast.success("Secure DNS enabled via Cloudflare 1.1.1.1");
+                      checkConnection();
+                    } else {
+                      toast("Secure DNS disconnected");
+                    }
+                  }}
+                  className={`w-24 h-24 rounded-full flex items-center justify-center transition-colors duration-500 ${
+                    connecting
+                      ? "bg-amber-500/20"
+                      : connected
+                      ? "bg-primary/15"
+                      : "bg-muted"
+                  }`}
+                >
+                  {connecting ? (
+                    <div className="w-8 h-8 border-3 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Power
+                      className={`w-10 h-10 transition-colors duration-500 ${
+                        connected ? "text-primary" : "text-muted-foreground"
+                      }`}
+                      strokeWidth={2.5}
+                    />
+                  )}
+                </motion.button>
+              </motion.div>
+            </motion.div>
+
+            {/* Pulse rings when connected */}
+            <AnimatePresence>
+              {connected && !connecting && (
+                <>
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0.8, opacity: 0.4 }}
+                      animate={{ scale: 1.8, opacity: 0 }}
+                      transition={{ duration: 2, delay: i * 0.6, repeat: Infinity }}
+                      className="absolute inset-0 rounded-full border border-primary/30 pointer-events-none"
+                    />
+                  ))}
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <motion.p
+            animate={{ color: connected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+            className="mt-5 text-sm font-bold"
+          >
+            {connecting ? "Connecting..." : connected ? "Connected" : "Disconnected"}
+          </motion.p>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            {connected ? "DNS queries routed via Cloudflare 1.1.1.1" : "Your traffic uses default ISP DNS"}
+          </p>
+        </motion.div>
+
         {/* Connection Status */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
