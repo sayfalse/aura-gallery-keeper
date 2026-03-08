@@ -534,6 +534,22 @@ const SettingsPage = () => {
               <span className="text-sm text-foreground">Version</span>
               <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">1.0.0</span>
             </div>
+            <div className="pt-2 border-t border-border space-y-2">
+              <a
+                href="/privacy-policy"
+                className="flex items-center justify-between py-2 rounded-lg hover:bg-accent px-2 -mx-2 transition-colors"
+              >
+                <span className="text-sm text-foreground">Privacy Policy</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </a>
+              <a
+                href="/terms-of-service"
+                className="flex items-center justify-between py-2 rounded-lg hover:bg-accent px-2 -mx-2 transition-colors"
+              >
+                <span className="text-sm text-foreground">Terms of Service</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </a>
+            </div>
           </div>
         </section>
 

@@ -17,6 +17,25 @@ interface LightboxProps {
 const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, hasPrev, hasNext }: LightboxProps) => {
   const [showInfo, setShowInfo] = useState(false);
 
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const response = await fetch(photo.src);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = photo.name + (photo.name.includes(".") ? "" : ".jpg");
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      // fallback: open in new tab
+      window.open(photo.src, "_blank");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 lightbox-overlay flex items-center justify-center animate-fade-in" onClick={onClose}>
       {/* Top bar */}
@@ -27,6 +46,9 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
         <div className="flex items-center gap-2">
           <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(photo.id); }} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
             <Heart className={`w-5 h-5 ${photo.favorite ? "fill-red-500 text-red-500" : "text-card"}`} />
+          </button>
+          <button onClick={handleDownload} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
+            <Download className="w-5 h-5 text-card" />
           </button>
           <button onClick={(e) => { e.stopPropagation(); setShowInfo(!showInfo); }} className="w-10 h-10 rounded-full bg-card/10 hover:bg-card/20 flex items-center justify-center transition-colors">
             <Info className="w-5 h-5 text-card" />
