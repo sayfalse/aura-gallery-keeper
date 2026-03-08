@@ -232,7 +232,7 @@ const ContactsPage = () => {
         <div className="fixed inset-0 z-50 bg-foreground/50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
           <div className="bg-card rounded-2xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="font-display text-lg font-bold text-foreground">New Contact</h2>
+              <h2 className="font-display text-lg font-bold text-foreground">{t("contacts.newContact")}</h2>
               <button onClick={() => setShowForm(false)} className="p-1 rounded-lg hover:bg-accent"><X className="w-5 h-5 text-muted-foreground" /></button>
             </div>
             <div className="space-y-3">
