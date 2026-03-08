@@ -206,7 +206,7 @@ const NotesPage = () => {
                   <ArrowLeft className="w-4 h-4 text-foreground" />
                 </button>
                 <div className="flex-1" />
-                <button onClick={handleExportMarkdown} className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="Export as Markdown">
+                <button onClick={handleExportMarkdown} className="p-2 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title={t("notes.exportMarkdown")}>
                   <FileDown className="w-4 h-4" />
                 </button>
                 <button onClick={() => handleTogglePin(activeNote)} className={`p-2 rounded-lg transition-colors ${activeNote.pinned ? "text-amber-500" : "text-muted-foreground hover:text-foreground"}`}>
