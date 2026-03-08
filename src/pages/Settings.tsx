@@ -200,6 +200,7 @@ const SettingsPage = () => {
           Sign Out
         </button>
       </div>
+      <ModuleSwitcher />
     </div>
   );
 };

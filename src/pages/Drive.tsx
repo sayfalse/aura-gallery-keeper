@@ -310,6 +310,7 @@ const DrivePage = () => {
         currentFolder={currentFolder}
         onMove={handleMove}
       />
+      <ModuleSwitcher />
     </div>
   );
 };

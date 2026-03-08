@@ -155,6 +155,7 @@ const Home = () => {
           </p>
         </div>
       </main>
+      <ModuleSwitcher />
     </div>
   );
 };

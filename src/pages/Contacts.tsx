@@ -249,6 +249,7 @@ const ContactsPage = () => {
           </div>
         </div>
       )}
+      <ModuleSwitcher />
     </div>
   );
 };

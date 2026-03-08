@@ -238,6 +238,7 @@ const NotesPage = () => {
           )}
         </main>
       </div>
+      <ModuleSwitcher />
     </div>
   );
 };
