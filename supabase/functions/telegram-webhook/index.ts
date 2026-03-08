@@ -14,9 +14,21 @@ Deno.serve(async (req) => {
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     if (req.method === "POST") {
+      // Validate the request comes from Telegram using a secret token in the URL
+      const url = new URL(req.url);
+      const secret = url.searchParams.get("secret");
+      if (!TELEGRAM_BOT_TOKEN || secret !== TELEGRAM_BOT_TOKEN) {
+        console.warn("Unauthorized webhook attempt");
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const body = await req.json();
       console.log("Telegram update received:", JSON.stringify(body));
 
