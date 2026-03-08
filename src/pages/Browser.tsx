@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Globe, RefreshCw, Share2, BookOpen, ChevronLeft, ChevronRight, RotateCw, Lock } from "lucide-react";
+import { Share2, BookOpen, ChevronLeft, ChevronRight, RotateCw, Lock, RefreshCw, Search } from "lucide-react";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 
 const BrowserPage = () => {
@@ -12,10 +12,12 @@ const BrowserPage = () => {
   const [focused, setFocused] = useState(false);
   const [history, setHistory] = useState<string[]>(["https://www.google.com/webhp?igu=1"]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [loadError, setLoadError] = useState(false);
 
   const navigateTo = (target: string) => {
     setUrl(target);
     setLoading(true);
+    setLoadError(false);
     const newHistory = [...history.slice(0, historyIndex + 1), target];
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
@@ -42,6 +44,7 @@ const BrowserPage = () => {
       setHistoryIndex(newIndex);
       setUrl(history[newIndex]);
       setLoading(true);
+      setLoadError(false);
     }
   };
 
@@ -51,11 +54,13 @@ const BrowserPage = () => {
       setHistoryIndex(newIndex);
       setUrl(history[newIndex]);
       setLoading(true);
+      setLoadError(false);
     }
   };
 
   const handleRefresh = () => {
     if (iframeRef.current) {
+      setLoadError(false);
       iframeRef.current.src = url;
       setLoading(true);
     }
@@ -80,25 +85,49 @@ const BrowserPage = () => {
 
   const isSecure = url.startsWith("https://");
 
+  const handleIframeLoad = () => {
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Page content */}
       <div className="flex-1 relative">
-        {/* Loading progress bar - Safari style */}
+        {/* Loading progress bar */}
         {loading && (
           <div className="absolute top-0 left-0 right-0 z-20 h-[2px] bg-secondary overflow-hidden">
             <div className="h-full bg-primary animate-pulse" style={{ width: "70%", animation: "safari-load 1.5s ease-in-out infinite" }} />
           </div>
         )}
-        <iframe
-          ref={iframeRef}
-          src={url}
-          className="w-full border-0"
-          style={{ height: "calc(100vh - 88px)" }}
-          onLoad={() => setLoading(false)}
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-          title="Browser"
-        />
+
+        {loadError ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center" style={{ height: "calc(100vh - 88px)" }}>
+            <Search className="w-12 h-12 text-muted-foreground/40" />
+            <div>
+              <p className="text-base font-medium text-foreground mb-1">Page can't be loaded</p>
+              <p className="text-sm text-muted-foreground">This site may block embedding. Try opening it directly in your device browser.</p>
+            </div>
+            <button
+              onClick={() => window.open(url, "_blank")}
+              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium"
+            >
+              Open in External Browser
+            </button>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            src={url}
+            className="w-full border-0"
+            style={{ height: "calc(100vh - 88px)" }}
+            onLoad={handleIframeLoad}
+            onError={() => { setLoading(false); setLoadError(true); }}
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation allow-downloads"
+            allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; payment; picture-in-picture; fullscreen"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Browser"
+          />
+        )}
       </div>
 
       {/* Safari-style bottom toolbar */}
@@ -116,11 +145,7 @@ const BrowserPage = () => {
                 onBlur={() => setTimeout(() => setFocused(false), 150)}
                 className="flex-1 px-4 py-2 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none ring-2 ring-primary/30"
               />
-              <button
-                type="button"
-                onClick={() => setFocused(false)}
-                className="text-sm text-primary font-medium px-2 py-2"
-              >
+              <button type="button" onClick={() => setFocused(false)} className="text-sm text-primary font-medium px-2 py-2">
                 Cancel
               </button>
             </form>
@@ -138,18 +163,10 @@ const BrowserPage = () => {
 
         {/* Navigation buttons */}
         <div className="flex items-center justify-between px-6 py-1.5">
-          <button
-            onClick={goBack}
-            disabled={historyIndex <= 0}
-            className="p-2 disabled:opacity-30 text-primary transition-opacity"
-          >
+          <button onClick={goBack} disabled={historyIndex <= 0} className="p-2 disabled:opacity-30 text-primary transition-opacity">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <button
-            onClick={goForward}
-            disabled={historyIndex >= history.length - 1}
-            className="p-2 disabled:opacity-30 text-primary transition-opacity"
-          >
+          <button onClick={goForward} disabled={historyIndex >= history.length - 1} className="p-2 disabled:opacity-30 text-primary transition-opacity">
             <ChevronRight className="w-5 h-5" />
           </button>
           <button onClick={handleShare} className="p-2 text-primary">

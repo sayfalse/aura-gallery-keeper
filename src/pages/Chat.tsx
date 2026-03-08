@@ -166,18 +166,32 @@ const ChatPage = () => {
       setShowNewChat(false);
       setSearchQuery("");
       setSearchResults([]);
-      await loadConversations();
-      const conv = conversations.find(c => c.id === convId);
-      if (conv) setActiveConv(conv);
-      else {
-        // Reload and find
-        const updated = await getConversations(user.id);
-        setConversations(updated);
-        const found = updated.find(c => c.id === convId);
-        if (found) setActiveConv(found);
+      // Reload conversations and find the new one
+      const updated = await getConversations(user.id);
+      setConversations(updated);
+      const found = updated.find(c => c.id === convId);
+      if (found) {
+        setActiveConv(found);
+      } else {
+        // Fallback: create a minimal conversation object to open
+        setActiveConv({
+          id: convId,
+          type: "direct",
+          name: null,
+          description: null,
+          avatar_url: null,
+          created_by: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          lastMessage: null,
+          unreadCount: 0,
+          otherUser: searchResults.find(u => u.user_id === otherUserId) || null,
+          memberCount: 2,
+        });
       }
-    } catch {
-      toast.error("Failed to start conversation");
+    } catch (err: any) {
+      console.error("Failed to start conversation:", err);
+      toast.error(err?.message || "Failed to start conversation. Please try again.");
     }
   };
 
