@@ -55,13 +55,31 @@ const Browser = () => {
     setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
   }, []);
 
+  const fetchViaProxy = useCallback(async (url: string) => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/web-proxy`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+        },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) throw new Error("Proxy error");
+      const html = await res.text();
+      setProxyHtml(html);
+    } catch (err) {
+      // Fallback: open in new tab
+      setProxyHtml(`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui;color:#666;background:#fafafa;"><div style="text-align:center;"><p>This site can't be loaded in the browser.</p><a href="${url}" target="_blank" style="color:#3b82f6;">Open in new tab →</a></div></body></html>`);
+    }
+  }, []);
+
   const navigate = useCallback(
     (url: string) => {
       if (!url) return;
       const normalized = normalizeUrl(url);
       const tabId = activeTab.id;
 
-      // Push current URL to back history
       if (activeTab.url) {
         setNavHistory((prev) => ({
           ...prev,
@@ -78,12 +96,15 @@ const Browser = () => {
         isLoading: true,
       });
       setUrlInput(normalized);
+      fetchViaProxy(normalized).finally(() => {
+        updateTab(tabId, { isLoading: false });
+      });
 
       if (user) {
         addHistoryEntry(user.id, normalized, getDisplayUrl(normalized)).catch(() => {});
       }
     },
-    [activeTab, updateTab, user]
+    [activeTab, updateTab, user, fetchViaProxy]
   );
 
   const goBack = useCallback(() => {
