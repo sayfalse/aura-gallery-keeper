@@ -280,7 +280,7 @@ const DrivePage = () => {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {formatFileSize(file.sizeBytes)} · {format(file.createdAt, "MMM d, yyyy")}
+                            {formatFileSize(file.sizeBytes)} · {format(file.createdAt, "MMM d, yyyy")} at {format(file.createdAt, "h:mm a")}
                           </p>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
