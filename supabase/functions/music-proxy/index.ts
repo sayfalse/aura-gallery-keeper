@@ -174,14 +174,30 @@ async function resolveSongUrl(songId: string): Promise<string> {
     const res = await fetch(`${JIOSAAVN_BASE}?${params}`, { headers: HEADERS });
     const data = await res.json();
     const song = data.songs?.[0] || data[songId];
-    if (!song) return "";
+    if (!song) { console.log("No song found for id:", songId); return ""; }
+    
     const encUrl = song.encrypted_media_url || song.more_info?.encrypted_media_url;
-    if (encUrl) return decryptUrl(encUrl);
-    if (song.media_preview_url) {
-      return song.media_preview_url.replace("preview.saavncdn.com", "aac.saavncdn.com").replace("_96_p.mp4", "_320.mp4");
+    console.log("Song:", songId, "has encrypted_media_url:", !!encUrl, "media_preview_url:", !!song.media_preview_url);
+    
+    if (encUrl) {
+      const decrypted = decryptUrl(encUrl);
+      console.log("Decrypted URL:", decrypted ? decrypted.substring(0, 60) + "..." : "(empty)");
+      if (decrypted) return decrypted;
     }
+    
+    // Fallback: use media_preview_url and upgrade quality
+    const previewUrl = song.media_preview_url || song.more_info?.media_preview_url;
+    if (previewUrl) {
+      const upgraded = previewUrl
+        .replace("preview.saavncdn.com", "aac.saavncdn.com")
+        .replace("_96_p.mp4", "_320.mp4");
+      console.log("Using preview URL fallback:", upgraded.substring(0, 60));
+      return upgraded;
+    }
+    
+    console.log("No URL source found for song:", songId, "keys:", Object.keys(song).join(","));
     return "";
-  } catch { return ""; }
+  } catch (e) { console.error("resolveSongUrl error:", e); return ""; }
 }
 
 async function resolveUrls(songs: any[]): Promise<any[]> {
