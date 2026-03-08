@@ -279,8 +279,8 @@ const DrivePage = () => {
             {filtered.length === 0 && subfolders.length === 0 ? (
               <div className="text-center py-20 text-muted-foreground">
                 <HardDrive className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No files yet</p>
-                <p className="text-xs mt-1">Upload files or drag & drop</p>
+                <p className="text-sm">{t("drive.noFiles")}</p>
+                <p className="text-xs mt-1">{t("drive.uploadOrDrag")}</p>
               </div>
             ) : filtered.length > 0 && (
               <div>
