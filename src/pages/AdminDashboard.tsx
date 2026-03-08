@@ -45,6 +45,7 @@ interface UserProfile {
   created_at: string;
   role: string;
   banned_until: string | null;
+  storage?: { totalBytes: number; fileCount: number; byType: Record<string, number> };
 }
 
 interface AuditEntry {
