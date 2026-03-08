@@ -31,6 +31,7 @@ const Lightbox = ({ photo, onClose, onPrev, onNext, onToggleFavorite, onDelete, 
   const [showInfo, setShowInfo] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [imageMeta, setImageMeta] = useState<ImageMeta | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
 
   // Extract image dimensions when loaded
