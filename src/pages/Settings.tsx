@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, ChevronRight, Lock, Fingerprint } from "lucide-react";
+import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, Lock, Globe, Search } from "lucide-react";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
 import QuickNavButton from "@/components/QuickNavButton";
@@ -14,6 +14,90 @@ import {
   setAppLockPin,
   removeAppLock,
 } from "@/components/AppLockScreen";
+
+const LANGUAGES = [
+  { code: "en", name: "English", native: "English" },
+  { code: "es", name: "Spanish", native: "Español" },
+  { code: "fr", name: "French", native: "Français" },
+  { code: "de", name: "German", native: "Deutsch" },
+  { code: "it", name: "Italian", native: "Italiano" },
+  { code: "pt", name: "Portuguese", native: "Português" },
+  { code: "ru", name: "Russian", native: "Русский" },
+  { code: "zh", name: "Chinese", native: "中文" },
+  { code: "ja", name: "Japanese", native: "日本語" },
+  { code: "ko", name: "Korean", native: "한국어" },
+  { code: "ar", name: "Arabic", native: "العربية" },
+  { code: "hi", name: "Hindi", native: "हिन्दी" },
+  { code: "bn", name: "Bengali", native: "বাংলা" },
+  { code: "ur", name: "Urdu", native: "اردو" },
+  { code: "pa", name: "Punjabi", native: "ਪੰਜਾਬੀ" },
+  { code: "ta", name: "Tamil", native: "தமிழ்" },
+  { code: "te", name: "Telugu", native: "తెలుగు" },
+  { code: "mr", name: "Marathi", native: "मराठी" },
+  { code: "gu", name: "Gujarati", native: "ગુજરાતી" },
+  { code: "kn", name: "Kannada", native: "ಕನ್ನಡ" },
+  { code: "ml", name: "Malayalam", native: "മലയാളം" },
+  { code: "th", name: "Thai", native: "ไทย" },
+  { code: "vi", name: "Vietnamese", native: "Tiếng Việt" },
+  { code: "id", name: "Indonesian", native: "Bahasa Indonesia" },
+  { code: "ms", name: "Malay", native: "Bahasa Melayu" },
+  { code: "tl", name: "Filipino", native: "Filipino" },
+  { code: "tr", name: "Turkish", native: "Türkçe" },
+  { code: "pl", name: "Polish", native: "Polski" },
+  { code: "nl", name: "Dutch", native: "Nederlands" },
+  { code: "sv", name: "Swedish", native: "Svenska" },
+  { code: "da", name: "Danish", native: "Dansk" },
+  { code: "no", name: "Norwegian", native: "Norsk" },
+  { code: "fi", name: "Finnish", native: "Suomi" },
+  { code: "el", name: "Greek", native: "Ελληνικά" },
+  { code: "cs", name: "Czech", native: "Čeština" },
+  { code: "sk", name: "Slovak", native: "Slovenčina" },
+  { code: "ro", name: "Romanian", native: "Română" },
+  { code: "hu", name: "Hungarian", native: "Magyar" },
+  { code: "bg", name: "Bulgarian", native: "Български" },
+  { code: "hr", name: "Croatian", native: "Hrvatski" },
+  { code: "sr", name: "Serbian", native: "Српски" },
+  { code: "uk", name: "Ukrainian", native: "Українська" },
+  { code: "he", name: "Hebrew", native: "עברית" },
+  { code: "fa", name: "Persian", native: "فارسی" },
+  { code: "sw", name: "Swahili", native: "Kiswahili" },
+  { code: "am", name: "Amharic", native: "አማርኛ" },
+  { code: "ha", name: "Hausa", native: "Hausa" },
+  { code: "yo", name: "Yoruba", native: "Yorùbá" },
+  { code: "ig", name: "Igbo", native: "Igbo" },
+  { code: "zu", name: "Zulu", native: "isiZulu" },
+  { code: "ne", name: "Nepali", native: "नेपाली" },
+  { code: "si", name: "Sinhala", native: "සිංහල" },
+  { code: "my", name: "Burmese", native: "မြန်မာ" },
+  { code: "km", name: "Khmer", native: "ខ្មែរ" },
+  { code: "lo", name: "Lao", native: "ລາວ" },
+  { code: "ka", name: "Georgian", native: "ქართული" },
+  { code: "hy", name: "Armenian", native: "Հայերեն" },
+  { code: "az", name: "Azerbaijani", native: "Azərbaycan" },
+  { code: "kk", name: "Kazakh", native: "Қазақ" },
+  { code: "uz", name: "Uzbek", native: "Oʻzbek" },
+  { code: "mn", name: "Mongolian", native: "Монгол" },
+  { code: "et", name: "Estonian", native: "Eesti" },
+  { code: "lv", name: "Latvian", native: "Latviešu" },
+  { code: "lt", name: "Lithuanian", native: "Lietuvių" },
+  { code: "sq", name: "Albanian", native: "Shqip" },
+  { code: "mk", name: "Macedonian", native: "Македонски" },
+  { code: "bs", name: "Bosnian", native: "Bosanski" },
+  { code: "sl", name: "Slovenian", native: "Slovenščina" },
+  { code: "is", name: "Icelandic", native: "Íslenska" },
+  { code: "ga", name: "Irish", native: "Gaeilge" },
+  { code: "cy", name: "Welsh", native: "Cymraeg" },
+  { code: "mt", name: "Maltese", native: "Malti" },
+  { code: "eu", name: "Basque", native: "Euskara" },
+  { code: "ca", name: "Catalan", native: "Català" },
+  { code: "gl", name: "Galician", native: "Galego" },
+  { code: "af", name: "Afrikaans", native: "Afrikaans" },
+  { code: "xh", name: "Xhosa", native: "isiXhosa" },
+];
+
+const LANG_STORAGE_KEY = "app_language";
+
+export const getAppLanguage = () => localStorage.getItem(LANG_STORAGE_KEY) || "en";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
@@ -28,15 +112,19 @@ const SettingsPage = () => {
 
   // App lock state
   const [lockEnabled, setLockEnabled] = useState(() => getAppLockSettings().enabled);
-  const [lockTimeout, setLockTimeout] = useState(() => getAppLockSettings().timeout);
+  const [lockTimeout, setLockTimeoutState] = useState(() => getAppLockSettings().timeout);
   const [showPinSetup, setShowPinSetup] = useState(false);
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [pinStep, setPinStep] = useState<"enter" | "confirm">("enter");
 
+  // Language state
+  const [selectedLang, setSelectedLang] = useState(() => getAppLanguage());
+  const [langSearch, setLangSearch] = useState("");
+  const [showAllLangs, setShowAllLangs] = useState(false);
+
   useEffect(() => {
     if (!user) return;
-    // Load profile
     supabase
       .from("profiles")
       .select("display_name")
@@ -47,7 +135,6 @@ const SettingsPage = () => {
         else setDisplayName(user.user_metadata?.full_name || user.email?.split("@")[0] || "");
       });
 
-    // Load counts
     supabase.from("photos").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("deleted", false).then(({ count }) => setPhotoCount(count || 0));
     supabase.from("notes").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setNoteCount(count || 0));
     supabase.from("contacts").select("id", { count: "exact", head: true }).eq("user_id", user.id).then(({ count }) => setContactCount(count || 0));
@@ -76,6 +163,13 @@ const SettingsPage = () => {
     navigate("/auth");
   };
 
+  const handleLanguageChange = (code: string) => {
+    setSelectedLang(code);
+    localStorage.setItem(LANG_STORAGE_KEY, code);
+    const lang = LANGUAGES.find((l) => l.code === code);
+    toast.success(`Language set to ${lang?.name || code}`);
+  };
+
   const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
   const email = user?.email || "";
 
@@ -84,6 +178,14 @@ const SettingsPage = () => {
     { value: "dark", label: "Dark", icon: Moon },
     { value: "system", label: "System", icon: Monitor },
   ];
+
+  const filteredLangs = LANGUAGES.filter(
+    (l) =>
+      l.name.toLowerCase().includes(langSearch.toLowerCase()) ||
+      l.native.toLowerCase().includes(langSearch.toLowerCase()) ||
+      l.code.toLowerCase().includes(langSearch.toLowerCase())
+  );
+  const displayedLangs = showAllLangs ? filteredLangs : filteredLangs.slice(0, 8);
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,6 +264,60 @@ const SettingsPage = () => {
           </div>
         </section>
 
+        {/* Language */}
+        <section className="rounded-2xl bg-card border border-border p-5">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
+            <Globe className="w-4 h-4" /> Language
+          </h2>
+          <p className="text-xs text-muted-foreground mb-3">
+            Current: <span className="text-foreground font-medium">{LANGUAGES.find((l) => l.code === selectedLang)?.name || "English"}</span>
+          </p>
+          {/* Search */}
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search languages..."
+              value={langSearch}
+              onChange={(e) => {
+                setLangSearch(e.target.value);
+                setShowAllLangs(true);
+              }}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+          </div>
+          {/* Language grid */}
+          <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
+            {displayedLangs.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => handleLanguageChange(lang.code)}
+                className={`flex flex-col items-start p-3 rounded-xl border-2 transition-all text-left ${
+                  selectedLang === lang.code
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-muted-foreground/30"
+                }`}
+              >
+                <span className={`text-sm font-medium ${selectedLang === lang.code ? "text-primary" : "text-foreground"}`}>
+                  {lang.native}
+                </span>
+                <span className="text-xs text-muted-foreground">{lang.name}</span>
+              </button>
+            ))}
+          </div>
+          {!showAllLangs && filteredLangs.length > 8 && (
+            <button
+              onClick={() => setShowAllLangs(true)}
+              className="w-full mt-3 py-2 text-sm text-primary font-medium hover:underline"
+            >
+              Show all {filteredLangs.length} languages
+            </button>
+          )}
+          {filteredLangs.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">No languages found</p>
+          )}
+        </section>
+
         {/* Storage */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -213,9 +369,7 @@ const SettingsPage = () => {
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
             <Lock className="w-4 h-4" /> App Lock
           </h2>
-
           <div className="space-y-4">
-            {/* Toggle */}
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-foreground font-medium">Enable App Lock</p>
@@ -239,17 +393,12 @@ const SettingsPage = () => {
                     toast.success("App lock enabled");
                   }
                 }}
-                className={`w-12 h-7 rounded-full transition-colors relative ${
-                  lockEnabled ? "bg-primary" : "bg-border"
-                }`}
+                className={`w-12 h-7 rounded-full transition-colors relative ${lockEnabled ? "bg-primary" : "bg-border"}`}
               >
-                <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${
-                  lockEnabled ? "translate-x-5" : "translate-x-0.5"
-                }`} />
+                <div className={`absolute top-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform ${lockEnabled ? "translate-x-5" : "translate-x-0.5"}`} />
               </button>
             </div>
 
-            {/* PIN Setup Modal */}
             {showPinSetup && (
               <div className="rounded-xl bg-secondary p-4 space-y-3">
                 <p className="text-sm font-medium text-foreground">
@@ -259,12 +408,7 @@ const SettingsPage = () => {
                   {Array.from({ length: 4 }).map((_, i) => {
                     const val = pinStep === "enter" ? newPin : confirmPin;
                     return (
-                      <div
-                        key={i}
-                        className={`w-4 h-4 rounded-full transition-all ${
-                          i < val.length ? "bg-primary" : "bg-border"
-                        }`}
-                      />
+                      <div key={i} className={`w-4 h-4 rounded-full transition-all ${i < val.length ? "bg-primary" : "bg-border"}`} />
                     );
                   })}
                 </div>
@@ -282,9 +426,7 @@ const SettingsPage = () => {
                           if (pinStep === "enter") {
                             const next = newPin + d;
                             if (next.length <= 4) setNewPin(next);
-                            if (next.length === 4) {
-                              setTimeout(() => setPinStep("confirm"), 200);
-                            }
+                            if (next.length === 4) setTimeout(() => setPinStep("confirm"), 200);
                           } else {
                             const next = confirmPin + d;
                             if (next.length <= 4) setConfirmPin(next);
@@ -311,16 +453,12 @@ const SettingsPage = () => {
                     )
                   )}
                 </div>
-                <button
-                  onClick={() => setShowPinSetup(false)}
-                  className="text-xs text-muted-foreground hover:text-foreground w-full text-center"
-                >
+                <button onClick={() => setShowPinSetup(false)} className="text-xs text-muted-foreground hover:text-foreground w-full text-center">
                   Cancel
                 </button>
               </div>
             )}
 
-            {/* Lock timeout */}
             {lockEnabled && (
               <div>
                 <p className="text-xs text-muted-foreground mb-2">Lock after</p>
@@ -334,7 +472,7 @@ const SettingsPage = () => {
                     <button
                       key={opt.value}
                       onClick={() => {
-                        setLockTimeout(opt.value);
+                        setLockTimeoutState(opt.value);
                         setAppLockTimeout(opt.value);
                       }}
                       className={`py-2 px-3 rounded-xl text-xs font-medium transition-all border-2 ${
@@ -350,7 +488,6 @@ const SettingsPage = () => {
               </div>
             )}
 
-            {/* Change PIN */}
             {lockEnabled && (
               <button
                 onClick={() => {
@@ -367,7 +504,7 @@ const SettingsPage = () => {
           </div>
         </section>
 
-
+        {/* Sign out */}
         <button
           onClick={handleSignOut}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors text-sm font-medium"
