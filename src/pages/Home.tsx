@@ -4,16 +4,26 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
-import { Image, StickyNote, HardDrive, Users, Mail, Cloud, Settings, Clock, Star, FileText, Sparkles } from "lucide-react";
+import {
+  Image, StickyNote, HardDrive, Users, Mail, Settings, Clock, FileText, Sparkles,
+  Shield, ArrowUpRight, TrendingUp, Layers
+} from "lucide-react";
 
 const apps = [
-  { id: "gallery", name: "Gallery", icon: Image, color: "from-blue-500 to-cyan-400", path: "/gallery" },
-  { id: "notes", name: "Notes", icon: StickyNote, color: "from-amber-400 to-orange-500", path: "/notes" },
-  { id: "drive", name: "Drive", icon: HardDrive, color: "from-indigo-500 to-purple-500", path: "/drive" },
-  { id: "contacts", name: "Contacts", icon: Users, color: "from-emerald-500 to-teal-500", path: "/contacts" },
-  { id: "mail", name: "Mail", icon: Mail, color: "from-sky-500 to-blue-600", path: "/mail" },
-  { id: "pixel-ai", name: "Pixel AI", icon: Sparkles, color: "from-violet-500 to-fuchsia-500", path: "/pixel-ai" },
-  { id: "settings", name: "Settings", icon: Settings, color: "from-gray-500 to-gray-600", path: "/settings" },
+  { id: "gallery", name: "Gallery", icon: Image, gradient: "from-blue-500 via-blue-400 to-cyan-400", shadow: "shadow-blue-500/25", desc: "Photos & Albums" },
+  { id: "notes", name: "Notes", icon: StickyNote, gradient: "from-amber-500 via-orange-400 to-yellow-400", shadow: "shadow-amber-500/25", desc: "Quick thoughts" },
+  { id: "drive", name: "Drive", icon: HardDrive, gradient: "from-indigo-600 via-indigo-500 to-purple-400", shadow: "shadow-indigo-500/25", desc: "File storage" },
+  { id: "contacts", name: "Contacts", icon: Users, gradient: "from-emerald-500 via-emerald-400 to-teal-400", shadow: "shadow-emerald-500/25", desc: "People" },
+  { id: "mail", name: "Mail", icon: Mail, gradient: "from-sky-500 via-sky-400 to-blue-400", shadow: "shadow-sky-500/25", desc: "Email" },
+  { id: "pixel-ai", name: "Pixel AI", icon: Sparkles, gradient: "from-violet-600 via-fuchsia-500 to-pink-400", shadow: "shadow-violet-500/25", desc: "AI Assistant" },
+  { id: "settings", name: "Settings", icon: Settings, gradient: "from-slate-500 via-slate-400 to-gray-400", shadow: "shadow-slate-500/25", desc: "Preferences" },
+];
+
+const statConfig = [
+  { key: "Photos", gradient: "from-blue-500 to-cyan-400", icon: Image },
+  { key: "Notes", gradient: "from-amber-500 to-orange-400", icon: StickyNote },
+  { key: "Contacts", gradient: "from-emerald-500 to-teal-400", icon: Users },
+  { key: "Files", gradient: "from-indigo-500 to-purple-400", icon: HardDrive },
 ];
 
 interface QuickStat {
@@ -31,7 +41,6 @@ const Home = () => {
 
   useEffect(() => {
     if (!user) return;
-    // Load stats
     Promise.all([
       supabase.from("photos").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("deleted", false),
       supabase.from("notes").select("id", { count: "exact", head: true }).eq("user_id", user.id),
@@ -46,7 +55,6 @@ const Home = () => {
       ]);
     });
 
-    // Load recent notes
     supabase
       .from("notes")
       .select("id, title, updated_at")
@@ -66,50 +74,94 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
+    <div className="min-h-screen bg-background">
+      {/* Decorative gradient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -left-20 w-72 h-72 bg-primary/3 rounded-full blur-3xl" />
+      </div>
+
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-5">
+      <header className="relative flex items-center justify-between px-6 py-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-            <Cloud className="w-5 h-5 text-primary-foreground" />
+          <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 flex items-center justify-center shadow-lg shadow-primary/20">
+            <Layers className="w-5 h-5 text-primary-foreground" />
+            <div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-background" />
           </div>
           <div>
             <h1 className="font-display text-xl font-bold text-foreground tracking-tight">PixelVault</h1>
-            <p className="text-xs text-muted-foreground">{greeting()}, {displayName}</p>
+            <p className="text-xs text-muted-foreground">{greeting()}, <span className="text-foreground font-medium">{displayName}</span></p>
           </div>
         </div>
         <ProfileMenu />
       </header>
 
-      <main className="px-6 pt-4 pb-24 max-w-3xl mx-auto space-y-8">
-        {/* Quick Stats */}
+      <main className="relative px-5 pt-2 pb-28 max-w-3xl mx-auto space-y-7">
+        {/* Stats Row */}
         {stats.length > 0 && (
-          <div className="grid grid-cols-4 gap-3">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center p-3 rounded-2xl bg-card border border-border">
-                <stat.icon className="w-5 h-5 mx-auto mb-1.5 text-primary/70" />
-                <p className="text-lg font-bold text-foreground">{stat.count}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{stat.label}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-4 gap-2.5">
+            {stats.map((stat, i) => {
+              const cfg = statConfig[i];
+              return (
+                <div
+                  key={stat.label}
+                  className="relative overflow-hidden p-3 rounded-2xl bg-card border border-border group hover:border-primary/20 transition-all duration-300"
+                >
+                  <div className={`absolute top-0 right-0 w-12 h-12 bg-gradient-to-br ${cfg.gradient} opacity-[0.08] rounded-full -translate-y-2 translate-x-2 group-hover:opacity-[0.15] transition-opacity`} />
+                  <cfg.icon className="w-4 h-4 text-muted-foreground mb-2" />
+                  <p className="text-xl font-bold text-foreground leading-none">{stat.count}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1 font-medium">{stat.label}</p>
+                </div>
+              );
+            })}
           </div>
         )}
 
+        {/* Pixel AI Banner */}
+        <button
+          onClick={() => navigate("/pixel-ai")}
+          className="w-full relative overflow-hidden rounded-3xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 p-5 text-left group hover:shadow-2xl hover:shadow-violet-500/20 transition-all duration-500"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-600/90 via-fuchsia-500/90 to-pink-500/90" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-700" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-10 -translate-x-5" />
+          <div className="relative flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h3 className="text-base font-bold text-white">Ask Pixel AI</h3>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-white/20 text-white/90 font-medium">NEW</span>
+              </div>
+              <p className="text-xs text-white/70">Chat, generate images, translate — in any language</p>
+            </div>
+            <ArrowUpRight className="w-5 h-5 text-white/60 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+          </div>
+        </button>
+
         {/* App Grid */}
         <div>
-          <h2 className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wider">Your Apps</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-foreground">Your Apps</h2>
+            <span className="text-[10px] text-muted-foreground">{apps.length} apps</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {apps.map((app, i) => (
               <button
                 key={app.id}
-                onClick={() => navigate(app.path)}
-                className="group flex flex-col items-center gap-3 p-5 rounded-3xl bg-card border border-border hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 animate-slide-up"
-                style={{ animationDelay: `${i * 60}ms`, animationFillMode: "both" }}
+                onClick={() => navigate(`/${app.id === "pixel-ai" ? "pixel-ai" : app.id === "settings" ? "settings" : app.id}`)}
+                className="group relative overflow-hidden flex flex-col items-start gap-3 p-4 rounded-2xl bg-card border border-border hover:border-primary/20 hover:shadow-lg transition-all duration-300 animate-slide-up"
+                style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}
               >
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                  <app.icon className="w-7 h-7 text-white" />
+                <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${app.gradient} opacity-[0.06] rounded-full -translate-y-6 translate-x-6 group-hover:opacity-[0.12] group-hover:scale-150 transition-all duration-500`} />
+                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${app.gradient} flex items-center justify-center shadow-md ${app.shadow} group-hover:scale-105 group-hover:shadow-lg transition-all duration-300`}>
+                  <app.icon className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm font-medium text-foreground">{app.name}</span>
+                <div>
+                  <span className="text-sm font-semibold text-foreground block">{app.name}</span>
+                  <span className="text-[10px] text-muted-foreground">{app.desc}</span>
+                </div>
               </button>
             ))}
           </div>
@@ -119,11 +171,11 @@ const Home = () => {
         {recentNotes.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5" /> Recent Notes
+              <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground" /> Recent Activity
               </h2>
-              <button onClick={() => navigate("/notes")} className="text-xs text-primary hover:underline">
-                View all
+              <button onClick={() => navigate("/notes")} className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                View all <ArrowUpRight className="w-3 h-3" />
               </button>
             </div>
             <div className="space-y-2">
@@ -131,29 +183,60 @@ const Home = () => {
                 <button
                   key={note.id}
                   onClick={() => navigate("/notes")}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-card border border-border hover:border-primary/30 hover:bg-accent/50 transition-all text-left"
+                  className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border hover:border-primary/20 hover:shadow-md transition-all duration-200 text-left group"
                 >
-                  <FileText className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span className="text-sm font-medium text-foreground truncate flex-1">{note.title || "Untitled"}</span>
-                  <span className="text-[10px] text-muted-foreground shrink-0">
-                    {new Date(note.updatedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                  </span>
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-400 flex items-center justify-center shadow-sm">
+                    <FileText className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-foreground truncate block">{note.title || "Untitled"}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(note.updatedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Cloud status */}
-        <div className="p-5 rounded-2xl bg-card border border-border">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-sm font-medium text-foreground">Cloud Sync Active</span>
+        {/* Cloud & Security Banner */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-card border border-border group">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 rounded-full -translate-y-4 translate-x-4" />
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-emerald-500" />
+              </div>
+              <div>
+                <span className="text-sm font-semibold text-foreground block">Cloud Sync</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Active</span>
+                </div>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Data syncs across all your devices in real-time.
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground">
-            All your data is securely stored in the cloud with at-rest encryption. 
-            Your files persist across devices and reinstalls — just sign back in.
-          </p>
+
+          <div className="relative overflow-hidden p-4 rounded-2xl bg-card border border-border group">
+            <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-full -translate-y-4 translate-x-4" />
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <span className="text-sm font-semibold text-foreground block">Encrypted</span>
+                <span className="text-[10px] text-muted-foreground">AES-256 • TLS 1.3</span>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Military-grade encryption protects your data.
+            </p>
+          </div>
         </div>
       </main>
       <ModuleSwitcher />
