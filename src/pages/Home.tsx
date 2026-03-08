@@ -1,13 +1,13 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useAnimation } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Clock, FileText, Sparkles,
-  Shield, ArrowUpRight, TrendingUp, Layers
+  Shield, ArrowUpRight, TrendingUp, Layers, RefreshCw
 } from "lucide-react";
 
 const apps = [
@@ -39,6 +39,11 @@ const Home = () => {
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
   const [stats, setStats] = useState<QuickStat[]>([]);
   const [recentNotes, setRecentNotes] = useState<{ id: string; title: string; updatedAt: string }[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const pullY = useMotionValue(0);
+  const pullProgress = useTransform(pullY, [0, 80], [0, 1]);
+  const pullRotate = useTransform(pullY, [0, 80], [0, 360]);
+  const pullOpacity = useTransform(pullY, [0, 30, 80], [0, 0.6, 1]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll({ container: scrollRef });
   const headerY = useTransform(scrollY, [0, 120], [0, -30]);
@@ -49,24 +54,34 @@ const Home = () => {
   const blobX2 = useTransform(scrollY, [0, 300], [0, -30]);
   const blobY2 = useTransform(scrollY, [0, 300], [0, 40]);
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (!user) return;
-    Promise.all([
+    const [photos, notes, contacts, files] = await Promise.all([
       supabase.from("photos").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("deleted", false),
       supabase.from("notes").select("id", { count: "exact", head: true }).eq("user_id", user.id),
       supabase.from("contacts").select("id", { count: "exact", head: true }).eq("user_id", user.id),
       supabase.from("drive_files").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-    ]).then(([photos, notes, contacts, files]) => {
-      setStats([
-        { label: "Photos", count: photos.count || 0, icon: Image },
-        { label: "Notes", count: notes.count || 0, icon: StickyNote },
-        { label: "Contacts", count: contacts.count || 0, icon: Users },
-        { label: "Files", count: files.count || 0, icon: HardDrive },
-      ]);
-    });
-    supabase.from("notes").select("id, title, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(3)
-      .then(({ data }) => { setRecentNotes((data || []).map((n: any) => ({ id: n.id, title: n.title, updatedAt: n.updated_at }))); });
+    ]);
+    setStats([
+      { label: "Photos", count: photos.count || 0, icon: Image },
+      { label: "Notes", count: notes.count || 0, icon: StickyNote },
+      { label: "Contacts", count: contacts.count || 0, icon: Users },
+      { label: "Files", count: files.count || 0, icon: HardDrive },
+    ]);
+    const { data } = await supabase.from("notes").select("id, title, updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(3);
+    setRecentNotes((data || []).map((n: any) => ({ id: n.id, title: n.title, updatedAt: n.updated_at })));
   }, [user]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handlePullRelease = useCallback(async () => {
+    if (pullY.get() > 60) {
+      setRefreshing(true);
+      await loadData();
+      setRefreshing(false);
+    }
+    pullY.set(0);
+  }, [loadData, pullY]);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -104,7 +119,29 @@ const Home = () => {
         <ProfileMenu />
       </motion.header>
 
-      <main className="relative px-5 pt-2 pb-28 max-w-3xl mx-auto space-y-7">
+      {/* Pull-to-refresh indicator */}
+      <motion.div
+        style={{ opacity: pullOpacity, y: pullY }}
+        className="flex justify-center py-2 -mt-2"
+      >
+        <motion.div
+          style={{ rotate: refreshing ? undefined : pullRotate }}
+          animate={refreshing ? { rotate: 360 } : {}}
+          transition={refreshing ? { duration: 0.8, repeat: Infinity, ease: "linear" } : {}}
+          className="w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center shadow-md"
+        >
+          <RefreshCw className={`w-4 h-4 text-primary ${refreshing ? "" : ""}`} />
+        </motion.div>
+      </motion.div>
+
+      <motion.main
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.5, bottom: 0 }}
+        style={{ y: pullY }}
+        onDragEnd={handlePullRelease}
+        className="relative px-5 pt-2 pb-28 max-w-3xl mx-auto space-y-7 cursor-grab active:cursor-grabbing"
+      >
         {/* Stats */}
         {stats.length > 0 && (
           <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-4 gap-2.5">
@@ -257,7 +294,7 @@ const Home = () => {
             <p className="text-[11px] text-muted-foreground leading-relaxed">Military-grade encryption protects your data.</p>
           </div>
         </motion.div>
-      </main>
+      </motion.main>
       <ModuleSwitcher />
     </div>
   );
