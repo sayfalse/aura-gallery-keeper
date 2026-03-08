@@ -682,10 +682,8 @@ const AdminDashboard = () => {
                                         confirmAction(
                                           `Set quota to ${opt.label}?`,
                                           `This will set ${u.display_name || "this user"}'s storage limit to ${opt.label}.`,
-                                          () => manageUser("set_quota", u.user_id, undefined)
-                                            .then(() => {})
-                                            .catch(() => {})
-                                            // Use direct call with quotaBytes
+                                          () => manageUser("set_quota", u.user_id, undefined, opt.bytes)
+                                        )
                                         )
                                       }
                                     >

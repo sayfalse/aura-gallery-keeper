@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ProfileMenu from "@/components/ProfileMenu";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import PullToRefresh from "@/components/PullToRefresh";
 import { motion } from "framer-motion";
 import {
   Image, StickyNote, HardDrive, Users, Mail, Settings, Sparkles, MessageCircle,
@@ -37,18 +38,24 @@ const Home = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
 
-  useEffect(() => {
+  const checkAdmin = useCallback(async () => {
     if (!user) return;
-    supabase
+    const { data } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .eq("role", "admin")
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setIsAdmin(true);
-      });
+      .maybeSingle();
+    if (data) setIsAdmin(true);
   }, [user]);
+
+  useEffect(() => { checkAdmin(); }, [checkAdmin]);
+
+  const handleRefresh = useCallback(async () => {
+    await checkAdmin();
+    // Small delay for visual feedback
+    await new Promise((r) => setTimeout(r, 300));
+  }, [checkAdmin]);
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -60,7 +67,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-background">
       <header className="flex items-center justify-between px-5 pt-[env(safe-area-inset-top)] py-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 via-primary to-cyan-400 flex items-center justify-center shadow-lg shadow-primary/25">
@@ -97,7 +104,7 @@ const Home = () => {
           </div>
         </motion.button>
 
-        {/* Admin link */}
+        {/* Admin link - hidden for non-admin users */}
         {isAdmin && (
           <motion.button
             initial={{ opacity: 0, y: 12 }}
@@ -146,7 +153,7 @@ const Home = () => {
       </main>
 
       <ModuleSwitcher />
-    </div>
+    </PullToRefresh>
   );
 };
 
