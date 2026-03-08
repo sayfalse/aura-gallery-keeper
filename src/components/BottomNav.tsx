@@ -1,4 +1,4 @@
-import { Images, Heart, Clock, Trash2, Upload } from "lucide-react";
+import { Images, Heart, Clock, Trash2, Upload, Share2 } from "lucide-react";
 import type { SidebarSection } from "@/types/photo";
 
 interface BottomNavProps {
