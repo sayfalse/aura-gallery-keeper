@@ -12,13 +12,13 @@ import {
 } from "lucide-react";
 
 const appKeys = [
-  { id: "gallery", nameKey: "apps.gallery", icon: Image, gradient: "from-violet-500 to-fuchsia-500", path: "/gallery", descKey: "apps.galleryDesc" },
+  { id: "gallery", nameKey: "apps.gallery", icon: Image, gradient: "from-blue-500 to-cyan-400", path: "/gallery", descKey: "apps.galleryDesc" },
   { id: "notes", nameKey: "apps.notes", icon: StickyNote, gradient: "from-amber-400 to-orange-500", path: "/notes", descKey: "apps.notesDesc" },
-  { id: "drive", nameKey: "apps.drive", icon: HardDrive, gradient: "from-cyan-400 to-blue-500", path: "/drive", descKey: "apps.driveDesc" },
+  { id: "drive", nameKey: "apps.drive", icon: HardDrive, gradient: "from-sky-400 to-blue-600", path: "/drive", descKey: "apps.driveDesc" },
   { id: "contacts", nameKey: "apps.people", icon: Users, gradient: "from-emerald-400 to-teal-500", path: "/contacts", descKey: "apps.peopleDesc" },
-  { id: "mail", nameKey: "apps.mail", icon: Mail, gradient: "from-pink-400 to-rose-500", path: "/mail", descKey: "apps.mailDesc" },
-  { id: "chat", nameKey: "apps.chat", icon: MessageCircle, gradient: "from-green-400 to-emerald-500", path: "/chat", descKey: "apps.chatDesc" },
-  { id: "pixel-ai", nameKey: "apps.pixelAI", icon: Sparkles, gradient: "from-purple-500 to-indigo-500", path: "/pixel-ai", descKey: "apps.pixelAIDesc" },
+  { id: "mail", nameKey: "apps.mail", icon: Mail, gradient: "from-indigo-400 to-blue-500", path: "/mail", descKey: "apps.mailDesc" },
+  { id: "chat", nameKey: "apps.chat", icon: MessageCircle, gradient: "from-cyan-400 to-sky-500", path: "/chat", descKey: "apps.chatDesc" },
+  { id: "pixel-ai", nameKey: "apps.pixelAI", icon: Sparkles, gradient: "from-blue-600 to-indigo-500", path: "/pixel-ai", descKey: "apps.pixelAIDesc" },
   { id: "settings", nameKey: "apps.settings", icon: Settings, gradient: "from-slate-400 to-zinc-500", path: "/settings", descKey: "apps.settingsDesc" },
 ];
 
