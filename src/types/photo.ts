@@ -6,6 +6,7 @@ export interface Photo {
   size: string;
   favorite: boolean;
   album?: string;
+  storagePath?: string;
 }
 
 export interface Album {
