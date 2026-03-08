@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ShieldCheck, Smartphone, Copy, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,17 +18,22 @@ const TwoFactorSection = () => {
   const [disabling, setDisabling] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useState(() => {
+  useEffect(() => {
     (async () => {
-      const { data } = await supabase.auth.mfa.listFactors();
-      const totp = data?.totp?.find((f) => f.status === "verified");
-      if (totp) {
-        setMfaEnabled(true);
-        setMfaFactorId(totp.id);
+      try {
+        const { data } = await supabase.auth.mfa.listFactors();
+        const totp = data?.totp?.find((f) => f.status === "verified");
+        if (totp) {
+          setMfaEnabled(true);
+          setMfaFactorId(totp.id);
+        }
+      } catch (err: any) {
+        console.error("MFA check failed:", err.message);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
-  });
+  }, []);
 
   const handleEnroll = async () => {
     setEnrolling(true);
