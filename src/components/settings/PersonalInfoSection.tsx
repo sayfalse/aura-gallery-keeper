@@ -142,6 +142,15 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
           </div>
         </div>
 
+        {/* Account Creation Date */}
+        <div>
+          <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Account Created</label>
+          <div className="px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-muted-foreground" />
+            {user.created_at ? format(new Date(user.created_at), "MMMM d, yyyy 'at' h:mm a") : "Unknown"}
+          </div>
+        </div>
+
         <button
           onClick={onSaveProfile}
           disabled={saving}
