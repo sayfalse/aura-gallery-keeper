@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchContacts, createContact, updateContact, deleteContact, type Contact } from "@/lib/contactService";
 import { ArrowLeft, Plus, Trash2, Search, Users, Phone, Mail, Building, Star, X } from "lucide-react";
 import { toast } from "sonner";
