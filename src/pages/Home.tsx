@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import ProfileMenu from "@/components/ProfileMenu";
-import { Image, StickyNote, HardDrive, Users, Mail, Cloud } from "lucide-react";
+import { Image, StickyNote, HardDrive, Users, Mail, Cloud, Settings } from "lucide-react";
 
 const apps = [
   { id: "gallery", name: "Gallery", icon: Image, color: "from-blue-500 to-cyan-400", path: "/gallery" },
@@ -9,6 +9,7 @@ const apps = [
   { id: "drive", name: "Drive", icon: HardDrive, color: "from-indigo-500 to-purple-500", path: "/drive" },
   { id: "contacts", name: "Contacts", icon: Users, color: "from-emerald-500 to-teal-500", path: "/contacts" },
   { id: "mail", name: "Mail", icon: Mail, color: "from-sky-500 to-blue-600", path: "/mail" },
+  { id: "settings", name: "Settings", icon: Settings, color: "from-gray-500 to-gray-600", path: "/settings" },
 ];
 
 const Home = () => {
