@@ -259,7 +259,7 @@ const ChatPage = () => {
           <button
             onClick={() => setShowNewChat(true)}
             className="p-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-            title="New chat"
+            title={t("chat.newChat")}
           >
             <Plus className="w-5 h-5" />
           </button>
