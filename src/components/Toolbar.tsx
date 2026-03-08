@@ -1,6 +1,7 @@
 import { Search, LayoutGrid, List, CheckSquare, Trash2, X, FolderPlus, ArrowLeft, RotateCcw, AlertTriangle } from "lucide-react";
 import type { ViewMode, SidebarSection, Album } from "@/types/photo";
 import ProfileMenu from "@/components/ProfileMenu";
+import QuickNavButton from "@/components/QuickNavButton";
 
 interface ToolbarProps {
   section: SidebarSection;
