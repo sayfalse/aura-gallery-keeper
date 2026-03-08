@@ -124,13 +124,24 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+  }
+  /* Smooth scrolling everywhere */
+  html {
+    scroll-behavior: smooth;
+  }
+  /* Smoother transitions globally */
+  button, a, input, textarea {
+    @apply transition-colors duration-200;
   }
 }
 
