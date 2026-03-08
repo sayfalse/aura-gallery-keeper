@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchContacts, createContact, updateContact, deleteContact, type Contact } from "@/lib/contactService";
 import { ArrowLeft, Plus, Trash2, Search, Users, Phone, Mail, Building, Star, X } from "lucide-react";
 import { toast } from "sonner";
+import ModuleSwitcher from "@/components/ModuleSwitcher";
 
 const AVATAR_COLORS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 
@@ -248,6 +249,7 @@ const ContactsPage = () => {
           </div>
         </div>
       )}
+      <ModuleSwitcher />
     </div>
   );
 };

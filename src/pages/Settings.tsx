@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Settings, User, Moon, Sun, Monitor, Shield, HardDrive, LogOut, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+import ModuleSwitcher from "@/components/ModuleSwitcher";
 
 const SettingsPage = () => {
   const { user, signOut } = useAuth();
@@ -199,6 +200,7 @@ const SettingsPage = () => {
           Sign Out
         </button>
       </div>
+      <ModuleSwitcher />
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileMenu from "@/components/ProfileMenu";
+import ModuleSwitcher from "@/components/ModuleSwitcher";
 import { Image, StickyNote, HardDrive, Users, Mail, Cloud, Settings, Clock, Star, FileText } from "lucide-react";
 
 const apps = [
@@ -79,7 +80,7 @@ const Home = () => {
         <ProfileMenu />
       </header>
 
-      <main className="px-6 pt-4 pb-20 max-w-3xl mx-auto space-y-8">
+      <main className="px-6 pt-4 pb-24 max-w-3xl mx-auto space-y-8">
         {/* Quick Stats */}
         {stats.length > 0 && (
           <div className="grid grid-cols-4 gap-3">
@@ -154,6 +155,7 @@ const Home = () => {
           </p>
         </div>
       </main>
+      <ModuleSwitcher />
     </div>
   );
 };
