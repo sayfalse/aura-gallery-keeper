@@ -103,7 +103,7 @@ const ContactsPage = () => {
         </button>
         <div className="flex-1 flex items-center gap-2">
           <Users className="w-5 h-5 text-emerald-500" />
-          <h1 className="font-display text-lg font-bold text-foreground">Contacts</h1>
+          <h1 className="font-display text-lg font-bold text-foreground">{t("contacts.title")}</h1>
           <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{contacts.length}</span>
         </div>
         <QuickNavButton />
