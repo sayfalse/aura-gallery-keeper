@@ -50,6 +50,7 @@ const MailPage = () => {
   const [composeBody, setComposeBody] = useState("");
   const [sending, setSending] = useState(false);
   const [replyTo, setReplyTo] = useState<{ messageId: string; threadId: string; subject: string; from: string } | null>(null);
+  const [attachments, setAttachments] = useState<{ filename: string; mimeType: string; data: string; size: number }[]>([]);
 
   // Load accounts on mount
   useEffect(() => {
