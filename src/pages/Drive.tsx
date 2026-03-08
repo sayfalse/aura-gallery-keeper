@@ -245,9 +245,9 @@ const DrivePage = () => {
         {showNewFolder && (
           <div className="mb-4 p-3 rounded-xl bg-card border border-border flex items-center gap-2">
             <Folder className="w-5 h-5 text-muted-foreground shrink-0" />
-            <input type="text" placeholder="Folder name..." value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()} autoFocus className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
-            <button onClick={handleCreateFolder} className="px-3 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90">Create</button>
-            <button onClick={() => { setShowNewFolder(false); setNewFolderName(""); }} className="px-3 py-1 rounded-lg text-muted-foreground text-xs hover:bg-accent">Cancel</button>
+            <input type="text" placeholder={t("drive.folderName")} value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()} autoFocus className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground" />
+            <button onClick={handleCreateFolder} className="px-3 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90">{t("common.create")}</button>
+            <button onClick={() => { setShowNewFolder(false); setNewFolderName(""); }} className="px-3 py-1 rounded-lg text-muted-foreground text-xs hover:bg-accent">{t("common.cancel")}</button>
           </div>
         )}
 
