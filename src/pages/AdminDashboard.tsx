@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,16 +6,37 @@ import { motion } from "framer-motion";
 import {
   Users, Image, StickyNote, HardDrive, MessageCircle,
   UserPlus, Megaphone, Contact, ArrowLeft, Shield,
-  TrendingUp, Activity, Clock
+  TrendingUp, Activity, Clock, Ban, ShieldCheck, ShieldAlert,
+  ChevronDown, UserCog, Loader2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, BarChart, Bar
+  ResponsiveContainer
 } from "recharts";
+
+interface UserProfile {
+  user_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  username: string | null;
+  email: string | null;
+  created_at: string;
+  role: string;
+  banned_until: string | null;
+}
 
 interface AdminStats {
   overview: {
@@ -36,13 +57,7 @@ interface AdminStats {
     user_id: string;
     created_at: string;
   }[];
-  users: {
-    user_id: string;
-    display_name: string | null;
-    avatar_url: string | null;
-    username: string | null;
-    created_at: string;
-  }[];
+  users: UserProfile[];
 }
 
 const statCards = [
@@ -56,23 +71,37 @@ const statCards = [
   { key: "totalAnnouncements", label: "Announcements", icon: Megaphone, gradient: "from-indigo-400 to-blue-500" },
 ];
 
+const roleBadgeStyles: Record<string, string> = {
+  admin: "bg-destructive/10 text-destructive border-destructive/20",
+  moderator: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  user: "bg-muted text-muted-foreground border-border",
+};
+
 const AdminDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    description: string;
+    action: () => Promise<void>;
+  }>({ open: false, title: "", description: "", action: async () => {} });
 
-  const fetchStats = async (isRefresh = false) => {
+  const getToken = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    return data?.session?.access_token;
+  }, []);
+
+  const fetchStats = useCallback(async (isRefresh = false) => {
     try {
       if (!isRefresh) setLoading(true);
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-      if (!token) {
-        setError("Not authenticated");
-        setLoading(false);
-        return;
-      }
+      const token = await getToken();
+      if (!token) { setError("Not authenticated"); setLoading(false); return; }
 
       const { data, error: fnError } = await supabase.functions.invoke("admin-stats", {
         headers: { Authorization: `Bearer ${token}` },
@@ -91,13 +120,45 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getToken]);
 
   useEffect(() => {
     fetchStats();
     const interval = setInterval(() => fetchStats(true), 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchStats]);
+
+  const manageUser = useCallback(async (action: string, targetUserId: string, role?: string) => {
+    setActionLoading(targetUserId);
+    try {
+      const token = await getToken();
+      if (!token) throw new Error("Not authenticated");
+
+      const { data, error: fnError } = await supabase.functions.invoke("admin-manage-user", {
+        headers: { Authorization: `Bearer ${token}` },
+        body: { action, targetUserId, role },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      toast({ title: "Success", description: data?.message || "Action completed" });
+      await fetchStats(true);
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally {
+      setActionLoading(null);
+    }
+  }, [getToken, fetchStats, toast]);
+
+  const confirmAction = (title: string, description: string, action: () => Promise<void>) => {
+    setConfirmDialog({ open: true, title, description, action });
+  };
+
+  const isBanned = (u: UserProfile) => {
+    if (!u.banned_until) return false;
+    return new Date(u.banned_until) > new Date();
+  };
 
   if (loading) {
     return (
@@ -257,12 +318,151 @@ const AdminDashboard = () => {
           </Card>
         </motion.div>
 
+        {/* User Management */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+        >
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <UserCog className="w-4 h-4 text-primary" />
+                User Management
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {stats.users.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No users yet</p>
+              ) : (
+                stats.users.map((profile) => {
+                  const banned = isBanned(profile);
+                  const isCurrentUser = profile.user_id === user?.id;
+                  const isLoading = actionLoading === profile.user_id;
+
+                  return (
+                    <div
+                      key={profile.user_id}
+                      className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${
+                        banned ? "bg-destructive/5 border border-destructive/10" : "bg-muted/40 hover:bg-muted/60"
+                      }`}
+                    >
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        {(profile.display_name || "U")[0].toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-medium text-foreground truncate">
+                            {profile.display_name || "Unknown"}
+                          </p>
+                          <Badge
+                            variant="outline"
+                            className={`text-[9px] px-1.5 py-0 h-4 ${roleBadgeStyles[profile.role] || roleBadgeStyles.user}`}
+                          >
+                            {profile.role}
+                          </Badge>
+                          {banned && (
+                            <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4">
+                              <Ban className="w-2.5 h-2.5 mr-0.5" /> Banned
+                            </Badge>
+                          )}
+                          {isCurrentUser && (
+                            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4">You</Badge>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          {profile.email || `@${profile.username || "no-username"}`}
+                        </p>
+                      </div>
+                      <Badge variant="secondary" className="text-[10px] hidden sm:inline-flex shrink-0">
+                        {formatDate(profile.created_at)}
+                      </Badge>
+
+                      {!isCurrentUser && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 shrink-0"
+                              disabled={isLoading}
+                            >
+                              {isLoading ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuLabel className="text-xs">Change Role</DropdownMenuLabel>
+                            {["admin", "moderator", "user"].map((r) => (
+                              <DropdownMenuItem
+                                key={r}
+                                disabled={profile.role === r}
+                                onClick={() =>
+                                  confirmAction(
+                                    `Set role to ${r}?`,
+                                    `This will change ${profile.display_name || "this user"}'s role to ${r}.`,
+                                    () => manageUser("set_role", profile.user_id, r)
+                                  )
+                                }
+                                className="text-xs"
+                              >
+                                {r === "admin" && <ShieldAlert className="w-3.5 h-3.5 mr-2 text-destructive" />}
+                                {r === "moderator" && <ShieldCheck className="w-3.5 h-3.5 mr-2 text-amber-500" />}
+                                {r === "user" && <Users className="w-3.5 h-3.5 mr-2 text-muted-foreground" />}
+                                {r.charAt(0).toUpperCase() + r.slice(1)}
+                                {profile.role === r && " (current)"}
+                              </DropdownMenuItem>
+                            ))}
+                            <DropdownMenuSeparator />
+                            {banned ? (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  confirmAction(
+                                    "Unban user?",
+                                    `This will restore ${profile.display_name || "this user"}'s access.`,
+                                    () => manageUser("unban_user", profile.user_id)
+                                  )
+                                }
+                                className="text-xs text-emerald-600"
+                              >
+                                <ShieldCheck className="w-3.5 h-3.5 mr-2" />
+                                Unban User
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  confirmAction(
+                                    "Ban user?",
+                                    `This will permanently block ${profile.display_name || "this user"} from signing in.`,
+                                    () => manageUser("ban_user", profile.user_id)
+                                  )
+                                }
+                                className="text-xs text-destructive"
+                              >
+                                <Ban className="w-3.5 h-3.5 mr-2" />
+                                Ban User
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
         <div className="grid md:grid-cols-2 gap-4">
           {/* Recent Activity */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
+            transition={{ delay: 0.6, duration: 0.4 }}
           >
             <Card className="h-full">
               <CardHeader className="pb-2">
@@ -309,50 +509,87 @@ const AdminDashboard = () => {
             </Card>
           </motion.div>
 
-          {/* Recent Users */}
+          {/* Role Distribution */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.4 }}
+            transition={{ delay: 0.7, duration: 0.4 }}
           >
             <Card className="h-full">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Users className="w-4 h-4 text-primary" />
-                  Recent Users
+                  <Shield className="w-4 h-4 text-primary" />
+                  Role Distribution
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                {stats.users.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">No users yet</p>
-                ) : (
-                  stats.users.slice(0, 8).map((profile) => (
-                    <div
-                      key={profile.user_id}
-                      className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-xs font-bold">
-                        {(profile.display_name || "U")[0].toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-foreground truncate">
-                          {profile.display_name || "Unknown"}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground">
-                          @{profile.username || "no-username"}
-                        </p>
-                      </div>
-                      <Badge variant="secondary" className="text-[10px]">
-                        {formatDate(profile.created_at)}
-                      </Badge>
+              <CardContent>
+                {(() => {
+                  const roleCounts = stats.users.reduce<Record<string, number>>((acc, u) => {
+                    acc[u.role] = (acc[u.role] || 0) + 1;
+                    return acc;
+                  }, {});
+                  const bannedCount = stats.users.filter(isBanned).length;
+                  return (
+                    <div className="space-y-3">
+                      {[
+                        { role: "admin", label: "Admins", color: "bg-destructive" },
+                        { role: "moderator", label: "Moderators", color: "bg-amber-500" },
+                        { role: "user", label: "Users", color: "bg-primary" },
+                      ].map(({ role, label, color }) => {
+                        const count = roleCounts[role] || 0;
+                        const pct = stats.users.length > 0 ? (count / stats.users.length) * 100 : 0;
+                        return (
+                          <div key={role}>
+                            <div className="flex items-center justify-between text-xs mb-1">
+                              <span className="text-muted-foreground">{label}</span>
+                              <span className="font-medium text-foreground">{count}</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${color} transition-all duration-500`}
+                                style={{ width: `${Math.max(pct, 2)}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {bannedCount > 0 && (
+                        <div className="flex items-center gap-2 pt-2 border-t border-border">
+                          <Ban className="w-3.5 h-3.5 text-destructive" />
+                          <span className="text-xs text-muted-foreground">
+                            {bannedCount} banned user{bannedCount !== 1 ? "s" : ""}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                  ))
-                )}
+                  );
+                })()}
               </CardContent>
             </Card>
           </motion.div>
         </div>
       </main>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog((d) => ({ ...d, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmDialog.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                await confirmDialog.action();
+                setConfirmDialog((d) => ({ ...d, open: false }));
+              }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

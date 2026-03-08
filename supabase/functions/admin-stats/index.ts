@@ -130,12 +130,33 @@ Deno.serve(async (req) => {
       .from("profiles")
       .select("user_id, display_name, avatar_url, username, created_at")
       .order("created_at", { ascending: false })
-      .limit(20);
+      .limit(50);
+
+    // Fetch roles for all users
+    const { data: allRoles } = await adminClient
+      .from("user_roles")
+      .select("user_id, role");
+
+    const roleMap: Record<string, string> = {};
+    (allRoles || []).forEach((r: any) => { roleMap[r.user_id] = r.role; });
+
+    // Get ban status from auth users
+    const banMap: Record<string, string | null> = {};
+    users.forEach((u: any) => {
+      banMap[u.id] = u.banned_until || null;
+    });
 
     // Announcements count
     const { count: totalAnnouncements } = await adminClient
       .from("announcements")
       .select("*", { count: "exact", head: true });
+
+    const enrichedProfiles = (profiles || []).map((p: any) => ({
+      ...p,
+      role: roleMap[p.user_id] || "user",
+      email: users.find((u: any) => u.id === p.user_id)?.email || null,
+      banned_until: banMap[p.user_id] || null,
+    }));
 
     return new Response(
       JSON.stringify({
@@ -154,22 +175,22 @@ Deno.serve(async (req) => {
           count,
         })),
         recentActivity: [
-          ...(recentPhotos || []).map((p) => ({
+          ...(recentPhotos || []).map((p: any) => ({
             type: "photo",
             id: p.id,
             title: p.name,
             user_id: p.user_id,
             created_at: p.created_at,
           })),
-          ...(recentNotes || []).map((n) => ({
+          ...(recentNotes || []).map((n: any) => ({
             type: "note",
             id: n.id,
             title: n.title,
             user_id: n.user_id,
             created_at: n.created_at,
           })),
-        ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10),
-        users: profiles || [],
+        ].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10),
+        users: enrichedProfiles,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
