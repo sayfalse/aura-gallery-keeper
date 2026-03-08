@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
     }
 
     let result: any = { success: true };
+    let auditDetails = "";
 
     switch (action) {
       case "set_role": {
@@ -84,13 +85,20 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Remove existing roles
+        // Get current role for audit
+        const { data: currentRole } = await adminClient
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", targetUserId)
+          .maybeSingle();
+
+        const prevRole = currentRole?.role || "user";
+
         await adminClient
           .from("user_roles")
           .delete()
           .eq("user_id", targetUserId);
 
-        // Insert new role (skip if 'user' since that's the default/no-role state)
         if (role !== "user") {
           const { error: insertErr } = await adminClient
             .from("user_roles")
@@ -104,14 +112,14 @@ Deno.serve(async (req) => {
           }
         }
 
+        auditDetails = `Role changed from ${prevRole} to ${role}`;
         result.message = `Role set to ${role}`;
         break;
       }
 
       case "ban_user": {
-        // Ban by setting banned_until far in the future
         const { error: banErr } = await adminClient.auth.admin.updateUserById(targetUserId, {
-          ban_duration: "876000h", // ~100 years
+          ban_duration: "876000h",
         });
 
         if (banErr) {
@@ -121,6 +129,7 @@ Deno.serve(async (req) => {
           });
         }
 
+        auditDetails = "User banned";
         result.message = "User banned";
         break;
       }
@@ -137,6 +146,7 @@ Deno.serve(async (req) => {
           });
         }
 
+        auditDetails = "User unbanned";
         result.message = "User unbanned";
         break;
       }
@@ -147,6 +157,14 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
     }
+
+    // Write audit log
+    await adminClient.from("admin_audit_log").insert({
+      admin_user_id: callerUserId,
+      action,
+      target_user_id: targetUserId,
+      details: auditDetails,
+    });
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -158,6 +158,30 @@ Deno.serve(async (req) => {
       banned_until: banMap[p.user_id] || null,
     }));
 
+    // Audit log (last 50)
+    const { data: auditLogs } = await adminClient
+      .from("admin_audit_log")
+      .select("id, admin_user_id, action, target_user_id, details, created_at")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    // Map admin/target user IDs to display names for audit
+    const allUserIds = new Set<string>();
+    (auditLogs || []).forEach((l: any) => {
+      allUserIds.add(l.admin_user_id);
+      allUserIds.add(l.target_user_id);
+    });
+    const profileMap: Record<string, string> = {};
+    (profiles || []).forEach((p: any) => {
+      profileMap[p.user_id] = p.display_name || p.username || "Unknown";
+    });
+
+    const enrichedAuditLogs = (auditLogs || []).map((l: any) => ({
+      ...l,
+      admin_name: profileMap[l.admin_user_id] || "Admin",
+      target_name: profileMap[l.target_user_id] || "User",
+    }));
+
     return new Response(
       JSON.stringify({
         overview: {
@@ -191,6 +215,7 @@ Deno.serve(async (req) => {
           })),
         ].sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10),
         users: enrichedProfiles,
+        auditLog: enrichedAuditLogs,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
