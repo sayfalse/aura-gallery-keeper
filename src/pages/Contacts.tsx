@@ -60,7 +60,7 @@ const ContactsPage = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this contact?")) return;
+    if (!confirm(t("contacts.deleteConfirm"))) return;
     setContacts((prev) => prev.filter((c) => c.id !== id));
     if (activeContact?.id === id) setActiveContact(null);
     try {
