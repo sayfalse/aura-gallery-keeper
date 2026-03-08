@@ -9,7 +9,7 @@ import UploadModal from "@/components/UploadModal";
 import CreateAlbumModal from "@/components/CreateAlbumModal";
 import AddToAlbumModal from "@/components/AddToAlbumModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchPhotos, fetchDeletedPhotos, toggleFavorite as toggleFavApi, softDeletePhoto, uploadPhoto } from "@/lib/photoService";
+import { fetchPhotos, fetchDeletedPhotos, toggleFavorite as toggleFavApi, softDeletePhoto, uploadPhoto, restorePhoto, permanentlyDeletePhoto } from "@/lib/photoService";
 import { fetchAlbums, createAlbum, deleteAlbum, addPhotosToAlbum, fetchAlbumPhotos, updateAlbumCover, reorderAlbumPhotos } from "@/lib/albumService";
 import type { Photo, Album, ViewMode, SidebarSection } from "@/types/photo";
 import { toast } from "sonner";
