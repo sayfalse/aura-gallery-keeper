@@ -91,6 +91,7 @@ const AppContent = () => {
           <Route path="/gmail-callback" element={<ProtectedRoute><GmailCallback /></ProtectedRoute>} />
           <Route path="/pixel-ai" element={<ProtectedRoute><PixelAIPage /></ProtectedRoute>} />
           <Route path="/browser" element={<ProtectedRoute><BrowserPage /></ProtectedRoute>} />
+          <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
