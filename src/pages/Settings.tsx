@@ -439,7 +439,7 @@ const SettingsPage = () => {
         {/* App Lock */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Lock className="w-4 h-4" /> App Lock
+            <Lock className="w-4 h-4" /> {t("settings.appLock")}
           </h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
