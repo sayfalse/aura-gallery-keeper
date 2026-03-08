@@ -1,11 +1,20 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, Sparkles, Loader2, Trash2, Bot, ChevronDown, Check, Paperclip, FileText, X } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Loader2, Trash2, Bot, ChevronDown, Paperclip, FileText, X, Brain, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import MessageActions from "@/components/pixel-ai/MessageActions";
+import MemoryPanel from "@/components/pixel-ai/MemoryPanel";
+import ModelPicker from "@/components/pixel-ai/ModelPicker";
+import VoiceChat from "@/components/pixel-ai/VoiceChat";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  getMemories, addMemory, deleteMemory, clearAllMemories,
+  formatMemoriesForContext, AIMemory
+} from "@/lib/pixelAIService";
 
 interface Message {
   id: string;
@@ -27,18 +36,15 @@ interface AIModel {
 }
 
 const AI_MODELS: AIModel[] = [
-  // 🔷 Gemini
   { id: "google/gemini-3-flash-preview", name: "Gemini 3 Flash", emoji: "⚡", description: "Fast & capable, next-gen speed", category: "🔷 Gemini" },
   { id: "google/gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", emoji: "🧠", description: "Latest next-gen reasoning", category: "🔷 Gemini" },
   { id: "google/gemini-2.5-pro", name: "Gemini 2.5 Pro", emoji: "💎", description: "Top-tier multimodal + reasoning", category: "🔷 Gemini" },
   { id: "google/gemini-2.5-flash", name: "Gemini 2.5 Flash", emoji: "🚀", description: "Balanced speed & quality", category: "🔷 Gemini" },
   { id: "google/gemini-2.5-flash-lite", name: "Gemini 2.5 Flash Lite", emoji: "🪶", description: "Fastest & cheapest Gemini", category: "🔷 Gemini" },
-  // 🟢 ChatGPT / OpenAI
   { id: "openai/gpt-5.2", name: "GPT-5.2", emoji: "🔮", description: "Latest & most capable OpenAI", category: "🟢 ChatGPT" },
   { id: "openai/gpt-5", name: "GPT-5", emoji: "🌟", description: "Powerful all-rounder", category: "🟢 ChatGPT" },
   { id: "openai/gpt-5-mini", name: "GPT-5 Mini", emoji: "✨", description: "Fast & affordable", category: "🟢 ChatGPT" },
   { id: "openai/gpt-5-nano", name: "GPT-5 Nano", emoji: "⚙️", description: "Ultra-fast & efficient", category: "🟢 ChatGPT" },
-  // 🖼️ Image Generation
   { id: "google/gemini-3-pro-image-preview", name: "Gemini 3 Pro Image", emoji: "🖌️", description: "Next-gen image creation", category: "🖼️ Image Generation", supportsImages: true },
   { id: "google/gemini-2.5-flash-image", name: "Gemini Flash Image", emoji: "🎨", description: "Fast image generation", category: "🖼️ Image Generation", supportsImages: true },
 ];
@@ -46,38 +52,38 @@ const AI_MODELS: AIModel[] = [
 const DEFAULT_MODEL = "google/gemini-3-flash-preview";
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pixel-chat`;
 
-// Read file as text
-const readFileAsText = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
+const readFileAsText = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = reject;
     reader.readAsText(file);
   });
-};
-
-const SUPPORTED_EXTENSIONS = [
-  ".txt", ".md", ".csv", ".json", ".xml", ".yaml", ".yml", ".toml",
-  ".js", ".ts", ".tsx", ".jsx", ".py", ".go", ".rs", ".java", ".c", ".cpp", ".h",
-  ".html", ".css", ".scss", ".less", ".sql", ".sh", ".bash", ".zsh",
-  ".env", ".gitignore", ".dockerfile", ".log", ".ini", ".cfg", ".conf",
-  ".pdf", ".doc", ".docx",
-];
 
 const PixelAI = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
   const [showModelPicker, setShowModelPicker] = useState(false);
+  const [showMemory, setShowMemory] = useState(false);
+  const [showVoice, setShowVoice] = useState(false);
   const [attachedFile, setAttachedFile] = useState<{ name: string; content: string } | null>(null);
+  const [memories, setMemories] = useState<AIMemory[]>([]);
+  const [lastVoiceResponse, setLastVoiceResponse] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentModel = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
   const isImageModel = currentModel.supportsImages;
+
+  // Load memories
+  useEffect(() => {
+    if (user) getMemories(user.id).then(setMemories);
+  }, [user]);
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -90,23 +96,38 @@ const PixelAI = () => {
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("File too large. Max 10MB 📁");
-      return;
-    }
-
+    if (file.size > 10 * 1024 * 1024) { toast.error("File too large. Max 10MB 📁"); return; }
     try {
       const content = await readFileAsText(file);
-      setAttachedFile({ name: file.name, content: content.slice(0, 50000) }); // Limit to ~50k chars
+      setAttachedFile({ name: file.name, content: content.slice(0, 50000) });
       toast.success(`📎 ${file.name} attached!`);
-    } catch {
-      toast.error("Couldn't read this file 😔");
-    }
-
-    // Reset input
+    } catch { toast.error("Couldn't read this file 😔"); }
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  // Extract memories from conversation (runs in background)
+  const extractMemories = useCallback(async (msgs: Message[]) => {
+    if (!user || msgs.length < 4) return; // Need at least 2 exchanges
+    try {
+      const resp = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        body: JSON.stringify({
+          messages: msgs.slice(-10).map(m => ({ role: m.role, content: m.content.slice(0, 500) })),
+          extractMemories: true,
+        }),
+      });
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (data.memories?.length > 0) {
+        for (const mem of data.memories) {
+          await addMemory(user.id, mem.content, mem.category || "general");
+        }
+        const updated = await getMemories(user.id);
+        setMemories(updated);
+      }
+    } catch { /* silent fail */ }
+  }, [user]);
 
   const sendTextMessage = async (userContent: string, allMessages: Message[]) => {
     let assistantSoFar = "";
@@ -114,12 +135,14 @@ const PixelAI = () => {
     setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "", isLoading: true, model: currentModel.name }]);
 
     try {
+      const memoryContext = formatMemoriesForContext(memories);
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
         body: JSON.stringify({
           messages: allMessages.filter(m => !m.images).map(m => ({ role: m.role, content: m.content })),
           model: selectedModel,
+          memories: memoryContext || undefined,
         }),
       });
 
@@ -157,6 +180,8 @@ const PixelAI = () => {
 
       if (!assistantSoFar) {
         setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: "Couldn't generate a response. Please try again. 😅", isLoading: false } : m));
+      } else {
+        setLastVoiceResponse(assistantSoFar);
       }
     } catch (e: any) {
       toast.error(e.message || "Failed to get response");
@@ -190,11 +215,10 @@ const PixelAI = () => {
     }
   };
 
-  const handleSend = async () => {
-    const trimmed = input.trim();
+  const handleSend = async (overrideContent?: string) => {
+    const trimmed = (overrideContent || input).trim();
     if ((!trimmed && !attachedFile) || isLoading) return;
 
-    // Build user content with file attachment
     let userContent = trimmed;
     let displayContent = trimmed;
     const fileName = attachedFile?.name;
@@ -205,28 +229,71 @@ const PixelAI = () => {
     }
 
     const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: userContent, fileName };
+    const displayMsg: Message = { ...userMsg, content: displayContent };
     const updatedMessages = [...messages, userMsg];
 
-    // Show simplified display in chat
-    setMessages(prev => [...prev, { ...userMsg, content: displayContent }]);
+    setMessages(prev => [...prev, displayMsg]);
     setInput("");
     setAttachedFile(null);
     setIsLoading(true);
 
     if (isImageModel) await sendImageMessage(userContent);
     else await sendTextMessage(userContent, updatedMessages);
+
     setIsLoading(false);
+
+    // Background memory extraction
+    const allMsgs = [...updatedMessages];
+    setTimeout(() => extractMemories(allMsgs), 2000);
   };
+
+  const handleRegenerate = useCallback(async () => {
+    if (isLoading || messages.length < 2) return;
+    // Remove last assistant message
+    const newMsgs = messages.slice(0, -1);
+    setMessages(newMsgs);
+    setIsLoading(true);
+    await sendTextMessage(newMsgs[newMsgs.length - 1].content, newMsgs);
+    setIsLoading(false);
+  }, [messages, isLoading, selectedModel, memories]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
-  const categories = [...new Set(AI_MODELS.map(m => m.category))];
+  const handleClearChat = () => {
+    setMessages([]);
+    setLastVoiceResponse("");
+    toast.success("Chat cleared! 🗑️");
+  };
+
+  const handleMemoryDelete = async (id: string) => {
+    await deleteMemory(id);
+    setMemories(prev => prev.filter(m => m.id !== id));
+    toast.success("Memory deleted 🗑️");
+  };
+
+  const handleMemoryClearAll = async () => {
+    if (!user) return;
+    await clearAllMemories(user.id);
+    setMemories([]);
+    toast.success("All memories cleared 🧹");
+  };
+
+  const handleAddMemory = async (content: string, category: string) => {
+    if (!user) return;
+    await addMemory(user.id, content, category);
+    const updated = await getMemories(user.id);
+    setMemories(updated);
+    toast.success("Memory saved! 🧠");
+  };
+
+  const handleVoiceTranscript = (text: string) => {
+    handleSend(text);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -249,8 +316,16 @@ const PixelAI = () => {
             <p className="text-[10px] text-muted-foreground">{currentModel.emoji} {currentModel.name}</p>
           </div>
         </div>
+        <Button variant="ghost" size="icon" onClick={() => setShowMemory(true)} className="relative">
+          <Brain className="w-4 h-4 text-muted-foreground" />
+          {memories.length > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-[8px] text-primary-foreground flex items-center justify-center font-bold">
+              {memories.length}
+            </span>
+          )}
+        </Button>
         {messages.length > 0 && (
-          <Button variant="ghost" size="icon" onClick={() => setMessages([])}>
+          <Button variant="ghost" size="icon" onClick={handleClearChat}>
             <Trash2 className="w-4 h-4 text-muted-foreground" />
           </Button>
         )}
@@ -264,15 +339,18 @@ const PixelAI = () => {
               <Sparkles className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-2">Hey, I'm Pixel! 👋</h2>
-            <p className="text-sm text-muted-foreground max-w-sm mb-6">
-              Your AI assistant powered by multiple models. Chat, write, translate, code, analyze documents, and create images! 📄🌍
+            <p className="text-sm text-muted-foreground max-w-sm mb-2">
+              Your professional AI assistant. Chat, code, write, translate, analyze documents, generate images, and more!
             </p>
-            <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
+            {memories.length > 0 && (
+              <p className="text-xs text-primary mb-4">🧠 {memories.length} memories loaded</p>
+            )}
+            <div className="grid grid-cols-2 gap-2 w-full max-w-sm mb-4">
               {[
                 "Write a poem about the stars ✨",
                 "Explain quantum physics simply 🔬",
-                "Translate 'hello' to 10 languages 🌍",
-                "Give me a creative story idea 📖",
+                "Help me debug my code 💻",
+                "Summarize a long article 📄",
               ].map((suggestion) => (
                 <button
                   key={suggestion}
@@ -283,102 +361,121 @@ const PixelAI = () => {
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => setShowVoice(true)}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-sm font-semibold shadow-lg shadow-violet-500/20 hover:opacity-90 transition-opacity"
+            >
+              <Mic className="w-4 h-4" />
+              Start Voice Chat 🎙️
+            </button>
           </div>
         )}
 
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[85%] ${msg.role === "user"
-              ? "bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2.5"
-              : "bg-card border border-border rounded-2xl rounded-bl-md px-4 py-2.5"
-            }`}>
-              {msg.role === "assistant" && (
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Bot className="w-3.5 h-3.5 text-violet-500" />
-                  <span className="text-[10px] font-semibold text-violet-500">Pixel</span>
-                  {msg.model && <span className="text-[9px] text-muted-foreground">· {msg.model}</span>}
-                </div>
-              )}
-              {msg.role === "user" && msg.fileName && (
-                <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-lg bg-primary-foreground/10">
-                  <FileText className="w-3.5 h-3.5" />
-                  <span className="text-[11px] font-medium truncate">{msg.fileName}</span>
-                </div>
-              )}
-              {msg.isLoading ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>{msg.content || "Thinking... 🤔"}</span>
-                </div>
-              ) : (
-                <>
-                  <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-pre:my-2 prose-code:text-xs prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+        {messages.map((msg, i) => {
+          const isLastAssistant = msg.role === "assistant" && i === messages.length - 1;
+          return (
+            <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} group`}>
+              <div className={`max-w-[85%] ${msg.role === "user"
+                ? "bg-primary text-primary-foreground rounded-2xl rounded-br-md px-4 py-2.5"
+                : "bg-card border border-border rounded-2xl rounded-bl-md px-4 py-2.5"
+              }`}>
+                {msg.role === "assistant" && (
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Bot className="w-3.5 h-3.5 text-violet-500" />
+                    <span className="text-[10px] font-semibold text-violet-500">Pixel</span>
+                    {msg.model && <span className="text-[9px] text-muted-foreground">· {msg.model}</span>}
                   </div>
-                  {msg.images && msg.images.length > 0 && (
-                    <div className="mt-3 space-y-2">
-                      {msg.images.map((imgUrl, i) => (
-                        <img key={i} src={imgUrl} alt={`Generated image ${i + 1}`} className="rounded-xl max-w-full border border-border shadow-sm" />
-                      ))}
+                )}
+                {msg.role === "user" && msg.fileName && (
+                  <div className="flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-lg bg-primary-foreground/10">
+                    <FileText className="w-3.5 h-3.5" />
+                    <span className="text-[11px] font-medium truncate">{msg.fileName}</span>
+                  </div>
+                )}
+                {msg.isLoading ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{msg.content || "Thinking... 🤔"}</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-pre:my-2 prose-code:text-xs prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
-                  )}
-                </>
-              )}
+                    {msg.images && msg.images.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {msg.images.map((imgUrl, idx) => (
+                          <img key={idx} src={imgUrl} alt={`Generated ${idx + 1}`} className="rounded-xl max-w-full border border-border shadow-sm" />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+                {/* Message actions (copy, speak, regenerate) */}
+                {!msg.isLoading && (
+                  <MessageActions
+                    content={msg.content}
+                    role={msg.role}
+                    onRegenerate={isLastAssistant ? handleRegenerate : undefined}
+                    isLastAssistant={isLastAssistant}
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* Model Picker Modal */}
+      {/* Model Picker */}
       {showModelPicker && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-end justify-center" onClick={() => setShowModelPicker(false)}>
-          <div className="w-full max-w-lg bg-card rounded-t-3xl border-t border-border max-h-[75vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-center pt-3 pb-2">
-              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-            </div>
-            <h3 className="text-lg font-bold text-foreground text-center mb-1 px-5">Choose AI Model 🤖</h3>
-            <p className="text-xs text-muted-foreground text-center mb-4 px-5">Select the best model for your task</p>
-            
-            {categories.map(category => (
-              <div key={category} className="mb-4">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-5 mb-2">{category}</p>
-                <div className="space-y-0.5 px-3">
-                  {AI_MODELS.filter(m => m.category === category).map(model => (
-                    <button
-                      key={model.id}
-                      onClick={() => { setSelectedModel(model.id); setShowModelPicker(false); toast.success(`Switched to ${model.name} ${model.emoji}`); }}
-                      className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all ${
-                        selectedModel === model.id ? "bg-primary/10" : "hover:bg-accent/60"
-                      }`}
-                    >
-                      <span className="text-xl">{model.emoji}</span>
-                      <div className="flex-1 text-left">
-                        <p className={`text-sm font-semibold ${selectedModel === model.id ? "text-primary" : "text-foreground"}`}>{model.name}</p>
-                        <p className="text-[11px] text-muted-foreground">{model.description}</p>
-                      </div>
-                      {selectedModel === model.id && <Check className="w-5 h-5 text-primary" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-            <div className="h-8" />
-          </div>
-        </div>
+        <ModelPicker
+          models={AI_MODELS}
+          selectedModel={selectedModel}
+          onSelect={(id) => { setSelectedModel(id); setShowModelPicker(false); toast.success(`Switched to ${AI_MODELS.find(m => m.id === id)?.name} ${AI_MODELS.find(m => m.id === id)?.emoji}`); }}
+          onClose={() => setShowModelPicker(false)}
+        />
+      )}
+
+      {/* Memory Panel */}
+      {showMemory && (
+        <MemoryPanel
+          memories={memories}
+          onClose={() => setShowMemory(false)}
+          onDelete={handleMemoryDelete}
+          onClearAll={handleMemoryClearAll}
+          onAddMemory={handleAddMemory}
+        />
+      )}
+
+      {/* Voice Chat */}
+      {showVoice && (
+        <VoiceChat
+          onTranscript={handleVoiceTranscript}
+          onClose={() => setShowVoice(false)}
+          isProcessing={isLoading}
+          lastResponse={lastVoiceResponse}
+        />
       )}
 
       {/* Input */}
       <div className="fixed bottom-16 left-0 right-0 px-4 pb-4 bg-gradient-to-t from-background via-background to-transparent pt-6">
         <div className="max-w-3xl mx-auto">
-          {/* Model selector pill */}
+          {/* Top row: model + memory + voice */}
           <div className="flex items-center gap-2 mb-2">
             <button
               onClick={() => setShowModelPicker(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
             >
               <span>{currentModel.emoji}</span>
-              <span>{currentModel.name}</span>
+              <span className="max-w-[100px] truncate">{currentModel.name}</span>
               <ChevronDown className="w-3 h-3" />
+            </button>
+            <button
+              onClick={() => setShowVoice(true)}
+              className="p-1.5 rounded-full bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
+              title="Voice Chat"
+            >
+              <Mic className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -394,29 +491,21 @@ const PixelAI = () => {
           )}
 
           <div className="flex items-end gap-2 bg-card border border-border rounded-2xl p-2 shadow-lg">
-            {/* Attachment button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => fileInputRef.current?.click()}
-              className="shrink-0 h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground"
-              disabled={isLoading}
-            >
+            <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} className="shrink-0 h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground" disabled={isLoading}>
               <Paperclip className="w-4 h-4" />
             </Button>
-
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={isImageModel ? "Describe the image you want... 🎨" : "Ask Pixel anything... 💬"}
+              placeholder={isImageModel ? "Describe the image... 🎨" : "Ask Pixel anything... 💬"}
               className="min-h-[40px] max-h-[120px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm"
               rows={1}
             />
             <Button
               size="icon"
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={(!input.trim() && !attachedFile) || isLoading}
               className={`shrink-0 rounded-xl h-9 w-9 ${isImageModel ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:opacity-90" : ""}`}
             >
@@ -424,7 +513,7 @@ const PixelAI = () => {
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-            {isImageModel ? "Image generation mode 🖼️" : "📎 Attach documents • 🌐 All languages • ⚡ Powered by AI"}
+            📎 Documents • 🎙️ Voice • 🧠 Memory • 🌐 All languages • ⚡ AI
           </p>
         </div>
       </div>
