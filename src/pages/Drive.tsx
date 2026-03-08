@@ -164,9 +164,9 @@ const DrivePage = () => {
       setFolders((prev) => [...prev, folderPath].sort());
       setShowNewFolder(false);
       setNewFolderName("");
-      toast.success("Folder created!");
+      toast.success(t("drive.folderCreated"));
     } catch {
-      toast.error("Failed to create folder");
+      toast.error(t("drive.failedCreateFolder"));
     }
   };
 
