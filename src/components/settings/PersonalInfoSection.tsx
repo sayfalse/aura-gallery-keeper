@@ -193,12 +193,15 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
         {/* Display Name */}
         <div>
           <label className="text-xs text-muted-foreground mb-1.5 block font-medium">Display Name</label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl bg-secondary text-sm text-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-          />
+          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 border border-primary/20">
+            <User className="w-4 h-4 text-primary shrink-0" />
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className="w-full bg-transparent text-sm font-medium text-foreground outline-none"
+            />
+          </div>
         </div>
 
         {/* Email (read-only display) */}
