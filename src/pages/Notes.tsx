@@ -236,7 +236,7 @@ const NotesPage = () => {
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
               <div className="text-center">
                 <StickyNote className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Select a note or create a new one</p>
+                <p className="text-sm">{t("notes.selectNote")}</p>
               </div>
             </div>
           )}
