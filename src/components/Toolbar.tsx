@@ -93,6 +93,8 @@ const Toolbar = ({
             <CheckSquare className="w-4 h-4" />
           </button>
 
+          {/* Quick Nav */}
+          <QuickNavButton />
           {/* Profile */}
           <ProfileMenu />
         </div>
