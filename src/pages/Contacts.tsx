@@ -5,6 +5,7 @@ import { fetchContacts, createContact, updateContact, deleteContact, type Contac
 import { ArrowLeft, Plus, Trash2, Search, Users, Phone, Mail, Building, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import QuickNavButton from "@/components/QuickNavButton";
 
 const AVATAR_COLORS = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 
@@ -104,6 +105,7 @@ const ContactsPage = () => {
           <h1 className="font-display text-lg font-bold text-foreground">Contacts</h1>
           <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{contacts.length}</span>
         </div>
+        <QuickNavButton />
         <button onClick={() => setShowForm(true)} className="p-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
           <Plus className="w-5 h-5" />
         </button>

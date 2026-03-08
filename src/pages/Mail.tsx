@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ArrowLeft, Mail, Inbox, Send, Star, Trash2, Plus, ExternalLink, AtSign, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import QuickNavButton from "@/components/QuickNavButton";
 
 interface MailAccount {
   id: string;
@@ -103,6 +104,7 @@ const MailPage = () => {
           <Mail className="w-5 h-5 text-primary" />
           <h1 className="font-display text-lg font-bold text-foreground">Mail</h1>
         </div>
+        <QuickNavButton />
         <button onClick={() => setShowAdd(true)} className="p-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
           <Plus className="w-5 h-5" />
         </button>

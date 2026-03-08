@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import MoveToFolderModal from "@/components/MoveToFolderModal";
 import ModuleSwitcher from "@/components/ModuleSwitcher";
+import QuickNavButton from "@/components/QuickNavButton";
 
 const getFileIcon = (mimeType: string) => {
   if (mimeType.startsWith("image/")) return Image;
@@ -162,6 +163,7 @@ const DrivePage = () => {
             {formatFileSize(totalSize)} used
           </span>
         </div>
+        <QuickNavButton />
         <button
           onClick={() => setShowNewFolder(true)}
           className="p-2 rounded-xl hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
