@@ -193,7 +193,7 @@ const PixelAI = () => {
 
   const sendImageMessage = async (prompt: string) => {
     const assistantId = crypto.randomUUID();
-    setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: "🎨 Creating your masterpiece...", isLoading: true, model: currentModel.name }]);
+    setMessages(prev => [...prev, { id: assistantId, role: "assistant", content: t("pixelAI.creating"), isLoading: true, model: currentModel.name }]);
 
     try {
       const resp = await fetch(CHAT_URL, {
