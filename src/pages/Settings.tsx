@@ -253,7 +253,7 @@ const SettingsPage = () => {
         {/* Language */}
         <section className="rounded-2xl bg-card border border-border p-5">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Globe className="w-4 h-4" /> Language
+            <Globe className="w-4 h-4" /> {t("settings.language")}
           </h2>
           <p className="text-xs text-muted-foreground mb-3">
             Current: <span className="text-foreground font-medium">{LANGUAGES.find((l) => l.code === selectedLang)?.name || "English"}</span>
