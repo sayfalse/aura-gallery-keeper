@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, DragEvent } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { fetchDriveFiles, uploadDriveFile, deleteDriveFile, downloadDriveFile, getDriveFolders, moveDriveFile, renameDriveFile, formatFileSize, type DriveFile } from "@/lib/driveService";
 import { ArrowLeft, Upload, Trash2, Download, HardDrive, File, Image, FileText, Film, Music, Search, FolderPlus, Folder, ChevronRight, Home, FolderInput, Eye, Pencil, X, Check } from "lucide-react";
 import { toast } from "sonner";
