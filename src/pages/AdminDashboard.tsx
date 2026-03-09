@@ -400,7 +400,7 @@ const AdminDashboard = () => {
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground">Admin Dashboard</h1>
-            <p className="text-xs text-muted-foreground">System overview & analytics</p>
+            <p className="text-xs text-muted-foreground">PixelVault v2.0.0 • System overview</p>
           </div>
         </div>
         {/* Global exports */}
