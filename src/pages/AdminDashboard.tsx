@@ -838,10 +838,15 @@ const AdminDashboard = () => {
                 ))}
               </div>
 
-              {/* Export button */}
-              <Button variant="outline" size="sm" onClick={exportUserDataCSV} className="gap-1.5">
-                <Download className="w-3.5 h-3.5" /> Export User Data CSV
-              </Button>
+              {/* Export buttons */}
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={exportUserDataCSV} className="gap-1.5">
+                  <Download className="w-3.5 h-3.5" /> Export CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={exportUserDataJSON} className="gap-1.5">
+                  <Download className="w-3.5 h-3.5" /> Export JSON
+                </Button>
+              </div>
 
               {/* Tabbed data view */}
               <Tabs defaultValue="photos" className="w-full">
