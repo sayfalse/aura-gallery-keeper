@@ -561,7 +561,10 @@ const MailPage = () => {
             <div className="rounded-xl border border-border bg-card p-4 overflow-x-auto">
               <div
                 className="prose prose-sm max-w-none text-foreground [&_a]:text-primary [&_img]:max-w-full [&_img]:h-auto"
-                dangerouslySetInnerHTML={{ __html: getMessageBody(selectedMessage) }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(getMessageBody(selectedMessage), {
+                  FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form'],
+                  FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+                }) }}
               />
             </div>
           </div>
