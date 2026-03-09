@@ -295,7 +295,42 @@ const AdminDashboard = () => {
     a.download = `user_data_${(inspectUser.display_name || inspectUser.user_id).replace(/\s+/g, "_")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    logExportAction(inspectUser.user_id, "CSV");
     toast({ title: "Exported", description: "User data exported as CSV" });
+  };
+
+  const exportUserDataJSON = () => {
+    if (!userDetail || !inspectUser) return;
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      version: "2.0.0",
+      user: { id: inspectUser.user_id, displayName: inspectUser.display_name, email: inspectUser.email, role: inspectUser.role },
+      photos: userDetail.photos,
+      notes: userDetail.notes,
+      driveFiles: userDetail.driveFiles,
+      contacts: userDetail.contacts,
+      summary: userDetail.counts,
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `user_data_${(inspectUser.display_name || inspectUser.user_id).replace(/\s+/g, "_")}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    logExportAction(inspectUser.user_id, "JSON");
+    toast({ title: "Exported", description: "User data exported as JSON" });
+  };
+
+  const logExportAction = async (targetUserId: string, format: string) => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+      await supabase.functions.invoke("admin-manage-user", {
+        headers: { Authorization: `Bearer ${token}` },
+        body: { action: "export_data", targetUserId, role: format },
+      });
+    } catch { /* silent - export already succeeded */ }
   };
 
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
