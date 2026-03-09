@@ -24,7 +24,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verify caller identity
     const anonClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -40,7 +39,6 @@ Deno.serve(async (req) => {
     const callerUserId = claimsData.claims.sub;
     const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    // Verify caller is admin
     const { data: roleData } = await adminClient
       .from("user_roles")
       .select("role")
@@ -65,7 +63,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Prevent self-modification
     if (targetUserId === callerUserId) {
       return new Response(JSON.stringify({ error: "Cannot modify your own account" }), {
         status: 400,
@@ -85,7 +82,6 @@ Deno.serve(async (req) => {
           });
         }
 
-        // Get current role for audit
         const { data: currentRole } = await adminClient
           .from("user_roles")
           .select("role")
@@ -105,7 +101,8 @@ Deno.serve(async (req) => {
             .insert({ user_id: targetUserId, role });
 
           if (insertErr) {
-            return new Response(JSON.stringify({ error: insertErr.message }), {
+            console.error("Role insert error:", insertErr);
+            return new Response(JSON.stringify({ error: "Failed to update role" }), {
               status: 500,
               headers: { ...corsHeaders, "Content-Type": "application/json" },
             });
@@ -123,7 +120,8 @@ Deno.serve(async (req) => {
         });
 
         if (banErr) {
-          return new Response(JSON.stringify({ error: banErr.message }), {
+          console.error("Ban error:", banErr);
+          return new Response(JSON.stringify({ error: "Failed to ban user" }), {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -140,7 +138,8 @@ Deno.serve(async (req) => {
         });
 
         if (unbanErr) {
-          return new Response(JSON.stringify({ error: unbanErr.message }), {
+          console.error("Unban error:", unbanErr);
+          return new Response(JSON.stringify({ error: "Failed to unban user" }), {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -167,7 +166,8 @@ Deno.serve(async (req) => {
           );
 
         if (quotaErr) {
-          return new Response(JSON.stringify({ error: quotaErr.message }), {
+          console.error("Quota error:", quotaErr);
+          return new Response(JSON.stringify({ error: "Failed to update quota" }), {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -186,7 +186,6 @@ Deno.serve(async (req) => {
         });
     }
 
-    // Write audit log
     await adminClient.from("admin_audit_log").insert({
       admin_user_id: callerUserId,
       action,
@@ -199,7 +198,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error("Admin manage user error:", err);
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

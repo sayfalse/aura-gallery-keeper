@@ -15,13 +15,14 @@ Deno.serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+    const TELEGRAM_WEBHOOK_SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     if (req.method === "POST") {
-      // Validate the request comes from Telegram using a secret token in the URL
-      const url = new URL(req.url);
-      const secret = url.searchParams.get("secret");
-      if (!TELEGRAM_BOT_TOKEN || secret !== TELEGRAM_BOT_TOKEN) {
+      // Validate using X-Telegram-Bot-Api-Secret-Token header (set via setWebhook secret_token param)
+      const secretHeader = req.headers.get("X-Telegram-Bot-Api-Secret-Token");
+      const expectedSecret = TELEGRAM_WEBHOOK_SECRET || TELEGRAM_BOT_TOKEN;
+      if (!expectedSecret || secretHeader !== expectedSecret) {
         console.warn("Unauthorized webhook attempt");
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
@@ -51,7 +52,6 @@ Deno.serve(async (req) => {
         const title = lines[0].replace(/#\w+/g, "").trim().substring(0, 200);
         const content = lines.length > 1 ? lines.slice(1).join("\n").trim() : title;
 
-        // Update the existing announcement by telegram_message_id
         const { error } = await supabase
           .from("announcements")
           .update({ title: title || null, content: content || text, type })
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 
         if (error) {
           console.error("DB update error:", error);
-          return new Response(JSON.stringify({ ok: false, error: error.message }), {
+          return new Response(JSON.stringify({ ok: false, error: "Processing failed" }), {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
 
       if (error) {
         console.error("DB insert error:", error);
-        return new Response(JSON.stringify({ ok: false, error: error.message }), {
+        return new Response(JSON.stringify({ ok: false, error: "Processing failed" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -132,20 +132,27 @@ Deno.serve(async (req) => {
 
       if (setup === "true") {
         const BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+        const WEBHOOK_SECRET = Deno.env.get("TELEGRAM_WEBHOOK_SECRET");
         if (!BOT_TOKEN) {
-          return new Response(JSON.stringify({ error: "TELEGRAM_BOT_TOKEN not set" }), {
+          return new Response(JSON.stringify({ error: "Bot token not configured" }), {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
 
-        const webhookUrl = `${SUPABASE_URL}/functions/v1/telegram-webhook?secret=${encodeURIComponent(BOT_TOKEN)}`;
+        // Use clean URL without secrets; authenticate via secret_token header
+        const webhookUrl = `${SUPABASE_URL}/functions/v1/telegram-webhook`;
+        const setWebhookBody: Record<string, string> = { url: webhookUrl };
+        if (WEBHOOK_SECRET) {
+          setWebhookBody.secret_token = WEBHOOK_SECRET;
+        }
+
         const telegramRes = await fetch(
           `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: webhookUrl }),
+            body: JSON.stringify(setWebhookBody),
           }
         );
         const result = await telegramRes.json();
@@ -162,7 +169,7 @@ Deno.serve(async (req) => {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   } catch (err) {
     console.error("Webhook error:", err);
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

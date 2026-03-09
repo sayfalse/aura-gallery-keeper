@@ -19,7 +19,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Verify the user with their JWT
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -37,8 +36,6 @@ Deno.serve(async (req) => {
     }
 
     const userId = user.id;
-
-    // Use service role to delete user data and account
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     // Delete storage files (photos bucket)
@@ -62,7 +59,8 @@ Deno.serve(async (req) => {
     // Delete user from auth (cascades to profiles and other FK tables)
     const { error: deleteError } = await adminClient.auth.admin.deleteUser(userId);
     if (deleteError) {
-      return new Response(JSON.stringify({ error: deleteError.message }), {
+      console.error("Delete user error:", deleteError);
+      return new Response(JSON.stringify({ error: "Failed to delete account" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -72,7 +70,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error("Delete account error:", err);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

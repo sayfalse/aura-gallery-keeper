@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { getPublicUrl } from "@/lib/photoService";
+import { getSignedUrl } from "@/lib/photoService";
 import type { Photo } from "@/types/photo";
 
 export interface SharedPhoto extends Photo {
@@ -11,7 +11,6 @@ export interface SharedPhoto extends Photo {
 }
 
 export const fetchSharedWithMe = async (userId: string): Promise<SharedPhoto[]> => {
-  // Get connections where I'm the connected user
   const { data: connections, error: connErr } = await supabase
     .from("sharing_connections" as any)
     .select("id, owner_id")
@@ -23,7 +22,6 @@ export const fetchSharedWithMe = async (userId: string): Promise<SharedPhoto[]> 
   const connectionIds = connections.map((c: any) => c.id);
   const ownerMap = new Map(connections.map((c: any) => [c.id, c.owner_id]));
 
-  // Get shared photo items
   const { data: items, error: itemErr } = await supabase
     .from("shared_items" as any)
     .select("*")
@@ -33,7 +31,6 @@ export const fetchSharedWithMe = async (userId: string): Promise<SharedPhoto[]> 
 
   if (itemErr || !items?.length) return [];
 
-  // Get the actual photos
   const photoIds = items.map((i: any) => i.item_id);
   const { data: photos, error: photoErr } = await supabase
     .from("photos")
@@ -43,7 +40,6 @@ export const fetchSharedWithMe = async (userId: string): Promise<SharedPhoto[]> 
 
   if (photoErr) return [];
 
-  // Get sharer profiles
   const ownerIds = [...new Set(items.map((i: any) => i.shared_by))];
   const { data: profiles } = await supabase
     .from("profiles")
@@ -57,37 +53,38 @@ export const fetchSharedWithMe = async (userId: string): Promise<SharedPhoto[]> 
     (photos || []).map((p: any) => [p.id, p])
   );
 
-  return items
-    .map((item: any) => {
-      const photo = photoMap.get(item.item_id);
-      if (!photo) return null;
-      const profile = profileMap.get(item.shared_by) as any;
-      return {
-        id: photo.id,
-        src: getPublicUrl(photo.storage_path),
-        name: photo.name,
-        date: new Date(photo.created_at),
-        size: photo.size || "",
-        favorite: false,
-        storagePath: photo.storage_path,
-        sharedBy: item.shared_by,
-        sharedByUsername: profile?.username || profile?.display_name || "Unknown",
-        sharedAt: new Date(item.created_at),
-        connectionId: item.connection_id,
-        savedByRecipient: item.saved_by_recipient,
-      } as SharedPhoto;
-    })
-    .filter(Boolean) as SharedPhoto[];
+  const results = await Promise.all(
+    items
+      .map(async (item: any) => {
+        const photo = photoMap.get(item.item_id);
+        if (!photo) return null;
+        const profile = profileMap.get(item.shared_by) as any;
+        return {
+          id: photo.id,
+          src: await getSignedUrl(photo.storage_path),
+          name: photo.name,
+          date: new Date(photo.created_at),
+          size: photo.size || "",
+          favorite: false,
+          storagePath: photo.storage_path,
+          sharedBy: item.shared_by,
+          sharedByUsername: profile?.username || profile?.display_name || "Unknown",
+          sharedAt: new Date(item.created_at),
+          connectionId: item.connection_id,
+          savedByRecipient: item.saved_by_recipient,
+        } as SharedPhoto;
+      })
+  );
+
+  return results.filter(Boolean) as SharedPhoto[];
 };
 
 export const saveSharedPhoto = async (userId: string, photo: SharedPhoto): Promise<Photo> => {
-  // Download the original file
   const { data: blob, error: dlErr } = await supabase.storage
     .from("photos")
     .download(photo.storagePath!);
   if (dlErr) throw dlErr;
 
-  // Re-upload to user's own storage
   const ext = photo.name.split(".").pop() || "jpg";
   const fileName = `${crypto.randomUUID()}.${ext}`;
   const storagePath = `${userId}/${fileName}`;
@@ -97,7 +94,6 @@ export const saveSharedPhoto = async (userId: string, photo: SharedPhoto): Promi
     .upload(storagePath, blob);
   if (upErr) throw upErr;
 
-  // Create photo record
   const { data, error } = await supabase
     .from("photos")
     .insert({
@@ -111,7 +107,6 @@ export const saveSharedPhoto = async (userId: string, photo: SharedPhoto): Promi
 
   if (error) throw error;
 
-  // Mark as saved
   await supabase
     .from("shared_items" as any)
     .update({ saved_by_recipient: true })
@@ -120,7 +115,7 @@ export const saveSharedPhoto = async (userId: string, photo: SharedPhoto): Promi
 
   return {
     id: data.id,
-    src: getPublicUrl(storagePath),
+    src: await getSignedUrl(storagePath),
     name: data.name,
     date: new Date(data.created_at),
     size: data.size || "",
@@ -150,7 +145,6 @@ export const createShareLink = async (
 };
 
 export const fetchShareLinkData = async (token: string) => {
-  // Use security definer function to look up share links safely
   const { data: links, error } = await supabase
     .rpc("get_share_link_by_token", { _token: token });
 
@@ -170,7 +164,7 @@ export const fetchShareLinkData = async (token: string) => {
       type: "photo" as const,
       data: {
         id: photo.id,
-        src: getPublicUrl(photo.storage_path),
+        src: await getSignedUrl(photo.storage_path),
         name: photo.name,
         date: new Date(photo.created_at),
         size: photo.size || "",
@@ -200,18 +194,22 @@ export const fetchShareLinkData = async (token: string) => {
       .in("id", photoIds)
       .eq("deleted", false);
 
+    const photosWithUrls = await Promise.all(
+      (photos || []).map(async (p: any) => ({
+        id: p.id,
+        src: await getSignedUrl(p.storage_path),
+        name: p.name,
+        date: new Date(p.created_at),
+        size: p.size || "",
+      }))
+    );
+
     return {
       type: "album" as const,
       data: {
         name: album.name,
         description: album.description,
-        photos: (photos || []).map((p: any) => ({
-          id: p.id,
-          src: getPublicUrl(p.storage_path),
-          name: p.name,
-          date: new Date(p.created_at),
-          size: p.size || "",
-        })),
+        photos: photosWithUrls,
       },
     };
   }

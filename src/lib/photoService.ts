@@ -1,11 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Photo } from "@/types/photo";
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-
-export const getPublicUrl = (storagePath: string) => {
-  const { data } = supabase.storage.from("photos").getPublicUrl(storagePath);
-  return data.publicUrl;
+export const getSignedUrl = async (storagePath: string): Promise<string> => {
+  const { data, error } = await supabase.storage
+    .from("photos")
+    .createSignedUrl(storagePath, 3600); // 1 hour expiry
+  if (error || !data?.signedUrl) {
+    console.error("Failed to create signed URL:", error);
+    return "";
+  }
+  return data.signedUrl;
 };
 
 export const fetchPhotos = async (userId: string): Promise<Photo[]> => {
@@ -17,16 +21,20 @@ export const fetchPhotos = async (userId: string): Promise<Photo[]> => {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return (data || []).map((row) => ({
-    id: row.id,
-    src: getPublicUrl(row.storage_path),
-    name: row.name,
-    date: new Date(row.created_at),
-    size: row.size || "",
-    favorite: row.favorite,
-    album: row.album || undefined,
-    storagePath: row.storage_path,
-  }));
+
+  const photos = await Promise.all(
+    (data || []).map(async (row) => ({
+      id: row.id,
+      src: await getSignedUrl(row.storage_path),
+      name: row.name,
+      date: new Date(row.created_at),
+      size: row.size || "",
+      favorite: row.favorite,
+      album: row.album || undefined,
+      storagePath: row.storage_path,
+    }))
+  );
+  return photos;
 };
 
 export const fetchDeletedPhotos = async (userId: string): Promise<Photo[]> => {
@@ -38,16 +46,20 @@ export const fetchDeletedPhotos = async (userId: string): Promise<Photo[]> => {
     .order("updated_at", { ascending: false });
 
   if (error) throw error;
-  return (data || []).map((row) => ({
-    id: row.id,
-    src: getPublicUrl(row.storage_path),
-    name: row.name,
-    date: new Date(row.created_at),
-    size: row.size || "",
-    favorite: row.favorite,
-    album: row.album || undefined,
-    storagePath: row.storage_path,
-  }));
+
+  const photos = await Promise.all(
+    (data || []).map(async (row) => ({
+      id: row.id,
+      src: await getSignedUrl(row.storage_path),
+      name: row.name,
+      date: new Date(row.created_at),
+      size: row.size || "",
+      favorite: row.favorite,
+      album: row.album || undefined,
+      storagePath: row.storage_path,
+    }))
+  );
+  return photos;
 };
 
 export const uploadPhoto = async (userId: string, file: File): Promise<Photo> => {
@@ -76,7 +88,7 @@ export const uploadPhoto = async (userId: string, file: File): Promise<Photo> =>
 
   return {
     id: data.id,
-    src: getPublicUrl(storagePath),
+    src: await getSignedUrl(storagePath),
     name: data.name,
     date: new Date(data.created_at),
     size: data.size || "",
