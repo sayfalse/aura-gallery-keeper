@@ -179,8 +179,15 @@ Deno.serve(async (req) => {
         break;
       }
 
+      case "export_data": {
+        const format = role || "CSV";
+        auditDetails = `User data exported as ${format}`;
+        result.message = `Data exported as ${format}`;
+        break;
+      }
+
       default:
-        return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
+        return new Response(JSON.stringify({ error: "Unknown action" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });

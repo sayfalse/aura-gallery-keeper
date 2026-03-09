@@ -116,6 +116,8 @@ const auditActionLabels: Record<string, { label: string; color: string }> = {
   set_role: { label: "Role Changed", color: "bg-primary/10 text-primary" },
   ban_user: { label: "User Banned", color: "bg-destructive/10 text-destructive" },
   unban_user: { label: "User Unbanned", color: "bg-emerald-500/10 text-emerald-600" },
+  set_quota: { label: "Quota Changed", color: "bg-sky-500/10 text-sky-600" },
+  export_data: { label: "Data Exported", color: "bg-violet-500/10 text-violet-600" },
 };
 
 // CSV export helper
@@ -293,7 +295,42 @@ const AdminDashboard = () => {
     a.download = `user_data_${(inspectUser.display_name || inspectUser.user_id).replace(/\s+/g, "_")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    logExportAction(inspectUser.user_id, "CSV");
     toast({ title: "Exported", description: "User data exported as CSV" });
+  };
+
+  const exportUserDataJSON = () => {
+    if (!userDetail || !inspectUser) return;
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      version: "2.0.0",
+      user: { id: inspectUser.user_id, displayName: inspectUser.display_name, email: inspectUser.email, role: inspectUser.role },
+      photos: userDetail.photos,
+      notes: userDetail.notes,
+      driveFiles: userDetail.driveFiles,
+      contacts: userDetail.contacts,
+      summary: userDetail.counts,
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `user_data_${(inspectUser.display_name || inspectUser.user_id).replace(/\s+/g, "_")}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    logExportAction(inspectUser.user_id, "JSON");
+    toast({ title: "Exported", description: "User data exported as JSON" });
+  };
+
+  const logExportAction = async (targetUserId: string, format: string) => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+      await supabase.functions.invoke("admin-manage-user", {
+        headers: { Authorization: `Bearer ${token}` },
+        body: { action: "export_data", targetUserId, role: format },
+      });
+    } catch { /* silent - export already succeeded */ }
   };
 
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -363,7 +400,7 @@ const AdminDashboard = () => {
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground">Admin Dashboard</h1>
-            <p className="text-xs text-muted-foreground">System overview & analytics</p>
+            <p className="text-xs text-muted-foreground">PixelVault v2.0.0 • System overview</p>
           </div>
         </div>
         {/* Global exports */}
@@ -801,10 +838,15 @@ const AdminDashboard = () => {
                 ))}
               </div>
 
-              {/* Export button */}
-              <Button variant="outline" size="sm" onClick={exportUserDataCSV} className="gap-1.5">
-                <Download className="w-3.5 h-3.5" /> Export User Data CSV
-              </Button>
+              {/* Export buttons */}
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={exportUserDataCSV} className="gap-1.5">
+                  <Download className="w-3.5 h-3.5" /> Export CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={exportUserDataJSON} className="gap-1.5">
+                  <Download className="w-3.5 h-3.5" /> Export JSON
+                </Button>
+              </div>
 
               {/* Tabbed data view */}
               <Tabs defaultValue="photos" className="w-full">
