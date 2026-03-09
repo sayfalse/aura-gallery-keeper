@@ -116,6 +116,8 @@ const auditActionLabels: Record<string, { label: string; color: string }> = {
   set_role: { label: "Role Changed", color: "bg-primary/10 text-primary" },
   ban_user: { label: "User Banned", color: "bg-destructive/10 text-destructive" },
   unban_user: { label: "User Unbanned", color: "bg-emerald-500/10 text-emerald-600" },
+  set_quota: { label: "Quota Changed", color: "bg-sky-500/10 text-sky-600" },
+  export_data: { label: "Data Exported", color: "bg-violet-500/10 text-violet-600" },
 };
 
 // CSV export helper
