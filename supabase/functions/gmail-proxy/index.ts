@@ -91,7 +91,8 @@ Deno.serve(async (req) => {
       });
       const tokenData = await tokenRes.json();
       if (!tokenRes.ok) {
-        return new Response(JSON.stringify({ error: "Token exchange failed", details: tokenData }), {
+        console.error("Token exchange failed:", tokenData);
+        return new Response(JSON.stringify({ error: "Token exchange failed" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -120,7 +121,8 @@ Deno.serve(async (req) => {
         );
 
       if (upsertError) {
-        return new Response(JSON.stringify({ error: "Failed to store tokens", details: upsertError }), {
+        console.error("Token store error:", upsertError);
+        return new Response(JSON.stringify({ error: "Failed to store credentials" }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -232,7 +234,10 @@ Deno.serve(async (req) => {
 
       const res = await fetch(`${GMAIL_API}/messages?${params}`, { headers: gmailHeaders });
       const data = await res.json();
-      if (!res.ok) throw new Error(`Gmail API error [${res.status}]: ${JSON.stringify(data)}`);
+      if (!res.ok) {
+        console.error("Gmail API error:", data);
+        throw new Error("Failed to fetch messages");
+      }
 
       // Fetch full message details for each
       const messages = data.messages || [];
@@ -258,7 +263,10 @@ Deno.serve(async (req) => {
         headers: gmailHeaders,
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(`Gmail API error [${res.status}]: ${JSON.stringify(data)}`);
+      if (!res.ok) {
+        console.error("Gmail message error:", data);
+        throw new Error("Failed to fetch message");
+      }
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -267,7 +275,6 @@ Deno.serve(async (req) => {
     // Send message (with optional attachments)
     if (action === "send" && req.method === "POST") {
       const { to, subject, body: msgBody, inReplyTo, references, threadId, attachments } = body;
-      // attachments: Array<{ filename: string; mimeType: string; data: string (base64) }>
 
       const boundary = "boundary_" + Date.now();
       let raw = `From: me\r\nTo: ${to}\r\nSubject: ${subject}\r\nMIME-Version: 1.0\r\n`;
@@ -290,7 +297,6 @@ Deno.serve(async (req) => {
         raw += `Content-Type: text/html; charset=utf-8\r\n\r\n${msgBody}`;
       }
 
-      // Base64url encode
       const encoded = btoa(unescape(encodeURIComponent(raw)))
         .replace(/\+/g, "-")
         .replace(/\//g, "_")
@@ -305,7 +311,10 @@ Deno.serve(async (req) => {
         body: JSON.stringify(sendBody),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(`Gmail send error [${res.status}]: ${JSON.stringify(data)}`);
+      if (!res.ok) {
+        console.error("Gmail send error:", data);
+        throw new Error("Failed to send message");
+      }
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -320,7 +329,10 @@ Deno.serve(async (req) => {
         body: JSON.stringify({ addLabelIds: addLabelIds || [], removeLabelIds: removeLabelIds || [] }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(`Gmail modify error [${res.status}]: ${JSON.stringify(data)}`);
+      if (!res.ok) {
+        console.error("Gmail modify error:", data);
+        throw new Error("Failed to modify message");
+      }
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -362,7 +374,10 @@ Deno.serve(async (req) => {
         headers: gmailHeaders,
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(`Gmail attachment error [${res.status}]: ${JSON.stringify(data)}`);
+      if (!res.ok) {
+        console.error("Gmail attachment error:", data);
+        throw new Error("Failed to fetch attachment");
+      }
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -374,8 +389,7 @@ Deno.serve(async (req) => {
     });
   } catch (error: unknown) {
     console.error("Gmail proxy error:", error);
-    const msg = error instanceof Error ? error.message : "Unknown error";
-    return new Response(JSON.stringify({ error: msg }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

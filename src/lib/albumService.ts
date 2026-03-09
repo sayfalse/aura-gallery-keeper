@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { getPublicUrl } from "@/lib/photoService";
+import { getSignedUrl } from "@/lib/photoService";
 import type { Album } from "@/types/photo";
 
 export const fetchAlbums = async (userId: string): Promise<Album[]> => {
@@ -11,14 +11,17 @@ export const fetchAlbums = async (userId: string): Promise<Album[]> => {
 
   if (error) throw error;
 
-  return (albums || []).map((a: any) => ({
-    id: a.id,
-    name: a.name,
-    description: a.description || undefined,
-    coverPhotoUrl: a.cover_photo?.storage_path ? getPublicUrl(a.cover_photo.storage_path) : undefined,
-    photoCount: a.album_photos?.[0]?.count || 0,
-    createdAt: new Date(a.created_at),
-  }));
+  const results = await Promise.all(
+    (albums || []).map(async (a: any) => ({
+      id: a.id,
+      name: a.name,
+      description: a.description || undefined,
+      coverPhotoUrl: a.cover_photo?.storage_path ? await getSignedUrl(a.cover_photo.storage_path) : undefined,
+      photoCount: a.album_photos?.[0]?.count || 0,
+      createdAt: new Date(a.created_at),
+    }))
+  );
+  return results;
 };
 
 export const createAlbum = async (userId: string, name: string, description?: string): Promise<Album> => {

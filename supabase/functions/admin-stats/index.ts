@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     return await handleOverview(adminClient, corsHeaders);
   } catch (err) {
     console.error("Admin stats error:", err);
-    return new Response(JSON.stringify({ error: String(err) }), {
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -136,7 +136,6 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
     adminClient.from("storage_quotas").select("user_id, quota_bytes"),
   ]);
 
-  // Build per-user storage breakdown
   const driveFiles = driveFilesAllRes.data || [];
   const storageByUser: Record<string, { totalBytes: number; fileCount: number; byType: Record<string, number> }> = {};
   for (const f of driveFiles) {
@@ -167,7 +166,6 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
   const profileMap: Record<string, string> = {};
   profiles.forEach((p: any) => { profileMap[p.user_id] = p.display_name || p.username || "Unknown"; });
 
-  // Build quota map
   const quotaMap: Record<string, number> = {};
   (quotasRes.data || []).forEach((q: any) => { quotaMap[q.user_id] = q.quota_bytes; });
 
@@ -177,7 +175,7 @@ async function handleOverview(adminClient: any, corsHeaders: Record<string, stri
     email: users.find((u: any) => u.id === p.user_id)?.email || null,
     banned_until: banMap[p.user_id] || null,
     storage: storageByUser[p.user_id] || { totalBytes: 0, fileCount: 0, byType: {} },
-    quotaBytes: quotaMap[p.user_id] || 1073741824, // default 1GB
+    quotaBytes: quotaMap[p.user_id] || 1073741824,
   }));
 
   const enrichedAuditLogs = auditLogs.map((l: any) => ({
