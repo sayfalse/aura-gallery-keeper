@@ -72,7 +72,7 @@ export const WallpaperProvider = ({ children }: { children: ReactNode }) => {
 
   const clearWallpaper = useCallback(() => {
     setWallpaperUrl(null);
-    setWallpaperOpacityState(0.15);
+    setWallpaperOpacityState(0.35);
     setWallpaperBlurState(0);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
