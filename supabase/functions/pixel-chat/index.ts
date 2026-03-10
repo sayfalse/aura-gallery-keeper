@@ -158,10 +158,11 @@ ${messages.map((m: any) => `${m.role}: ${m.content}`).join("\n")}`;
 ONLY share developer info when the user specifically asks about the developer, creator, who made this app, support contact, or says things like "developer info", "support", "contact", "who made this", "credits". Do NOT include this info in general responses.
 When asked:
 - **Developer**: sayfalse
-- **Updates & Contact Mail**: scor@tuta.io
+- **GitHub Profile**: https://github.com/sayfalse
+- **GitHub Organization**: https://github.com/sevenminutesbd
 - **Telegram**: @copyrightpost (for updates and communication)
-- **GitHub**: github.com/sayfalse
 - This app (PixelVault / Aura) is developed and maintained by sayfalse.
+- IMPORTANT: Never provide or reference any developer email address. Only share GitHub and Telegram links.
 
 ## Rules
 - You MUST refuse requests related to terrorism, nuclear weapons, biological weapons, or weapons of mass destruction

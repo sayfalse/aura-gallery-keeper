@@ -1,0 +1,90 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "confirm": "確認",
+    "search": "検索",
+    "loading": "読み込み中...",
+    "retry": "再試行",
+    "signOut": "サインアウト",
+    "back": "戻る",
+    "upload": "アップロード",
+    "items": "件",
+    "create": "作成",
+    "open": "開く",
+    "noResults": "結果が見つかりません",
+    "phone": "電話",
+    "email": "メール",
+    "address": "住所",
+    "notes": "メモ"
+  },
+  "home": {
+    "greeting": {
+      "night": "おやすみなさい 🌙",
+      "morning": "おはようございます ☀️",
+      "afternoon": "こんにちは 🌤️",
+      "evening": "こんばんは 🌆"
+    },
+    "apps": "アプリ",
+    "askPixelAI": "Pixel AIに聞く",
+    "aiDesc": "チャット、生成、翻訳",
+    "stats": {
+      "photos": "写真",
+      "notes": "メモ",
+      "people": "連絡先",
+      "files": "ファイル"
+    }
+  },
+  "apps": {
+    "gallery": "ギャラリー",
+    "galleryDesc": "写真とアルバム",
+    "notes": "メモ",
+    "notesDesc": "クイックメモ",
+    "drive": "ドライブ",
+    "driveDesc": "クラウドストレージ",
+    "people": "連絡先",
+    "peopleDesc": "人々",
+    "mail": "メール",
+    "mailDesc": "電子メール",
+    "chat": "チャット",
+    "chatDesc": "メッセージ",
+    "browser": "ブラウザ",
+    "browserDesc": "安全なブラウジング",
+    "vault": "金庫",
+    "vaultDesc": "暗号化ストレージ",
+    "pixelAI": "Pixel AI",
+    "pixelAIDesc": "AIアシスタント",
+    "settings": "設定",
+    "settingsDesc": "環境設定"
+  },
+  "nav": {
+    "home": "ホーム",
+    "gallery": "ギャラリー",
+    "mail": "メール",
+    "chat": "チャット",
+    "settings": "設定",
+    "photos": "写真",
+    "favorites": "お気に入り",
+    "shared": "共有",
+    "recent": "最近",
+    "upload": "アップロード"
+  },
+  "settings": {
+    "title": "設定",
+    "appearance": "外観",
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム",
+    "language": "言語",
+    "currentLang": "現在",
+    "searchLanguages": "言語を検索...",
+    "showAll": "全{{count}}言語を表示",
+    "noLanguagesFound": "言語が見つかりません",
+    "developer": "開発者",
+    "developedBy": "開発者",
+    "version": "バージョン",
+    "privacyPolicy": "プライバシーポリシー",
+    "termsOfService": "利用規約"
+  }
+}

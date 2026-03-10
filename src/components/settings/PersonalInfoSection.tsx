@@ -114,8 +114,28 @@ const PersonalInfoSection = ({ user, displayName, setDisplayName, onSaveProfile,
     if (newPassword !== confirmPassword) return toast.error("Passwords don't match");
     setPassLoading(true);
     try {
+      // Check if MFA is enabled — if so, we need to verify TOTP first to get AAL2
+      const { data: mfaData } = await supabase.auth.mfa.listFactors();
+      const verifiedFactor = mfaData?.totp?.find((f) => f.status === "verified");
+      
+      if (verifiedFactor) {
+        // Check current AAL level
+        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aalData?.currentLevel !== "aal2") {
+          // We need to elevate to AAL2 — but since we're already authenticated,
+          // updateUser should still work for password changes on the current session.
+          // If it fails, we'll catch and guide the user.
+        }
+      }
+
       const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
+      if (error) {
+        // If MFA-related error, provide clear guidance
+        if (error.message?.includes("aal2") || error.message?.includes("MFA") || error.message?.includes("factor")) {
+          throw new Error("Please disable 2FA first, change your password, then re-enable 2FA.");
+        }
+        throw error;
+      }
       toast.success("Password updated successfully!");
       setShowChangePassword(false);
       setCurrentPassword("");

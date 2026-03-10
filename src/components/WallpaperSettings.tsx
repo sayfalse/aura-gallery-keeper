@@ -73,7 +73,7 @@ const WallpaperSettings = () => {
         ))}
       </div>
 
-      {/* Controls */}
+      {/* Wallpaper controls */}
       {showControls && wallpaperUrl && (
         <div className="space-y-3 pt-3 border-t border-border">
           <div>

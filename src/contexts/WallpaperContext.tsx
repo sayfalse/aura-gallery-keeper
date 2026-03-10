@@ -12,7 +12,7 @@ interface WallpaperContextType {
 
 const WallpaperContext = createContext<WallpaperContextType>({
   wallpaperUrl: null,
-  wallpaperOpacity: 0.15,
+  wallpaperOpacity: 0.35,
   wallpaperBlur: 0,
   setWallpaper: () => {},
   setWallpaperOpacity: () => {},
@@ -32,7 +32,7 @@ interface StoredWallpaper {
 
 export const WallpaperProvider = ({ children }: { children: ReactNode }) => {
   const [wallpaperUrl, setWallpaperUrl] = useState<string | null>(null);
-  const [wallpaperOpacity, setWallpaperOpacityState] = useState(0.15);
+  const [wallpaperOpacity, setWallpaperOpacityState] = useState(0.35);
   const [wallpaperBlur, setWallpaperBlurState] = useState(0);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export const WallpaperProvider = ({ children }: { children: ReactNode }) => {
       if (stored) {
         const parsed: StoredWallpaper = JSON.parse(stored);
         setWallpaperUrl(parsed.url);
-        setWallpaperOpacityState(parsed.opacity ?? 0.15);
+        setWallpaperOpacityState(parsed.opacity ?? 0.35);
         setWallpaperBlurState(parsed.blur ?? 0);
       }
     } catch {}
@@ -72,7 +72,7 @@ export const WallpaperProvider = ({ children }: { children: ReactNode }) => {
 
   const clearWallpaper = useCallback(() => {
     setWallpaperUrl(null);
-    setWallpaperOpacityState(0.15);
+    setWallpaperOpacityState(0.35);
     setWallpaperBlurState(0);
     localStorage.removeItem(STORAGE_KEY);
   }, []);

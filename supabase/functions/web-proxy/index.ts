@@ -197,7 +197,7 @@ async function handleProxy(targetUrl: string): Promise<Response> {
       <body><div class="wrap">
         <div style="font-size:2.5rem;margin-bottom:1rem;">🌐</div>
         <h2>Can't reach this page</h2>
-        <p>${error.message || 'Connection failed'}</p>
+        <p>${error instanceof Error ? error.message : 'Connection failed'}</p>
         <a href="${targetUrl}" target="_blank" rel="noopener">Open in browser ↗</a>
       </div></body></html>`,
       {

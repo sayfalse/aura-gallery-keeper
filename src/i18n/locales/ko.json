@@ -1,0 +1,90 @@
+{
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "confirm": "확인",
+    "search": "검색",
+    "loading": "로딩 중...",
+    "retry": "다시 시도",
+    "signOut": "로그아웃",
+    "back": "뒤로",
+    "upload": "업로드",
+    "items": "항목",
+    "create": "만들기",
+    "open": "열기",
+    "noResults": "결과를 찾을 수 없습니다",
+    "phone": "전화",
+    "email": "이메일",
+    "address": "주소",
+    "notes": "메모"
+  },
+  "home": {
+    "greeting": {
+      "night": "안녕히 주무세요 🌙",
+      "morning": "좋은 아침이에요 ☀️",
+      "afternoon": "좋은 오후에요 🌤️",
+      "evening": "좋은 저녁이에요 🌆"
+    },
+    "apps": "앱",
+    "askPixelAI": "Pixel AI에게 물어보기",
+    "aiDesc": "채팅, 생성, 번역",
+    "stats": {
+      "photos": "사진",
+      "notes": "메모",
+      "people": "연락처",
+      "files": "파일"
+    }
+  },
+  "apps": {
+    "gallery": "갤러리",
+    "galleryDesc": "사진 및 앨범",
+    "notes": "메모",
+    "notesDesc": "빠른 메모",
+    "drive": "드라이브",
+    "driveDesc": "클라우드 스토리지",
+    "people": "연락처",
+    "peopleDesc": "사람들",
+    "mail": "메일",
+    "mailDesc": "이메일",
+    "chat": "채팅",
+    "chatDesc": "메시지",
+    "browser": "브라우저",
+    "browserDesc": "안전한 브라우징",
+    "vault": "금고",
+    "vaultDesc": "암호화된 스토리지",
+    "pixelAI": "Pixel AI",
+    "pixelAIDesc": "AI 어시스턴트",
+    "settings": "설정",
+    "settingsDesc": "환경설정"
+  },
+  "nav": {
+    "home": "홈",
+    "gallery": "갤러리",
+    "mail": "메일",
+    "chat": "채팅",
+    "settings": "설정",
+    "photos": "사진",
+    "favorites": "즐겨찾기",
+    "shared": "공유",
+    "recent": "최근",
+    "upload": "업로드"
+  },
+  "settings": {
+    "title": "설정",
+    "appearance": "모양",
+    "light": "라이트",
+    "dark": "다크",
+    "system": "시스템",
+    "language": "언어",
+    "currentLang": "현재",
+    "searchLanguages": "언어 검색...",
+    "showAll": "모든 {{count}}개 언어 보기",
+    "noLanguagesFound": "언어를 찾을 수 없습니다",
+    "developer": "개발자",
+    "developedBy": "개발자",
+    "version": "버전",
+    "privacyPolicy": "개인정보 처리방침",
+    "termsOfService": "서비스 약관"
+  }
+}
