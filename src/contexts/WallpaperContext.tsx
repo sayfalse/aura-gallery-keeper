@@ -12,7 +12,7 @@ interface WallpaperContextType {
 
 const WallpaperContext = createContext<WallpaperContextType>({
   wallpaperUrl: null,
-  wallpaperOpacity: 0.15,
+  wallpaperOpacity: 0.35,
   wallpaperBlur: 0,
   setWallpaper: () => {},
   setWallpaperOpacity: () => {},
