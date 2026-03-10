@@ -32,7 +32,7 @@ interface StoredWallpaper {
 
 export const WallpaperProvider = ({ children }: { children: ReactNode }) => {
   const [wallpaperUrl, setWallpaperUrl] = useState<string | null>(null);
-  const [wallpaperOpacity, setWallpaperOpacityState] = useState(0.15);
+  const [wallpaperOpacity, setWallpaperOpacityState] = useState(0.35);
   const [wallpaperBlur, setWallpaperBlurState] = useState(0);
 
   useEffect(() => {
