@@ -637,12 +637,12 @@ const SettingsPage = () => {
               <span className="text-sm text-primary font-semibold">sayfalse</span>
             </div>
             <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
-              <span className="flex items-center gap-2 text-sm font-medium text-foreground"><Mail className="w-3.5 h-3.5 text-primary" />Contact</span>
-              <a href="mailto:scor@tuta.io" className="text-sm text-primary font-semibold hover:underline">scor@tuta.io</a>
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground"><Github className="w-3.5 h-3.5 text-primary" />GitHub Profile</span>
+              <a href="https://github.com/sayfalse" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-semibold hover:underline">@sayfalse</a>
             </div>
             <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
-              <span className="flex items-center gap-2 text-sm font-medium text-foreground"><Github className="w-3.5 h-3.5 text-primary" />GitHub</span>
-              <a href="https://github.com/sayfalse" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-semibold hover:underline">@sayfalse</a>
+              <span className="flex items-center gap-2 text-sm font-medium text-foreground"><Github className="w-3.5 h-3.5 text-primary" />GitHub Organization</span>
+              <a href="https://github.com/sevenminutesbd" target="_blank" rel="noopener noreferrer" className="text-sm text-primary font-semibold hover:underline">sevenminutesbd</a>
             </div>
             <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
               <span className="flex items-center gap-2 text-sm font-medium text-foreground"><Send className="w-3.5 h-3.5 text-primary" />Telegram</span>
