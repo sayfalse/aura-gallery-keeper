@@ -41,7 +41,7 @@ export const WallpaperProvider = ({ children }: { children: ReactNode }) => {
       if (stored) {
         const parsed: StoredWallpaper = JSON.parse(stored);
         setWallpaperUrl(parsed.url);
-        setWallpaperOpacityState(parsed.opacity ?? 0.15);
+        setWallpaperOpacityState(parsed.opacity ?? 0.35);
         setWallpaperBlurState(parsed.blur ?? 0);
       }
     } catch {}
