@@ -650,7 +650,7 @@ const SettingsPage = () => {
             </div>
             <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-primary/10 border border-primary/20">
               <span className="text-sm font-medium text-foreground">{t("settings.version")}</span>
-              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">1.0.0</span>
+              <span className="text-xs text-primary bg-primary/15 px-2.5 py-0.5 rounded-full font-semibold">2.0.0</span>
             </div>
             <div className="pt-2 border-t border-border space-y-2">
               <a href="/privacy-policy" className="flex items-center justify-between py-2 rounded-lg hover:bg-accent px-2 -mx-2 transition-colors">
