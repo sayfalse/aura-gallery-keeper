@@ -8,7 +8,7 @@ import {
   UserPlus, Megaphone, Contact, ArrowLeft, Shield,
   TrendingUp, Activity, Clock, Ban, ShieldCheck, ShieldAlert,
   ChevronDown, UserCog, Loader2, Search, Filter, FileText,
-  ArrowUpDown, Download, Eye, X, Database
+  ArrowUpDown, Download, Eye, X, Database, Plus, Pencil, Trash2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
