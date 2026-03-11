@@ -861,6 +861,84 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Announcement Management */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}>
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Megaphone className="w-4 h-4 text-primary" /> Announcements
+                  <Badge variant="secondary" className="text-[10px] ml-1">{announcements.length}</Badge>
+                </CardTitle>
+                <Button size="sm" className="gap-1.5" onClick={() => { setAnnFormOpen(true); setAnnEditing(null); setAnnTitle(""); setAnnContent(""); setAnnType("update"); }}>
+                  <Plus className="w-3.5 h-3.5" /> New
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {annFormOpen && (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                  <p className="text-sm font-semibold text-foreground">{annEditing ? "Edit Announcement" : "Create Announcement"}</p>
+                  <Input placeholder="Title (optional)" value={annTitle} onChange={(e) => setAnnTitle(e.target.value)} className="h-9 text-sm" />
+                  <textarea
+                    placeholder="Announcement content..."
+                    value={annContent}
+                    onChange={(e) => setAnnContent(e.target.value)}
+                    className="w-full min-h-[80px] rounded-lg border border-border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <div className="flex items-center gap-2">
+                    <select value={annType} onChange={(e) => setAnnType(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs">
+                      <option value="update">Update</option>
+                      <option value="announcement">Announcement</option>
+                      <option value="feature">Feature</option>
+                      <option value="maintenance">Maintenance</option>
+                    </select>
+                    <div className="flex-1" />
+                    <Button variant="outline" size="sm" onClick={() => { setAnnFormOpen(false); setAnnEditing(null); }}>Cancel</Button>
+                    <Button size="sm" onClick={saveAnnouncement} disabled={annSaving || !annContent.trim()}>
+                      {annSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
+                      {annEditing ? "Update" : "Publish"}
+                    </Button>
+                  </div>
+                  {!annEditing && (
+                    <p className="text-[10px] text-muted-foreground">⚠️ Publishing replaces all previous announcements. Only the latest announcement is shown to users.</p>
+                  )}
+                </div>
+              )}
+              {announcements.length === 0 ? (
+                <div className="text-center py-8">
+                  <Megaphone className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No announcements yet</p>
+                </div>
+              ) : (
+                announcements.map((ann) => (
+                  <div key={ann.id} className="flex items-start gap-3 p-3 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Megaphone className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <Badge variant="secondary" className="text-[9px]">{ann.type || "update"}</Badge>
+                        <span className="text-[10px] text-muted-foreground">{new Date(ann.created_at).toLocaleDateString()}</span>
+                      </div>
+                      {ann.title && <p className="text-xs font-medium text-foreground">{ann.title}</p>}
+                      <p className="text-[11px] text-muted-foreground line-clamp-2">{ann.content}</p>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => editAnnouncement(ann)}>
+                        <Pencil className="w-3 h-3" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => confirmAction("Delete announcement?", "This will remove the announcement.", () => deleteAnnouncement(ann.id))}>
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </main>
 
       {/* User Data Inspection Dialog */}
