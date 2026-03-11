@@ -100,6 +100,8 @@ const AppContent = () => {
     <>
       {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
       {locked && <AppLockScreen onUnlock={() => setLocked(false)} />}
+      {!showSplash && !locked && <AnnouncementOverlay />}
+      {!showSplash && !locked && <UpdateOverlay />}
       <BrowserRouter>
         <Routes>
           {/* Auth routes */}
