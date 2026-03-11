@@ -11,6 +11,8 @@ import ErrorBoundary from "@/core/ErrorBoundary";
 import LoadingScreen from "@/core/LoadingScreen";
 import AppLockScreen, { shouldShowLockScreen, updateLastActive } from "./components/AppLockScreen";
 import { WallpaperProvider } from "@/contexts/WallpaperContext";
+import AnnouncementOverlay from "@/components/AnnouncementOverlay";
+import UpdateOverlay from "@/components/UpdateOverlay";
 
 // Lazy-loaded module pages for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -98,6 +100,8 @@ const AppContent = () => {
     <>
       {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
       {locked && <AppLockScreen onUnlock={() => setLocked(false)} />}
+      {!showSplash && !locked && <AnnouncementOverlay />}
+      {!showSplash && !locked && <UpdateOverlay />}
       <BrowserRouter>
         <Routes>
           {/* Auth routes */}

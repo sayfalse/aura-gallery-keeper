@@ -148,6 +148,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_version: {
+        Row: {
+          created_at: string
+          download_url: string | null
+          id: string
+          release_notes: string | null
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          release_notes?: string | null
+          version: string
+        }
+        Update: {
+          created_at?: string
+          download_url?: string | null
+          id?: string
+          release_notes?: string | null
+          version?: string
+        }
+        Relationships: []
+      }
       browser_bookmarks: {
         Row: {
           created_at: string | null

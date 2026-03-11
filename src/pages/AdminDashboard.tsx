@@ -8,7 +8,7 @@ import {
   UserPlus, Megaphone, Contact, ArrowLeft, Shield,
   TrendingUp, Activity, Clock, Ban, ShieldCheck, ShieldAlert,
   ChevronDown, UserCog, Loader2, Search, Filter, FileText,
-  ArrowUpDown, Download, Eye, X, Database
+  ArrowUpDown, Download, Eye, X, Database, Plus, Pencil, Trash2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -152,6 +152,17 @@ const AdminDashboard = () => {
   const [userDetail, setUserDetail] = useState<UserDetailData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
+  // Announcement management
+  const [announcements, setAnnouncements] = useState<Array<{
+    id: string; title: string | null; content: string; type: string | null; author: string | null; created_at: string;
+  }>>([]);
+  const [annFormOpen, setAnnFormOpen] = useState(false);
+  const [annEditing, setAnnEditing] = useState<string | null>(null);
+  const [annTitle, setAnnTitle] = useState("");
+  const [annContent, setAnnContent] = useState("");
+  const [annType, setAnnType] = useState("update");
+  const [annSaving, setAnnSaving] = useState(false);
+
   const getToken = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
     return data?.session?.access_token;
@@ -178,6 +189,55 @@ const AdminDashboard = () => {
     const interval = setInterval(() => fetchStats(true), 30000);
     return () => clearInterval(interval);
   }, [fetchStats]);
+
+  // Fetch announcements
+  const fetchAnnouncements = useCallback(async () => {
+    const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false }).limit(50);
+    if (data) setAnnouncements(data);
+  }, []);
+
+  useEffect(() => { fetchAnnouncements(); }, [fetchAnnouncements]);
+
+  const saveAnnouncement = async () => {
+    if (!annContent.trim()) return;
+    setAnnSaving(true);
+    try {
+      if (annEditing) {
+        const { error } = await supabase.from("announcements").update({
+          title: annTitle || null, content: annContent, type: annType,
+        }).eq("id", annEditing);
+        if (error) throw error;
+        toast({ title: "Updated", description: "Announcement updated" });
+      } else {
+        // Delete all previous announcements (only one active at a time)
+        await supabase.from("announcements").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        const { error } = await supabase.from("announcements").insert({
+          title: annTitle || null, content: annContent, type: annType, author: "Admin",
+        });
+        if (error) throw error;
+        toast({ title: "Published", description: "Announcement published. Previous announcements replaced." });
+      }
+      setAnnFormOpen(false); setAnnEditing(null); setAnnTitle(""); setAnnContent(""); setAnnType("update");
+      fetchAnnouncements();
+      fetchStats(true);
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally { setAnnSaving(false); }
+  };
+
+  const deleteAnnouncement = async (id: string) => {
+    const { error } = await supabase.from("announcements").delete().eq("id", id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: "Deleted", description: "Announcement removed" }); fetchAnnouncements(); fetchStats(true); }
+  };
+
+  const editAnnouncement = (ann: typeof announcements[0]) => {
+    setAnnEditing(ann.id);
+    setAnnTitle(ann.title || "");
+    setAnnContent(ann.content);
+    setAnnType(ann.type || "update");
+    setAnnFormOpen(true);
+  };
 
   const fetchUserDetail = useCallback(async (targetUserId: string) => {
     setDetailLoading(true);
@@ -303,7 +363,7 @@ const AdminDashboard = () => {
     if (!userDetail || !inspectUser) return;
     const exportData = {
       exportedAt: new Date().toISOString(),
-      version: "2.0.0",
+      version: "4.0.0",
       user: { id: inspectUser.user_id, displayName: inspectUser.display_name, email: inspectUser.email, role: inspectUser.role },
       photos: userDetail.photos,
       notes: userDetail.notes,
@@ -400,7 +460,7 @@ const AdminDashboard = () => {
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground">Admin Dashboard</h1>
-            <p className="text-xs text-muted-foreground">PixelVault v2.0.0 • System overview</p>
+            <p className="text-xs text-muted-foreground">PixelVault v4.0.0 • System overview</p>
           </div>
         </div>
         {/* Global exports */}
@@ -798,6 +858,84 @@ const AdminDashboard = () => {
                   </div>
                 );
               })()}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Announcement Management */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}>
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <Megaphone className="w-4 h-4 text-primary" /> Announcements
+                  <Badge variant="secondary" className="text-[10px] ml-1">{announcements.length}</Badge>
+                </CardTitle>
+                <Button size="sm" className="gap-1.5" onClick={() => { setAnnFormOpen(true); setAnnEditing(null); setAnnTitle(""); setAnnContent(""); setAnnType("update"); }}>
+                  <Plus className="w-3.5 h-3.5" /> New
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {annFormOpen && (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+                  <p className="text-sm font-semibold text-foreground">{annEditing ? "Edit Announcement" : "Create Announcement"}</p>
+                  <Input placeholder="Title (optional)" value={annTitle} onChange={(e) => setAnnTitle(e.target.value)} className="h-9 text-sm" />
+                  <textarea
+                    placeholder="Announcement content..."
+                    value={annContent}
+                    onChange={(e) => setAnnContent(e.target.value)}
+                    className="w-full min-h-[80px] rounded-lg border border-border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <div className="flex items-center gap-2">
+                    <select value={annType} onChange={(e) => setAnnType(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs">
+                      <option value="update">Update</option>
+                      <option value="announcement">Announcement</option>
+                      <option value="feature">Feature</option>
+                      <option value="maintenance">Maintenance</option>
+                    </select>
+                    <div className="flex-1" />
+                    <Button variant="outline" size="sm" onClick={() => { setAnnFormOpen(false); setAnnEditing(null); }}>Cancel</Button>
+                    <Button size="sm" onClick={saveAnnouncement} disabled={annSaving || !annContent.trim()}>
+                      {annSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
+                      {annEditing ? "Update" : "Publish"}
+                    </Button>
+                  </div>
+                  {!annEditing && (
+                    <p className="text-[10px] text-muted-foreground">⚠️ Publishing replaces all previous announcements. Only the latest announcement is shown to users.</p>
+                  )}
+                </div>
+              )}
+              {announcements.length === 0 ? (
+                <div className="text-center py-8">
+                  <Megaphone className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No announcements yet</p>
+                </div>
+              ) : (
+                announcements.map((ann) => (
+                  <div key={ann.id} className="flex items-start gap-3 p-3 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Megaphone className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <Badge variant="secondary" className="text-[9px]">{ann.type || "update"}</Badge>
+                        <span className="text-[10px] text-muted-foreground">{new Date(ann.created_at).toLocaleDateString()}</span>
+                      </div>
+                      {ann.title && <p className="text-xs font-medium text-foreground">{ann.title}</p>}
+                      <p className="text-[11px] text-muted-foreground line-clamp-2">{ann.content}</p>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => editAnnouncement(ann)}>
+                        <Pencil className="w-3 h-3" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => confirmAction("Delete announcement?", "This will remove the announcement.", () => deleteAnnouncement(ann.id))}>
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </motion.div>
