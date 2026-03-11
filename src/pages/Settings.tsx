@@ -585,7 +585,7 @@ const SettingsPage = () => {
             <div className="text-center py-6">
               <Bell className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
               <p className="text-sm text-muted-foreground">No announcements yet</p>
-              <p className="text-xs text-muted-foreground/60 mt-1">Updates from our Telegram channel will appear here in real-time</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Announcements from the admin team will appear here</p>
             </div>
           ) : (
             <div className="space-y-3">
