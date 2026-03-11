@@ -7,8 +7,8 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: true,
     appendUserAgent: 'PixelVault-Android',
-    versionCode: 2,
-    versionName: '2.0.0',
+    versionCode: 4,
+    versionName: '4.0.0',
   },
   plugins: {
     Camera: {

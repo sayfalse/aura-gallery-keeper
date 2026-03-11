@@ -303,7 +303,7 @@ const AdminDashboard = () => {
     if (!userDetail || !inspectUser) return;
     const exportData = {
       exportedAt: new Date().toISOString(),
-      version: "2.0.0",
+      version: "4.0.0",
       user: { id: inspectUser.user_id, displayName: inspectUser.display_name, email: inspectUser.email, role: inspectUser.role },
       photos: userDetail.photos,
       notes: userDetail.notes,
