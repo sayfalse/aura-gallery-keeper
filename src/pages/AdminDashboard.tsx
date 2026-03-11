@@ -190,6 +190,55 @@ const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, [fetchStats]);
 
+  // Fetch announcements
+  const fetchAnnouncements = useCallback(async () => {
+    const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false }).limit(50);
+    if (data) setAnnouncements(data);
+  }, []);
+
+  useEffect(() => { fetchAnnouncements(); }, [fetchAnnouncements]);
+
+  const saveAnnouncement = async () => {
+    if (!annContent.trim()) return;
+    setAnnSaving(true);
+    try {
+      if (annEditing) {
+        const { error } = await supabase.from("announcements").update({
+          title: annTitle || null, content: annContent, type: annType,
+        }).eq("id", annEditing);
+        if (error) throw error;
+        toast({ title: "Updated", description: "Announcement updated" });
+      } else {
+        // Delete all previous announcements (only one active at a time)
+        await supabase.from("announcements").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        const { error } = await supabase.from("announcements").insert({
+          title: annTitle || null, content: annContent, type: annType, author: "Admin",
+        });
+        if (error) throw error;
+        toast({ title: "Published", description: "Announcement published. Previous announcements replaced." });
+      }
+      setAnnFormOpen(false); setAnnEditing(null); setAnnTitle(""); setAnnContent(""); setAnnType("update");
+      fetchAnnouncements();
+      fetchStats(true);
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } finally { setAnnSaving(false); }
+  };
+
+  const deleteAnnouncement = async (id: string) => {
+    const { error } = await supabase.from("announcements").delete().eq("id", id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: "Deleted", description: "Announcement removed" }); fetchAnnouncements(); fetchStats(true); }
+  };
+
+  const editAnnouncement = (ann: typeof announcements[0]) => {
+    setAnnEditing(ann.id);
+    setAnnTitle(ann.title || "");
+    setAnnContent(ann.content);
+    setAnnType(ann.type || "update");
+    setAnnFormOpen(true);
+  };
+
   const fetchUserDetail = useCallback(async (targetUserId: string) => {
     setDetailLoading(true);
     try {
