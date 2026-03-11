@@ -152,6 +152,17 @@ const AdminDashboard = () => {
   const [userDetail, setUserDetail] = useState<UserDetailData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
+  // Announcement management
+  const [announcements, setAnnouncements] = useState<Array<{
+    id: string; title: string | null; content: string; type: string | null; author: string | null; created_at: string;
+  }>>([]);
+  const [annFormOpen, setAnnFormOpen] = useState(false);
+  const [annEditing, setAnnEditing] = useState<string | null>(null);
+  const [annTitle, setAnnTitle] = useState("");
+  const [annContent, setAnnContent] = useState("");
+  const [annType, setAnnType] = useState("update");
+  const [annSaving, setAnnSaving] = useState(false);
+
   const getToken = useCallback(async () => {
     const { data } = await supabase.auth.getSession();
     return data?.session?.access_token;
